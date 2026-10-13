@@ -1,10 +1,26 @@
-## 1. Problem Definition
-The objective is to choose installed capacities $P_w, P_s, P_o, P_v$ and BESS energy $E_b$ that minimize the annualized cost of serving a target load at or above a specified reliability threshold.
+# BlueGrid — Optimization Formulation (WIP)
 
+## 1. Core Problem
+We have an island with a flat load and renewable generation choices:
+- Wind
+- Floating PV (FPV)
+- OTEC
+- Wave (optional)
+- BESS (battery)
+
+We want to find capacity sizes:
 $$
-\min_{\{P_i, E_b\}} \; \text{Annualized Cost}
+P_w, P_s, P_o, P_v \ge 0 \quad [\text{kW}]
 $$
 $$
-\text{subject to } \text{hourly physics, storage dynamics, LPSP} \le \varepsilon, \text{ and } P_i, E_b \ge 0.
+E_b \ge 0 \quad [\text{kWh}]
 $$
 
+Objective:
+$$
+\min \quad \text{Total Annualized Cost}(P_w, P_s, P_o, P_v, E_b)
+$$
+subject to:
+$$
+\text{Unmet Load Fraction} \le \varepsilon
+$$
