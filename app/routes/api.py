@@ -97,3 +97,39 @@ def api_optimize():
     )
 
     return jsonify({"ok": True, "result": result})
+
+@bp.post("/compare")
+def api_compare():
+    body = request.get_json(force=True) or {}
+    dfs = current_app.config["DATA"]
+
+    caps = body.get("capacities", {})
+    capacities = {
+        "wind_kW":   float(caps.get("wind_kW", 0)),
+        "solar_kWp": float(caps.get("solar_kWp", 0)),
+        "otec_kW":   float(caps.get("otec_kW", 0)),
+        "wave_kW":   float(caps.get("wave_kW", 0)),
+        "bess_kWh":  float(caps.get("bess_kWh", 0)),
+        "load_kW":   float(body.get("load_kW", 1000)),
+    }
+
+    results = []
+    # Evaluate the mix for every island in the dataset
+    for island in dfs["islands"].index:
+        try:
+            res = evaluate(island, capacities, dfs, use_hourly=False)
+            results.append({
+                "island": island,
+                "lcoe": res["econ"]["LCOE_RE_INR_per_kWh"],
+                "cos": res["econ"]["cost_of_service_INR_per_kWh"],
+                "lpsp": res["reliability"]["lpsp_monthly"],
+                "plf": res["plf_target"],
+                "capex_INR": res["econ"]["capex_INR"],
+                "co2_avoided_t": res["carbon"]["co2_avoided_t"],
+            })
+        except Exception as e:
+            current_app.logger.warning(f"Failed to evaluate {island} for comparison: {e}")
+
+    # Sort the results by LCOE (cheapest first)
+    results.sort(key=lambda x: x["lcoe"])
+    return jsonify({"ok": True, "result": results})

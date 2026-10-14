@@ -214,6 +214,65 @@
     }
   }
 
+  async function doCompare() {
+    els.status.textContent = "Comparing all islands…";
+    const body = {
+      load_kW: Number(els.load.value),
+      capacities: state.capacities,
+    };
+    const resp = await postJSON("/api/compare", body);
+    els.status.textContent = resp.ok ? "" : "error";
+    if (!resp.ok) { alert(resp.error); return; }
+
+    // Show the panel
+    document.getElementById("panel-compare").style.display = "block";
+    
+    const data = resp.result;
+    const islands = data.map(d => d.island);
+    const lcoe = data.map(d => d.lcoe);
+    const cos = data.map(d => d.cos);
+    
+    // 1. Render Grouped Bar Chart
+    Plotly.newPlot("chart-compare", [
+      { x: islands, y: lcoe, name: "LCOE (RE) ₹/kWh", type: "bar", marker: { color: "#0b3d91" } },
+      { x: islands, y: cos, name: "System CoS ₹/kWh", type: "bar", marker: { color: "#a5b4fc" } }
+    ], {
+      barmode: "group",
+      margin: { l: 50, r: 20, t: 30, b: 60 },
+      yaxis: { title: "INR / kWh" },
+      legend: { orientation: "h", y: 1.1 }
+    }, { responsive: true, displaylogo: false });
+
+    // 2. Render Table
+    const rows = data.map(r => `
+      <tr>
+        <td><strong>${r.island}</strong></td>
+        <td>₹${r.lcoe.toFixed(2)}</td>
+        <td>₹${r.cos.toFixed(2)}</td>
+        <td>${(r.lpsp * 100).toFixed(1)}%</td>
+        <td>${(r.plf * 100).toFixed(1)}%</td>
+        <td>₹${(r.capex_INR / 1e7).toFixed(1)} Cr</td>
+      </tr>
+    `).join("");
+
+    document.getElementById("table-compare").innerHTML = `
+      <table class="ranked-table">
+        <thead><tr>
+          <th>Island</th>
+          <th>LCOE (RE)</th>
+          <th>System CoS</th>
+          <th>LPSP (Monthly)</th>
+          <th>PLF</th>
+          <th>CAPEX</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    
+    // Scroll to the comparison panel
+    document.getElementById("panel-compare").scrollIntoView({ behavior: 'smooth' });
+  }
+
   function resetAll() {
     state.capacities = { wind_kW: 1500, solar_kWp: 1500, otec_kW: 500, wave_kW: 0, bess_kWh: 4000 };
     buildSliders();
@@ -223,6 +282,7 @@
     buildSliders();
     document.getElementById("btn-evaluate").addEventListener("click", doEvaluate);
     document.getElementById("btn-optimize").addEventListener("click", doOptimize);
+    document.getElementById("btn-compare").addEventListener("click", doCompare);
     document.getElementById("btn-reset").addEventListener("click", resetAll);
     
     // Add Export Listeners
