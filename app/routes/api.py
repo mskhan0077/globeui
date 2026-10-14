@@ -6,6 +6,7 @@ from flask import Blueprint, current_app, jsonify, request
 from app.engine.config_eval import evaluate
 from app.engine.optimizer import optimize
 from app.config import APP_DEFAULTS
+import time
 
 bp = Blueprint("api", __name__)
 
@@ -59,7 +60,6 @@ def api_evaluate():
 
     return jsonify({"ok": True, "result": result})
 
-
 @bp.post("/optimize")
 def api_optimize():
     body = request.get_json(force=True) or {}
@@ -73,9 +73,22 @@ def api_optimize():
     weights = body.get("weights", APP_DEFAULTS["weights"])
     lpsp_target = float(body.get("lpsp_target", APP_DEFAULTS["reliability_target_lpsp"]))
 
+    current_app.logger.info(f"OPTIMIZE START: {island} | Target Load: {load_kW} kW | LPSP Target: {lpsp_target}")
+    start_time = time.time()
+
     try:
         result = optimize(island, load_kW, dfs, weights, lpsp_target=lpsp_target)
     except Exception as exc:
+        current_app.logger.error(f"OPTIMIZE FAILED: {str(exc)}")
         return jsonify({"ok": False, "error": str(exc)}), 500
+
+    elapsed = time.time() - start_time
+    search_size = result.get("search_size", 0)
+    feasible_count = len(result.get("feasible", []))
+    
+    current_app.logger.info(
+        f"OPTIMIZE DONE in {elapsed:.2f}s | "
+        f"Evaluated {search_size} mixes | Found {feasible_count} feasible options."
+    )
 
     return jsonify({"ok": True, "result": result})

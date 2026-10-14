@@ -174,7 +174,7 @@
   }
 
   async function doOptimize() {
-    els.status.textContent = "Optimizing… (this can take ~10 s)";
+    els.status.textContent = "Optimizing… (this can take up to 60s)"; // Updated expected time
     const body = {
       island: els.island.value,
       load_kW: Number(els.load.value),
@@ -182,8 +182,10 @@
     const resp = await postJSON("/api/optimize", body);
     els.status.textContent = resp.ok ? "" : "error";
     if (!resp.ok) { alert(resp.error); return; }
+    
     renderRanked(resp.result.feasible);
-    // Optionally auto-apply the top mix
+    
+    // Auto-apply the top mix
     if (resp.result.recommended) {
       const c = resp.result.recommended.capacities;
       Object.assign(state.capacities, c);
@@ -192,6 +194,10 @@
         const out = document.getElementById("out-" + key);
         if (el) { el.value = c[key]; out.textContent = c[key]; }
       });
+      
+      // Force the dashboard to re-evaluate and update the charts/KPIs
+      // to match the newly applied optimal slider values.
+      await doEvaluate(); 
     }
   }
 
