@@ -200,11 +200,16 @@
       SLIDERS.forEach(({ key }) => {
         const el = document.getElementById("sl-" + key);
         const out = document.getElementById("out-" + key);
-        if (el) { el.value = c[key]; out.textContent = c[key]; }
+        if (el) { 
+          // Expand the slider's maximum visually if the optimizer found a higher value
+          if (c[key] > el.max) {
+             el.max = Math.ceil(c[key] * 1.25); // Expand max bound by 25% overhead
+          }
+          el.value = c[key]; 
+          out.textContent = c[key]; 
+        }
       });
       
-      // Force the dashboard to re-evaluate and update the charts/KPIs
-      // to match the newly applied optimal slider values.
       await doEvaluate(); 
     }
   }
