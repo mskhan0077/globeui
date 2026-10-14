@@ -3,7 +3,6 @@ from app.config import APP_DEFAULTS
 
 bp = Blueprint("main", __name__)
 
-
 @bp.get("/")
 def index():
     islands = sorted(current_app.config["DATA"]["islands"].index.tolist())
