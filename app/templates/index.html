@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}BlueGrid Planner{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>Choose island &amp; load</h2>
+  <form id="config-form">
+    <div class="grid-2">
+      <label>Island
+        <select name="island" id="island">
+          {% for i in islands %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Target net AC load (kW)
+        <input type="number" id="load_kW" name="load_kW"
+               value="{{ defaults.load_kW }}" min="100" step="100" />
+      </label>
+    </div>
+  </form>
+</section>
+<section class="panel">
+  <h2>Size the system</h2>
+  <p class="muted">Sliders to be added.</p>
+</section>
+<section class="panel" id="results">
+  <h2>Results</h2>
+  <p class="muted">Run an evaluation to see KPIs, charts, and a ranked table.</p>
+</section>
+<footer>Change this with the actual UI.</footer>
+{% endblock %}
