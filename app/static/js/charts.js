@@ -11,6 +11,7 @@
   const state = {
     capacities: { wind_kW: 1500, solar_kWp: 1500, otec_kW: 500, wave_kW: 0, bess_kWh: 4000 },
     lastResult: null,
+    lastRunId: null,
   };
 
   const els = {
@@ -167,7 +168,14 @@
     const resp = await postJSON("/api/evaluate", body);
     els.status.textContent = resp.ok ? "" : "error";
     if (!resp.ok) { alert(resp.error); return; }
+    
     state.lastResult = resp.result;
+    state.lastRunId = resp.run_id; // Save the ID
+    
+    // Enable the export buttons
+    document.getElementById("btn-export-csv").disabled = false;
+    document.getElementById("btn-export-pdf").disabled = false;
+
     renderKPIs(resp.result);
     renderMonthly(resp.result);
     renderRadar(resp.result.tech_scores);
@@ -211,5 +219,13 @@
     document.getElementById("btn-evaluate").addEventListener("click", doEvaluate);
     document.getElementById("btn-optimize").addEventListener("click", doOptimize);
     document.getElementById("btn-reset").addEventListener("click", resetAll);
+    
+    // Add Export Listeners
+    document.getElementById("btn-export-csv").addEventListener("click", () => {
+      if (state.lastRunId) window.location.href = `/export/csv/${state.lastRunId}`;
+    });
+    document.getElementById("btn-export-pdf").addEventListener("click", () => {
+      if (state.lastRunId) window.location.href = `/export/pdf/${state.lastRunId}`;
+    });
   });
 })();

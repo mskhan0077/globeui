@@ -3,7 +3,7 @@
 
 {% block content %}
 <section class="panel">
-  <h2>1. Island &amp; load</h2>
+  <h2>Island &amp; load</h2>
   <div class="grid-2">
     <label>Island
       <select id="island">
@@ -17,33 +17,35 @@
 </section>
 
 <section class="panel">
-  <h2>2. Capacity (kW / kWp / kWh)</h2>
+  <h2>Capacity (kW / kWp / kWh)</h2>
   <div id="sliders"></div>
   <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
     <button id="btn-evaluate">Evaluate</button>
     <button id="btn-optimize" class="secondary">Find optimal mix</button>
     <button id="btn-reset" class="secondary">Reset</button>
+    <button id="btn-export-csv" class="secondary" disabled>Export CSV</button>
+    <button id="btn-export-pdf" class="secondary" disabled>Export PDF</button>
     <span id="status" class="muted"></span>
   </div>
 </section>
 
 <section class="panel">
-  <h2>3. KPIs</h2>
+  <h2>KPIs</h2>
   <div id="kpis" class="kpi-grid"></div>
 </section>
 
 <section class="panel">
-  <h2>4. Monthly energy balance</h2>
+  <h2>Monthly energy balance</h2>
   <div id="chart-monthly" style="height:360px;"></div>
 </section>
 
 <section class="panel">
-  <h2>5. Technology radar</h2>
+  <h2>Technology radar</h2>
   <div id="chart-radar" style="height:420px;"></div>
 </section>
 
 <section class="panel">
-  <h2>6. Ranked configurations</h2>
+  <h2>Ranked configurations</h2>
   <div id="ranked"></div>
 </section>
 {% endblock %}

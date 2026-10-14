@@ -7,9 +7,9 @@ from app.engine.config_eval import evaluate
 from app.engine.optimizer import optimize
 from app.config import APP_DEFAULTS
 import time
+import uuid
 
 bp = Blueprint("api", __name__)
-
 
 @bp.get("/health")
 def health():
@@ -58,7 +58,12 @@ def api_evaluate():
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
 
-    return jsonify({"ok": True, "result": result})
+    run_id = str(uuid.uuid4())
+    if "CACHE" not in current_app.config:
+        current_app.config["CACHE"] = {}
+    current_app.config["CACHE"][run_id] = result
+    
+    return jsonify({"ok": True, "result": result, "run_id": run_id})
 
 @bp.post("/optimize")
 def api_optimize():
