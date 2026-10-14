@@ -1,29 +1,58 @@
 {% extends "base.html" %}
-{% block title %}BlueGrid Planner{% endblock %}
+{% block title %}BlueGrid — Planner{% endblock %}
+
 {% block content %}
 <section class="panel">
-  <h2>Choose island &amp; load</h2>
-  <form id="config-form">
-    <div class="grid-2">
-      <label>Island
-        <select name="island" id="island">
-          {% for i in islands %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
-        </select>
-      </label>
-      <label>Target net AC load (kW)
-        <input type="number" id="load_kW" name="load_kW"
-               value="{{ defaults.load_kW }}" min="100" step="100" />
-      </label>
-    </div>
-  </form>
+  <h2>1. Island &amp; load</h2>
+  <div class="grid-2">
+    <label>Island
+      <select id="island">
+        {% for i in islands %}<option value="{{ i }}" {% if i == 'Kadmat' %}selected{% endif %}>{{ i }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Target net AC load (kW)
+      <input type="number" id="load_kW" value="{{ defaults.load_kW }}" min="100" step="100">
+    </label>
+  </div>
 </section>
+
 <section class="panel">
-  <h2>Size the system</h2>
-  <p class="muted">Sliders to be added.</p>
+  <h2>2. Capacity (kW / kWp / kWh)</h2>
+  <div id="sliders"></div>
+  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button id="btn-evaluate">Evaluate</button>
+    <button id="btn-optimize" class="secondary">Find optimal mix</button>
+    <button id="btn-reset" class="secondary">Reset</button>
+    <span id="status" class="muted"></span>
+  </div>
 </section>
-<section class="panel" id="results">
-  <h2>Results</h2>
-  <p class="muted">Run an evaluation to see KPIs, charts, and a ranked table.</p>
+
+<section class="panel">
+  <h2>3. KPIs</h2>
+  <div id="kpis" class="kpi-grid"></div>
 </section>
-<footer>Change this with the actual UI.</footer>
+
+<section class="panel">
+  <h2>4. Monthly energy balance</h2>
+  <div id="chart-monthly" style="height:360px;"></div>
+</section>
+
+<section class="panel">
+  <h2>5. Technology radar</h2>
+  <div id="chart-radar" style="height:420px;"></div>
+</section>
+
+<section class="panel">
+  <h2>6. Ranked configurations</h2>
+  <div id="ranked"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.BLUEGRID = {
+    defaults: {{ defaults|tojson }}
+  };
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}
