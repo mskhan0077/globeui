@@ -41,3 +41,18 @@ def test_optimize_runs(client):
     j = r.get_json()
     assert j["ok"], j
     assert j["result"]["search_size"] > 100
+
+def test_tech_scores_in_range(client):
+    r = client.post("/api/evaluate", json={
+        "island": "Kadmat",
+        "load_kW": 1000,
+        "capacities": {
+            "wind_kW": 1500, "solar_kWp": 1500,
+            "otec_kW": 500, "wave_kW": 0, "bess_kWh": 4000,
+        },
+    })
+    j = r.get_json()
+    assert j["ok"], j
+    for tech, s in j["result"]["tech_scores"].items():
+        for k in ("resource", "capex", "reliability", "sustainability"):
+            assert 0 <= s[k] <= 10, (tech, k, s[k])

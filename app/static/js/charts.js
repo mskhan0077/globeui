@@ -109,7 +109,11 @@
       };
     });
     Plotly.newPlot("chart-radar", traces, {
-      polar: { radialaxis: { range: [0, 10], visible: true } },
+      polar: {
+        gridshape: "linear",
+        radialaxis: { range: [0, 100], visible: true },
+        angularaxis: { direction: "clockwise", rotation: 90 },
+      },
       showlegend: true, margin: { l: 40, r: 40, t: 20, b: 20 },
     }, { responsive: true, displaylogo: false });
   }

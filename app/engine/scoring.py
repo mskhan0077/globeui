@@ -34,22 +34,22 @@ def technology_scores(island: str, dfs: dict) -> dict:
             "cf_min": cf_min,
             "cf_max": float(cfs.max()),
             "firmness": firmness,
-            "capex": float(tech.loc[name, "capex_island_INR"]),
+            "capex_INR_per_kW": float(tech.loc[name, "capex_island_INR"]),
             "gco2": float(tech.loc[name, "lifecycle_gCO2_per_kWh"]),
             "trl": _parse_trl(tech.loc[name, "TRL"]),  # <-- Fixed parsing
         }
 
     cf_max = max(m["cf_annual"] for m in metrics.values())
-    capex_min = min(m["capex"] for m in metrics.values())
+    capex_min = min(m["capex_INR_per_kW"] for m in metrics.values())
     gco2_max = max(m["gco2"] for m in metrics.values())
 
     out = {}
     for name, m in metrics.items():
         out[name] = {
-            "resource": 10.0 * m["cf_annual"] / max(cf_max, 1e-9),
-            "capex": 10.0 * capex_min / max(m["capex"], 1e-9),
-            "reliability": 10.0 * m["firmness"] * (m["trl"] / 9.0),
-            "sustainability": 10.0 * (1.0 - m["gco2"] / max(gco2_max, 1e-9)),
+            "resource": 100.0 * m["cf_annual"] / max(cf_max, 1e-9),
+            "capex": 100.0 * capex_min / max(m["capex_INR_per_kW"], 1e-9),
+            "reliability": 100.0 * m["firmness"] * (m["trl"] / 9.0),
+            "sustainability": 100.0 * (1.0 - m["gco2"] / max(gco2_max, 1e-9)),
             **m,
         }
     return out
