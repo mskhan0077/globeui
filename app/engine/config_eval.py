@@ -45,19 +45,20 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         h = dfs["hourly"][hourly_key]
         
         # Generate accurate hourly arrays using real API physical data
-        gen_wind = float(capacities["wind_kW"]) * h["cf_wind"].to_numpy()
-        gen_fpv = float(capacities["solar_kWp"]) * h["cf_fpv"].to_numpy()
-        gen_otec = float(capacities["otec_kW"]) * h["cf_otec"].to_numpy()
-        gen_wave = float(capacities["wave_kW"]) * h["cf_wave"].to_numpy()
+        gen_wind = float(capacities.get("wind_kW", 0)) * h["cf_wind"].to_numpy()
+        gen_fpv = float(capacities.get("solar_kWp", 0)) * h["cf_fpv"].to_numpy()
+        gen_otec = float(capacities.get("otec_kW", 0)) * h["cf_otec"].to_numpy()
+        gen_wave = float(capacities.get("wave_kW", 0)) * h["cf_wave"].to_numpy()
         gen = gen_wind + gen_fpv + gen_otec + gen_wave
         
-        # Dynamically generate the load array based on the UI input
+        # CRITICAL FIX: Dynamically generate the load array based on the UI input
+        # instead of relying on the potentially empty CSV column.
         target_load = float(capacities.get("load_kW", 1000.0))
         load = np.full(len(gen), target_load)
         
         # Run Chronological Dispatch
         hr_result = bess.dispatch_hourly(
-            gen, load, float(capacities["bess_kWh"]),
+            gen, load, float(capacities.get("bess_kWh", 0)),
             rte=float(finance["bess_round_trip_eff"]),
             dod=float(finance["bess_depth_of_discharge"]),
             c_rate=float(finance["bess_max_c_rate"]),
@@ -75,9 +76,9 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         annual["surplus_kWh"] = float(hr_result["curtailed_kWh"])
         
         # OVERRIDE the monthly dataframe directly so UI charts reflect chronological API data
-        if "timestamp_IST" in h.columns:
+        if "timestamp_local" in h.columns:
             df_agg = pd.DataFrame({
-                "month_num": h["timestamp_IST"].dt.month,
+                "month_num": h["timestamp_local"].dt.month,
                 "gen_wind_kWh": gen_wind,
                 "gen_fpv_kWh": gen_fpv,
                 "gen_otec_kWh": gen_otec,
@@ -98,7 +99,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
     # 4. Economics (Calculated AFTER hourly dispatch for exact LCOE/CoS)
     capex, subsidy = economics.compute_capex(capacities, dfs["tech"], finance)
     opex = economics.compute_annual_opex(capacities, dfs["tech"])
-    repl = economics.bess_replacement_pv(capex["bess_kWh"], finance)
+    repl = economics.bess_replacement_pv(capex.get("bess_kWh", 0), finance)
 
     econ = economics.cost_metrics(
         capex, subsidy, opex, repl,
@@ -132,8 +133,15 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "econ": econ,
         "carbon": carb,
         "reliability": reliability,
-        "plf_target": annual["delivered_kWh"] / (float(capacities["load_kW"]) * 8760.0),
+        "plf_target": annual["delivered_kWh"] / (float(capacities.get("load_kW", 1000.0)) * 8760.0),
     }
+
+    # Extract the timezone to the result dictionary
+    resolved_tz = "Unknown"
+    if do_hourly and hourly_key and "timezone" in dfs["hourly"][hourly_key].columns:
+        resolved_tz = dfs["hourly"][hourly_key]["timezone"].iloc[0]
+        
+    result["timezone"] = resolved_tz
 
     if hr_result:
         result["hourly"] = {

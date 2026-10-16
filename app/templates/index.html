@@ -5,7 +5,7 @@
 <section class="panel">
   <h2>Island &amp; load</h2>
   <div class="grid-2">
-    <label>Island
+    <label>Island <span id="timezone-badge" class="muted" style="font-size: 0.85em; font-weight: normal; margin-left: 10px;"></span>
       <select id="island">
         {% for i in islands %}<option value="{{ i }}" {% if i == 'Kadmat' %}selected{% endif %}>{{ i }}</option>{% endfor %}
       </select>
@@ -40,14 +40,39 @@
   <div id="chart-monthly" style="height:360px;"></div>
 </section>
 
+<!-- Split Technology Radar Section -->
 <section class="panel">
-  <h2>Technology radar</h2>
-  <div id="chart-radar" style="height:420px;"></div>
+  <h2>Technology Viability Scores (0-100)</h2>
+  <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+    <div style="flex: 1; min-width: 200px;">
+      <h3 style="text-align: center; font-size: 1rem; color: #555;">Wind</h3>
+      <div id="chart-radar-wind" style="height:260px;"></div>
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+      <h3 style="text-align: center; font-size: 1rem; color: #555;">Floating Solar</h3>
+      <div id="chart-radar-fpv" style="height:260px;"></div>
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+      <h3 style="text-align: center; font-size: 1rem; color: #555;">OTEC</h3>
+      <div id="chart-radar-otec" style="height:260px;"></div>
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+      <h3 style="text-align: center; font-size: 1rem; color: #555;">Wave</h3>
+      <div id="chart-radar-wave" style="height:260px;"></div>
+    </div>
+  </div>
 </section>
 
 <section class="panel">
   <h2>Ranked configurations</h2>
   <div id="ranked"></div>
+</section>
+
+<section class="panel" id="panel-compare" style="display: none;">
+  <h2>Multi-Island Comparison</h2>
+  <p class="muted" style="margin-top:-8px; margin-bottom:16px;">Comparing the current capacity mix across all islands.</p>
+  <div id="chart-compare" style="height:350px; margin-bottom: 20px;"></div>
+  <div id="table-compare"></div>
 </section>
 {% endblock %}
 
@@ -58,10 +83,4 @@
   };
 </script>
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-<section class="panel" id="panel-compare" style="display: none;">
-  <h2>Multi-Island Comparison</h2>
-  <p class="muted" style="margin-top:-8px; margin-bottom:16px;">Comparing the current capacity mix across all islands.</p>
-  <div id="chart-compare" style="height:350px; margin-bottom: 20px;"></div>
-  <div id="table-compare"></div>
-</section>
 {% endblock %}

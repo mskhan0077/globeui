@@ -22,7 +22,17 @@ def load_all(data_dir: str | Path = "Data/processed") -> dict:
     if hourly_dir.exists():
         for csv in sorted(hourly_dir.glob("*.csv")):
             clean_key = csv.stem.replace("_", " ").strip().lower()
-            df = pd.read_csv(csv, parse_dates=["timestamp_IST"])
+            
+            # Read the CSV without forcing the date parser yet
+            df = pd.read_csv(csv)
+            
+            # Dynamically parse whichever timestamp column exists
+            if "timestamp_local" in df.columns:
+                df["timestamp_local"] = pd.to_datetime(df["timestamp_local"])
+            elif "timestamp_IST" in df.columns:
+                # Convert the old IST column and rename it so the engine doesn't break
+                df["timestamp_local"] = pd.to_datetime(df["timestamp_IST"])
+                
             hourly[clean_key] = df
 
     return {
