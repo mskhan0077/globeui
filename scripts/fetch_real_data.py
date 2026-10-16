@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+from pathlib import Path
 
 def fetch_open_meteo_hourly(lat, lon, year="2023"):
     """Fetches 8760 hourly data for Wind Speed (100m) and Solar GHI."""
@@ -53,17 +54,26 @@ def convert_to_capacity_factors(df):
     return df
 
 if __name__ == "__main__":
-    print("Fetching actual data for Kadmat Island...")
+    print("Fetching actual data for Kadmat Island... hmmmmm")
     # Kadmat coordinates
     df_hourly = fetch_open_meteo_hourly(11.22, 72.78)
     df_hourly = convert_to_capacity_factors(df_hourly)
     
-    # Keep the dummy OTEC, Wave, and Load for now
-    df_dummy = pd.read_csv("../data/hourly/kadmat.csv") 
+    # Dynamically find the project root
+    project_root = Path(__file__).resolve().parent.parent
+    hourly_dir = project_root / "Data" / "processed" / "hourly"
+    
+    dummy_csv_path = hourly_dir / "kadmat.csv"
+    real_csv_path = hourly_dir / "kadmat_real.csv"
+    
+    print(f"Reading dummy data from: {dummy_csv_path}")
+    df_dummy = pd.read_csv(dummy_csv_path) 
+    
+    # Merge the dummy OTEC, Wave, and Load to match the app's expectations
     df_hourly["cf_otec"] = df_dummy["cf_otec"]
     df_hourly["cf_wave"] = df_dummy["cf_wave"]
     df_hourly["load_flat_kW"] = df_dummy["load_flat_kW"]
     
     # Save the realistic 8760 data back to the app's data folder
-    df_hourly.to_csv("../data/hourly/kadmat_real.csv", index=False)
-    print("Real data saved successfully lalala!")
+    df_hourly.to_csv(real_csv_path, index=False)
+    print(f"Real data saved successfully to: {real_csv_path} lalalala!")
