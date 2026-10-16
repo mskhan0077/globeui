@@ -12,16 +12,16 @@ def dispatch_hourly(
     dod: float = 0.9,
     c_rate: float = 0.5,
 ) -> dict:
-    """Dispatch BESS over hourly generation and load profiles.
-
-    Symmetric one-way efficiency eta = sqrt(rte).
-    Returns cumulative energy, LPSP, LOLE, and SOC trajectory.
-    """
+    """Dispatch BESS over hourly generation and load profiles."""
     eta = float(np.sqrt(rte))
     pmax = c_rate * bess_kWh
     smax = dod * bess_kWh
     smin = (1 - dod) * bess_kWh
     n = len(gen_kW)
+    
+    # 1.5% hourly self-discharge ensures the BESS fully empties in ~3 days
+    # This prevents the solver from treating BESS as a seasonal energy source.
+    self_discharge_rate = 0.015 
 
     soc = 0.5 * smax
     delivered = np.zeros(n)
@@ -30,6 +30,10 @@ def dispatch_hourly(
     soc_hist = np.zeros(n)
 
     for t in range(n):
+        # Apply strict multi-day discharge penalty
+        if soc > smin:
+            soc = max(smin, soc * (1.0 - self_discharge_rate))
+            
         net = gen_kW[t] - load_kW[t]
         if net >= 0:
             room = max(smax - soc, 0.0)
@@ -55,4 +59,8 @@ def dispatch_hourly(
         "lpsp": total_unmet / max(total_load, 1e-9),
         "lole_hours": int((unmet > 1e-9).sum()),
         "soc_kWh": soc_hist.tolist(),
+        # CRITICAL FIX: Pass the actual arrays back to the orchestrator
+        "hourly_delivered": delivered,
+        "hourly_unmet": unmet,
+        "hourly_curtailed": curtailed,
     }

@@ -11,7 +11,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
              use_hourly: bool | None = None) -> dict:
     """Full pipeline for one configuration."""
 
-    # Base Generation (Fallback to rough monthly model)
+    # 1. Base Generation (Fallback to rough monthly model)
     monthly = generation.monthly_generation(island, capacities, dfs)
     annual = {
         "hours": float(monthly["hours"].sum()),
@@ -26,7 +26,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "unmet_kWh": float(monthly["unmet_kWh"].sum()),
     }
 
-    # Hourly Refinement (Identify 8760 file via robust matching)
+    # 2. Hourly Refinement (Identify 8760 file via robust matching)
     island_norm = island.replace("_", " ").strip().lower()
     hourly_key = None
     if "hourly" in dfs:
@@ -50,7 +50,10 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         gen_otec = float(capacities["otec_kW"]) * h["cf_otec"].to_numpy()
         gen_wave = float(capacities["wave_kW"]) * h["cf_wave"].to_numpy()
         gen = gen_wind + gen_fpv + gen_otec + gen_wave
-        load = h["load_flat_kW"].to_numpy()
+        
+        # Dynamically generate the load array based on the UI input
+        target_load = float(capacities.get("load_kW", 1000.0))
+        load = np.full(len(gen), target_load)
         
         # Run Chronological Dispatch
         hr_result = bess.dispatch_hourly(
@@ -71,7 +74,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         annual["unmet_kWh"] = float(hr_result["unmet_kWh"])
         annual["surplus_kWh"] = float(hr_result["curtailed_kWh"])
         
-        # OVERRIDE the monthly dataframe directly so UI charts reflect API data, not dummy data
+        # OVERRIDE the monthly dataframe directly so UI charts reflect chronological API data
         if "timestamp_IST" in h.columns:
             df_agg = pd.DataFrame({
                 "month_num": h["timestamp_IST"].dt.month,
@@ -80,7 +83,11 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                 "gen_otec_kWh": gen_otec,
                 "gen_wave_kWh": gen_wave,
                 "gen_total_kWh": gen,
-                "load_kWh": load
+                "load_kWh": load,
+                # CRITICAL FIX: Inject the true hourly BESS tracking into the UI charts
+                "delivered_kWh": hr_result["hourly_delivered"],
+                "surplus_kWh": hr_result["hourly_curtailed"],
+                "unmet_kWh": hr_result["hourly_unmet"]
             }).groupby("month_num").sum()
             
             # Safely inject the precise API aggregations into the UI payload
@@ -88,7 +95,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                 if col in monthly.columns:
                     monthly[col] = df_agg[col].values
 
-    # Economics (Calculated AFTER hourly dispatch for exact LCOE/CoS)
+    # 4. Economics (Calculated AFTER hourly dispatch for exact LCOE/CoS)
     capex, subsidy = economics.compute_capex(capacities, dfs["tech"], finance)
     opex = economics.compute_annual_opex(capacities, dfs["tech"])
     repl = economics.bess_replacement_pv(capex["bess_kWh"], finance)
@@ -99,10 +106,10 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         finance,
     )
     
-    # Carbon Metrics
+    # 5. Carbon Metrics
     carb = carbon.carbon_metrics(annual["delivered_kWh"], finance)
 
-    # Reliability Metrics
+    # 6. Reliability Metrics
     lpsp_annual = annual["unmet_kWh"] / max(annual["load_kWh"], 1e-9)
     reliability = {
         "lpsp_monthly": lpsp_annual, 
@@ -115,7 +122,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         reliability["lpsp_monthly"] = hr_result["lpsp"]
         reliability["coverage_monthly"] = 1.0 - hr_result["lpsp"]
 
-    # Build Final Result
+    # 7. Build Final Result
     result = {
         "island": island,
         "capacities": dict(capacities),

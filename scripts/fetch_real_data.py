@@ -6,8 +6,8 @@ from pathlib import Path
 
 def fetch_open_meteo_data(lat, lon, year="2023"):
     """Fetches 8760 hourly atmospheric and marine data and merges them."""
-    # Fetch Atmospheric Data
-    url_weather = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=Asia%2FKolkata"
+    # Fetch Atmospheric Data - ADDED &wind_speed_unit=ms to fix the cut-out bug!
+    url_weather = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=Asia%2FKolkata&wind_speed_unit=ms"
     res_weather = requests.get(url_weather).json()
     
     df_weather = pd.DataFrame({
@@ -76,7 +76,6 @@ if __name__ == "__main__":
         island_name = row["island"]
         
         # SHIFT COORDINATES TO DEEP SEA
-        # Shifting 0.04 degrees (~4.4 km) East to get off the shallow atoll reefs
         deep_sea_lat = float(row["lat_deg_N"])
         deep_sea_lon = float(row["lon_deg_E"]) + 0.04
         
@@ -98,7 +97,7 @@ if __name__ == "__main__":
             csv_path = hourly_dir / f"{island_name.lower().replace(' ', '_')}.csv"
             df_hourly[cols].to_csv(csv_path, index=False)
             
-            # Sleep briefly to respect API rate limits (Open-Meteo allows 10,000 calls/day, but it's polite to pause)
+            # Sleep briefly to respect API rate limits
             time.sleep(1.5)
             
         except Exception as e:

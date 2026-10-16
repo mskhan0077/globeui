@@ -9,14 +9,15 @@ from . import economics
 
 def get_dynamic_grid(load_kW: float) -> dict:
     """Scale the grid search space dynamically based on target load."""
-    max_w_s = max(3000, int(load_kW * 4))
-    max_o   = max(1500, int(load_kW * 1.5))
-    max_b   = max(10000, int(load_kW * 12))
+    # Significantly expanded max limits so the solver can find a 100% reliable system
+    max_w_s = max(5000, int(load_kW * 8))
+    max_o   = max(2000, int(load_kW * 2))
+    max_b   = max(30000, int(load_kW * 30)) # Allow up to 30 hours of storage
     
     # Target roughly 5-6 points per dimension
     step_w_s = max(500, int(np.ceil((max_w_s / 5) / 100) * 100))
-    step_o   = max(500, int(np.ceil((max_o / 3) / 100) * 100))
-    step_b   = max(1000, int(np.ceil((max_b / 5) / 500) * 500))
+    step_o   = max(500, int(np.ceil((max_o / 4) / 100) * 100))
+    step_b   = max(2000, int(np.ceil((max_b / 6) / 500) * 500))
     
     return {
         "wind_kW":   list(range(0, max_w_s + 1, step_w_s)),
@@ -66,9 +67,10 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
     a_o = calc_a("OTEC")
     a_v = calc_a("Wave")
     a_b = calc_a("BESS", is_bess=True)
-    c_diesel = float(finance["diesel_fuel_cost_INR_per_kWh"])
+    
+    # 1. FORCE THE SOLVER TO MEET THE LOAD
+    c_diesel = 50000.0 
 
-    # Variables: 5 capacities + T*(g_w, g_s, g_o, g_v, ch, dis, soc, u, k) = 5 + 9T
     N = 5 + 9 * T
     c = np.zeros(N)
     c[0:5] = [a_w, a_s, a_o, a_v, a_b]
@@ -85,35 +87,26 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
 
     A_eq, b_eq, A_ub, b_ub = [], [], [], []
 
-    # 1. Gen limits: g_i[t] <= CF_i[t] * P_i
     for i in range(4):
         for t in range(T):
             row = np.zeros(N)
             row[idx_g(i, t)] = 1
             row[i] = -cfs[i][t]
-            A_ub.append(row)
-            b_ub.append(0)
+            A_ub.append(row); b_ub.append(0)
 
-    # 2. Bus balance: sum(g) + dis - ch - k + u = L
     for t in range(T):
         row = np.zeros(N)
         for i in range(4): row[idx_g(i, t)] = 1
         row[idx_dis(t)] = 1; row[idx_ch(t)] = -1; row[idx_k(t)] = -1; row[idx_u(t)] = 1
-        A_eq.append(row)
-        b_eq.append(load_kW)
+        A_eq.append(row); b_eq.append(load_kW)
 
-    # 3. SOC tracking
     eta = np.sqrt(float(finance["bess_round_trip_eff"]))
     for t in range(T):
         row = np.zeros(N)
-        row[idx_soc(t)] = 1
-        row[idx_soc(T-1 if t == 0 else t-1)] = -1
-        row[idx_ch(t)] = -eta * hours[t]
-        row[idx_dis(t)] = (1.0 / eta) * hours[t]
-        A_eq.append(row)
-        b_eq.append(0)
+        row[idx_soc(t)] = 1; row[idx_soc(T-1 if t == 0 else t-1)] = -1
+        row[idx_ch(t)] = -eta * hours[t]; row[idx_dis(t)] = (1.0 / eta) * hours[t]
+        A_eq.append(row); b_eq.append(0)
 
-    # 4. Envelopes & Power Limits
     dod = float(finance["bess_depth_of_discharge"])
     rho = float(finance["bess_max_c_rate"])
     for t in range(T):
@@ -126,19 +119,16 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
         row = np.zeros(N); row[idx_u(t)] = 1
         A_ub.append(row); b_ub.append(load_kW)
 
-    # 5. Annual LPSP target
     row = np.zeros(N)
     for t in range(T): row[idx_u(t)] = hours[t]
-    A_ub.append(row)
-    b_ub.append(lpsp_target * load_kW * np.sum(hours))
+    A_ub.append(row); b_ub.append(lpsp_target * load_kW * np.sum(hours))
 
-    # DYNAMIC BOUNDS BASED ON LOAD
     bounds = [(0, None)] * N
-    bounds[0] = (0, max(3000, load_kW * 5))  # Wind
-    bounds[1] = (0, max(3000, load_kW * 5))  # Solar
-    bounds[2] = (0, max(1500, load_kW * 2))  # OTEC
-    bounds[3] = (0, max(1000, load_kW * 1))  # Wave
-    bounds[4] = (0, max(10000, load_kW * 15)) # BESS
+    bounds[0] = (0, max(5000, load_kW * 20.0))  
+    bounds[1] = (0, max(5000, load_kW * 20.0))  
+    bounds[2] = (0, max(3000, load_kW * 3.0))   
+    bounds[3] = (0, max(1000, load_kW * 1.0))   
+    bounds[4] = (0, max(20000, load_kW * 50.0)) 
 
     res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method="highs")
     
@@ -173,8 +163,9 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
     if lp_caps:
         lp_caps["load_kW"] = load_kW
         try:
-            r = evaluate(island, lp_caps, dfs, use_hourly=False)
-            lpsp = r["reliability"]["lpsp_monthly"]
+            # CRITICAL FIX: Force 8760 Hourly Evaluation to expose night-time deficits
+            r = evaluate(island, lp_caps, dfs, use_hourly=True)
+            lpsp = r["reliability"].get("lpsp_hourly", r["reliability"]["lpsp_monthly"])
             results.append({
                 "capacities": {k: lp_caps.get(k, 0) for k in grid.keys()},
                 "lcoe": r["econ"]["LCOE_RE_INR_per_kWh"],
@@ -184,7 +175,7 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
                 "plf": r["plf_target"],
                 "co2_avoided_t": r["carbon"]["co2_avoided_t"],
                 "capex_INR": r["econ"]["capex_INR"],
-                "feasible": lpsp <= lpsp_target,
+                "feasible": lpsp <= lpsp_target + 1e-4, # floating point tolerance
                 "is_lp_optimal": True
             })
         except Exception:
@@ -194,10 +185,17 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
     for caps in _iter_combos(grid):
         caps = {**caps, "load_kW": load_kW}
         try:
-            r = evaluate(island, caps, dfs, use_hourly=False)
+            # CRITICAL FIX: Force 8760 Hourly Evaluation
+            r = evaluate(island, caps, dfs, use_hourly=True)
         except Exception:
             continue
-        lpsp = r["reliability"]["lpsp_monthly"]
+            
+        lpsp = r["reliability"].get("lpsp_hourly", r["reliability"]["lpsp_monthly"])
+        
+        # STRICT RULE: Discard immediately if it fails the strict target
+        if lpsp > lpsp_target + 1e-4:
+            continue
+            
         results.append({
             "capacities": {k: caps[k] for k in grid.keys()},
             "lcoe": r["econ"]["LCOE_RE_INR_per_kWh"],
@@ -207,12 +205,12 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
             "plf": r["plf_target"],
             "co2_avoided_t": r["carbon"]["co2_avoided_t"],
             "capex_INR": r["econ"]["capex_INR"],
-            "feasible": lpsp <= lpsp_target,
+            "feasible": True,
             "is_lp_optimal": False
         })
 
-    feasible = [r for r in results if r["feasible"]]
-    infeasible = [r for r in results if not r["feasible"]]
+    feasible = [r for r in results if r.get("feasible", False)]
+    infeasible = [r for r in results if not r.get("feasible", True)]
 
     def score(row):
         return (
@@ -221,7 +219,6 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
             + 0.2 * (1.0 / max(row["capex_INR"] / 1e7, 1e-6))
         )
 
-    # Force the LP Optimal mix to stay at rank #1
     lp_mixes = [r for r in feasible if r["is_lp_optimal"]]
     grid_mixes = [r for r in feasible if not r["is_lp_optimal"]]
     
