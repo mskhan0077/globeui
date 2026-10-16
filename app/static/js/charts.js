@@ -97,25 +97,39 @@
 
   function renderRadar(techScores) {
     const cats = ["Resource", "CAPEX", "Reliability", "Sustainability"];
-    const techs = Object.keys(techScores);
-    const traces = techs.map((t) => {
-      const s = techScores[t];
-      return {
-        type: "scatterpolar",
-        r: [s.resource, s.capex, s.reliability, s.sustainability, s.resource],
-        theta: [...cats, cats[0]],
-        fill: "toself",
-        name: t,
-      };
+    
+    // Map individual technologies to their specific chart divs
+    const configs = [
+        { key: "Wind", id: "chart-radar-wind", color: "#1f77b4" },
+        { key: "Floating Solar PV", id: "chart-radar-fpv", color: "#ff7f0e" },
+        { key: "OTEC", id: "chart-radar-otec", color: "#2ca02c" },
+        { key: "Wave", id: "chart-radar-wave", color: "#d62728" },
+    ];
+
+    configs.forEach(({ key, id, color }) => {
+        const s = techScores[key];
+        const chartDiv = document.getElementById(id);
+        
+        if (s && chartDiv) {
+            const trace = {
+                type: "scatterpolar",
+                r: [s.resource, s.capex, s.reliability, s.sustainability, s.resource],
+                theta: [...cats, cats[0]],
+                fill: "toself",
+                name: key,
+                line: { color: color }
+            };
+            
+            Plotly.newPlot(id, [trace], {
+                polar: {
+                    radialaxis: { range: [0, 100], visible: true },
+                    angularaxis: { direction: "clockwise", rotation: 90 },
+                },
+                showlegend: false,
+                margin: { l: 30, r: 30, t: 20, b: 20 },
+            }, { responsive: true, displaylogo: false });
+        }
     });
-    Plotly.newPlot("chart-radar", traces, {
-      polar: {
-        gridshape: "linear",
-        radialaxis: { range: [0, 100], visible: true },
-        angularaxis: { direction: "clockwise", rotation: 90 },
-      },
-      showlegend: true, margin: { l: 40, r: 40, t: 20, b: 20 },
-    }, { responsive: true, displaylogo: false });
   }
 
   function renderRanked(list) {
@@ -174,11 +188,16 @@
     if (!resp.ok) { alert(resp.error); return; }
     
     state.lastResult = resp.result;
-    state.lastRunId = resp.run_id; // Save the ID
+    state.lastRunId = resp.run_id;
     
-    // Enable the export buttons
     document.getElementById("btn-export-csv").disabled = false;
     document.getElementById("btn-export-pdf").disabled = false;
+
+    // Inject Timezone badge
+    const tzBadge = document.getElementById("timezone-badge");
+    if (tzBadge && resp.result.timezone) {
+        tzBadge.textContent = "(Timezone: " + resp.result.timezone + ")";
+    }
 
     renderKPIs(resp.result);
     renderMonthly(resp.result);
@@ -186,7 +205,7 @@
   }
 
   async function doOptimize() {
-    els.status.textContent = "Optimizing… (this can take up to 60s)"; // Updated expected time
+    els.status.textContent = "Optimizing… (this can take up to 60s)";
     const body = {
       island: els.island.value,
       load_kW: Number(els.load.value),
@@ -197,7 +216,6 @@
     
     renderRanked(resp.result.feasible);
     
-    // Auto-apply the top mix
     if (resp.result.recommended) {
       const c = resp.result.recommended.capacities;
       Object.assign(state.capacities, c);
@@ -205,15 +223,11 @@
         const el = document.getElementById("sl-" + key);
         const out = document.getElementById("out-" + key);
         if (el) { 
-          // Expand the slider's maximum visually if the optimizer found a higher value
-          if (c[key] > el.max) {
-             el.max = Math.ceil(c[key] * 1.25); // Expand max bound by 25% overhead
-          }
+          if (c[key] > el.max) { el.max = Math.ceil(c[key] * 1.25); }
           el.value = c[key]; 
           out.textContent = c[key]; 
         }
       });
-      
       await doEvaluate(); 
     }
   }
@@ -228,7 +242,6 @@
     els.status.textContent = resp.ok ? "" : "error";
     if (!resp.ok) { alert(resp.error); return; }
 
-    // Show the panel
     document.getElementById("panel-compare").style.display = "block";
     
     const data = resp.result;
@@ -236,7 +249,6 @@
     const lcoe = data.map(d => d.lcoe);
     const cos = data.map(d => d.cos);
     
-    // 1. Render Grouped Bar Chart
     Plotly.newPlot("chart-compare", [
       { x: islands, y: lcoe, name: "LCOE (RE) ₹/kWh", type: "bar", marker: { color: "#0b3d91" } },
       { x: islands, y: cos, name: "System CoS ₹/kWh", type: "bar", marker: { color: "#a5b4fc" } }
@@ -247,7 +259,6 @@
       legend: { orientation: "h", y: 1.1 }
     }, { responsive: true, displaylogo: false });
 
-    // 2. Render Table
     const rows = data.map(r => `
       <tr>
         <td><strong>${r.island}</strong></td>
@@ -273,7 +284,6 @@
       </table>
     `;
     
-    // Scroll to the comparison panel
     document.getElementById("panel-compare").scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -289,7 +299,6 @@
     document.getElementById("btn-compare").addEventListener("click", doCompare);
     document.getElementById("btn-reset").addEventListener("click", resetAll);
     
-    // Add Export Listeners
     document.getElementById("btn-export-csv").addEventListener("click", () => {
       if (state.lastRunId) window.location.href = `/export/csv/${state.lastRunId}`;
     });

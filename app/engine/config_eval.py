@@ -11,6 +11,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
              use_hourly: bool | None = None) -> dict:
     """Full pipeline for one configuration."""
 
+    # 1. Base Generation (Fallback to rough monthly model)
     monthly = generation.monthly_generation(island, capacities, dfs)
     annual = {
         "hours": float(monthly["hours"].sum()),
@@ -25,25 +26,104 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "unmet_kWh": float(monthly["unmet_kWh"].sum()),
     }
 
+    # 2. Hourly Refinement (Identify 8760 file via robust matching)
+    island_norm = island.replace("_", " ").strip().lower()
+    hourly_key = None
+    if "hourly" in dfs:
+        for k in dfs["hourly"].keys():
+            k_norm = str(k).replace("_", " ").strip().lower()
+            if island_norm == k_norm or island_norm in k_norm or k_norm in island_norm:
+                hourly_key = k
+                break
+
+    do_hourly = use_hourly if use_hourly is not None else (hourly_key is not None)
     finance = dfs["finance"]
+    hr_result = None
+
+    # 3. High-Fidelity Override (If real 8760 API data exists)
+    if do_hourly and hourly_key:
+        h = dfs["hourly"][hourly_key]
+        
+        # Generate accurate hourly arrays using real API physical data
+        gen_wind = float(capacities.get("wind_kW", 0)) * h["cf_wind"].to_numpy()
+        gen_fpv = float(capacities.get("solar_kWp", 0)) * h["cf_fpv"].to_numpy()
+        gen_otec = float(capacities.get("otec_kW", 0)) * h["cf_otec"].to_numpy()
+        gen_wave = float(capacities.get("wave_kW", 0)) * h["cf_wave"].to_numpy()
+        gen = gen_wind + gen_fpv + gen_otec + gen_wave
+        
+        # CRITICAL FIX: Dynamically generate the load array based on the UI input
+        # instead of relying on the potentially empty CSV column.
+        target_load = float(capacities.get("load_kW", 1000.0))
+        load = np.full(len(gen), target_load)
+        
+        # Run Chronological Dispatch
+        hr_result = bess.dispatch_hourly(
+            gen, load, float(capacities.get("bess_kWh", 0)),
+            rte=float(finance["bess_round_trip_eff"]),
+            dod=float(finance["bess_depth_of_discharge"]),
+            c_rate=float(finance["bess_max_c_rate"]),
+        )
+        
+        # OVERRIDE annual metrics with highly accurate 8760 physical data
+        annual["gen_wind_kWh"] = float(gen_wind.sum())
+        annual["gen_fpv_kWh"] = float(gen_fpv.sum())
+        annual["gen_otec_kWh"] = float(gen_otec.sum())
+        annual["gen_wave_kWh"] = float(gen_wave.sum())
+        annual["gen_total_kWh"] = float(gen.sum())
+        annual["load_kWh"] = float(load.sum())
+        annual["delivered_kWh"] = float(hr_result["delivered_kWh"])
+        annual["unmet_kWh"] = float(hr_result["unmet_kWh"])
+        annual["surplus_kWh"] = float(hr_result["curtailed_kWh"])
+        
+        # OVERRIDE the monthly dataframe directly so UI charts reflect chronological API data
+        if "timestamp_local" in h.columns:
+            df_agg = pd.DataFrame({
+                "month_num": h["timestamp_local"].dt.month,
+                "gen_wind_kWh": gen_wind,
+                "gen_fpv_kWh": gen_fpv,
+                "gen_otec_kWh": gen_otec,
+                "gen_wave_kWh": gen_wave,
+                "gen_total_kWh": gen,
+                "load_kWh": load,
+                # CRITICAL FIX: Inject the true hourly BESS tracking into the UI charts
+                "delivered_kWh": hr_result["hourly_delivered"],
+                "surplus_kWh": hr_result["hourly_curtailed"],
+                "unmet_kWh": hr_result["hourly_unmet"]
+            }).groupby("month_num").sum()
+            
+            # Safely inject the precise API aggregations into the UI payload
+            for col in df_agg.columns:
+                if col in monthly.columns:
+                    monthly[col] = df_agg[col].values
+
+    # 4. Economics (Calculated AFTER hourly dispatch for exact LCOE/CoS)
     capex, subsidy = economics.compute_capex(capacities, dfs["tech"], finance)
     opex = economics.compute_annual_opex(capacities, dfs["tech"])
-    repl = economics.bess_replacement_pv(capex["bess_kWh"], finance)
+    repl = economics.bess_replacement_pv(capex.get("bess_kWh", 0), finance)
 
     econ = economics.cost_metrics(
         capex, subsidy, opex, repl,
         annual["delivered_kWh"], annual["load_kWh"], annual["unmet_kWh"],
         finance,
     )
+    
+    # 5. Carbon Metrics
     carb = carbon.carbon_metrics(annual["delivered_kWh"], finance)
 
-    lpsp_monthly = annual["unmet_kWh"] / max(annual["load_kWh"], 1e-9)
+    # 6. Reliability Metrics
+    lpsp_annual = annual["unmet_kWh"] / max(annual["load_kWh"], 1e-9)
     reliability = {
-        "lpsp_monthly": lpsp_monthly,
-        "coverage_monthly": 1.0 - lpsp_monthly,
-        "worst_month_coverage": float(monthly["coverage"].min()),
+        "lpsp_monthly": lpsp_annual, 
+        "coverage_monthly": 1.0 - lpsp_annual,
+        "worst_month_coverage": float(monthly["coverage"].min()) if "coverage" in monthly else 1.0,
     }
 
+    if hr_result:
+        reliability["lpsp_hourly"] = hr_result["lpsp"]
+        reliability["lpsp_monthly"] = hr_result["lpsp"]
+        reliability["coverage_monthly"] = 1.0 - hr_result["lpsp"]
+
+    # 7. Build Final Result
     result = {
         "island": island,
         "capacities": dict(capacities),
@@ -53,47 +133,25 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "econ": econ,
         "carbon": carb,
         "reliability": reliability,
-        "plf_target": annual["delivered_kWh"] / (float(capacities["load_kW"]) * 8760.0),
+        "plf_target": annual["delivered_kWh"] / (float(capacities.get("load_kW", 1000.0)) * 8760.0),
     }
 
-    # Hourly refinement (Kadmat only)
-    do_hourly = use_hourly
-    
-    # Robustly find the hourly key for the island (handles "kadmat", "Kadmat", "Hourly_Kadmat", etc.)
-    hourly_key = None
-    if "hourly" in dfs:
-        for k in dfs["hourly"].keys():
-            if island.lower() in k.lower():
-                hourly_key = k
-                break
+    # Extract the timezone to the result dictionary
+    resolved_tz = "Unknown"
+    if do_hourly and hourly_key and "timezone" in dfs["hourly"][hourly_key].columns:
+        resolved_tz = dfs["hourly"][hourly_key]["timezone"].iloc[0]
+        
+    result["timezone"] = resolved_tz
 
-    if do_hourly is None:
-        do_hourly = hourly_key is not None
-
-    if do_hourly and hourly_key:
-        h = dfs["hourly"][hourly_key]
-        gen = (
-            float(capacities["wind_kW"]) * h["cf_wind"].to_numpy()
-            + float(capacities["solar_kWp"]) * h["cf_fpv"].to_numpy()
-            + float(capacities["otec_kW"]) * h["cf_otec"].to_numpy()
-            + float(capacities["wave_kW"]) * h["cf_wave"].to_numpy()
-        )
-        load = h["load_flat_kW"].to_numpy()
-        hr = bess.dispatch_hourly(
-            gen, load, float(capacities["bess_kWh"]),
-            rte=float(finance["bess_round_trip_eff"]),
-            dod=float(finance["bess_depth_of_discharge"]),
-            c_rate=float(finance["bess_max_c_rate"]),
-        )
+    if hr_result:
         result["hourly"] = {
-            "delivered_kWh": hr["delivered_kWh"],
-            "unmet_kWh": hr["unmet_kWh"],
-            "curtailed_kWh": hr["curtailed_kWh"],
-            "lpsp": hr["lpsp"],
-            "lole_hours": hr["lole_hours"],
-            "soc_kWh": hr["soc_kWh"],
+            "delivered_kWh": hr_result["delivered_kWh"],
+            "unmet_kWh": hr_result["unmet_kWh"],
+            "curtailed_kWh": hr_result["curtailed_kWh"],
+            "lpsp": hr_result["lpsp"],
+            "lole_hours": hr_result["lole_hours"],
+            "soc_kWh": hr_result["soc_kWh"],
         }
-        reliability["lpsp_hourly"] = hr["lpsp"]
 
     result["tech_scores"] = scoring.technology_scores(island, dfs)
 
