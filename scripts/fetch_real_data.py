@@ -1,11 +1,12 @@
-"""Fetch real 8760 weather and marine data for BlueGrid."""
+"""Fetch real 8760 weather and marine data for ALL Lakshadweep islands."""
 import pandas as pd
 import requests
+import time
 from pathlib import Path
 
 def fetch_open_meteo_data(lat, lon, year="2023"):
     """Fetches 8760 hourly atmospheric and marine data and merges them."""
-    # Fetch Atmospheric Data (Wind, Solar, Temp)
+    # Fetch Atmospheric Data
     url_weather = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=Asia%2FKolkata"
     res_weather = requests.get(url_weather).json()
     
@@ -16,7 +17,7 @@ def fetch_open_meteo_data(lat, lon, year="2023"):
         "temp_c": res_weather["hourly"]["temperature_2m"]
     })
     
-    # Fetch Marine Data (Waves)
+    # Fetch Marine Data
     url_marine = f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wave_height,wave_period&timezone=Asia%2FKolkata"
     res_marine = requests.get(url_marine).json()
     
@@ -26,107 +27,81 @@ def fetch_open_meteo_data(lat, lon, year="2023"):
         "wave_period_s": res_marine["hourly"]["wave_period"]
     })
     
-    # Fill any missing marine data (e.g., if coordinates are too close to shore) with 0
     df_marine.fillna(0, inplace=True)
-    
-    # Merge on timestamp
-    df_merged = pd.merge(df_weather, df_marine, on="timestamp_IST", how="inner")
-    return df_merged
+    return pd.merge(df_weather, df_marine, on="timestamp_IST", how="inner")
 
 def convert_to_capacity_factors(df):
     """Converts raw physics into Net Capacity Factors."""
-    
-    # Solar FPV Capacity Factor
-    # CF = (GHI / Standard Test Condition Irradiance) * Performance Ratio
-    # Standard STC is 1000 W/m2. Assume a PR of 0.80 for floating marine solar.
+    # Solar FPV
     STC_W_M2 = 1000.0
-    PERFORMANCE_RATIO = 0.80
-    
-    # Temperature derating: panels lose ~0.4% efficiency per degree over 25C
-    temp_penalty = 1 - (0.004 * (df["temp_c"] - 25).clip(lower=0))
-    
-    df["cf_fpv"] = (df["ghi_w_m2"] / STC_W_M2) * PERFORMANCE_RATIO * temp_penalty
+    df["cf_fpv"] = (df["ghi_w_m2"] / STC_W_M2) * 0.80 * (1 - (0.004 * (df["temp_c"] - 25).clip(lower=0)))
     df["cf_fpv"] = df["cf_fpv"].clip(lower=0.0, upper=1.0)
     
-    # Wind Capacity Factor (Simplified Power Curve mapping)
-    # Using a standard 1.5MW offshore/island turbine profile
-    cut_in = 3.0    # m/s
-    rated = 11.0    # m/s
-    cut_out = 25.0  # m/s
+    # Wind
+    cut_in, rated, cut_out = 3.0, 11.0, 25.0
+    def wind_curve(v):
+        if v < cut_in or v > cut_out: return 0.0
+        elif v >= rated: return 1.0
+        else: return ((v**3 - cut_in**3) / (rated**3 - cut_in**3))
+    df["cf_wind"] = df["wind_speed_100m_ms"].apply(wind_curve) * 0.88 
     
-    def wind_power_curve(v):
-        if v < cut_in or v > cut_out:
-            return 0.0
-        elif v >= rated:
-            return 1.0
-        else:
-            # Cubic relationship between cut-in and rated speed
-            return ((v**3 - cut_in**3) / (rated**3 - cut_in**3))
-            
-    df["cf_wind_gross"] = df["wind_speed_100m_ms"].apply(wind_power_curve)
-    
-    # Apply standard wake, electrical, and availability losses (assume 12% total loss)
-    df["cf_wind"] = df["cf_wind_gross"] * 0.88 
-    
-    # OTEC CAPACITY FACTOR (Rankine Cycle Thermodynamics)
-    # The ocean surface doesn't change temp quickly like the air does.
-    # A 24-hour rolling mean of air temp creates a highly accurate SST proxy.
+    # OTEC
     df["sst_proxy_c"] = df["temp_c"].rolling(window=24, min_periods=1).mean()
-    
-    t_c = 7.0 # Constant deep water temperature at 1000m
-    delta_t = df["sst_proxy_c"] - t_c
-    
-    # Net Output Factor (NOF) formula
-    # NOF = ((delta_T / 22)^2 - 0.30) / (1 - 0.30)
-    nof = ((delta_t / 22.0)**2 - 0.30) / (1.0 - 0.30)
-    
-    # Clip NOF: if pumping takes more energy than generated, NOF = 0
-    nof = nof.clip(lower=0.0, upper=1.05) 
-    
-    # Final CF is Thermodynamic Output * 92% Mechanical Availability
-    df["cf_otec"] = nof * 0.92
+    delta_t = df["sst_proxy_c"] - 4.0 
+    df["cf_otec"] = (((delta_t / 22.0)**2 - 0.30) / 0.70).clip(lower=0.0, upper=1.05) * 0.92
 
-    # WAVE
-    # J = 0.49 * H^2 * T (Wave Power Flux in kW/m)
+    # Wave
     df["wave_power_flux"] = 0.49 * (df["wave_height_m"]**2) * df["wave_period_s"]
-    
-    rated_wave_flux = 25.0 # kW/m
-    availability = 0.85
-    
     def wave_cf(row):
-        h = row["wave_height_m"]
-        j = row["wave_power_flux"]
-        if h < 0.5 or h > 4.0:
-            return 0.0
-        return min(1.0, j / rated_wave_flux) * availability
-        
+        h, j = row["wave_height_m"], row["wave_power_flux"]
+        if h < 0.5 or h > 4.0: return 0.0
+        return min(1.0, j / 25.0) * 0.85
     df["cf_wave"] = df.apply(wave_cf, axis=1)
 
     return df
 
 if __name__ == "__main__":
-    print("Fetching actual atmospheric and marine data for Kadmat Island...")
-    
-    # Fetch and Calculate
-    df_hourly = fetch_open_meteo_data(11.13408, 72.43113)
-    df_hourly = convert_to_capacity_factors(df_hourly)
-    
-    # Locate Data Directories dynamically
     project_root = Path(__file__).resolve().parent.parent
+    
+    # Load the master islands list from the Excel file
+    excel_path = project_root / "Data" / "Dummy" / "BlueGrid_Lakshadweep_Dummy_Data (1).xlsx"
+    df_islands = pd.read_excel(excel_path, sheet_name="Islands")
+    
     hourly_dir = project_root / "Data" / "processed" / "hourly"
+    hourly_dir.mkdir(parents=True, exist_ok=True)
     
-    dummy_csv_path = hourly_dir / "kadmat.csv"
-    real_csv_path = hourly_dir / "kadmat.csv" # Overwriting the file directly
+    print(f"Beginning deep-sea data extraction for {len(df_islands)} islands...")
     
-    # Port over the remaining Dummy Data (Load)
-    print(f"Reading dummy load data from: {dummy_csv_path}")
-    df_dummy = pd.read_csv(dummy_csv_path) 
-    df_hourly["load_flat_kW"] = df_dummy["load_flat_kW"]
-    
-    # Clean up temporary columns
-    columns_to_keep = ["timestamp_IST", "cf_wind", "cf_fpv", "cf_otec", "cf_wave", "load_flat_kW"]
-    df_hourly = df_hourly[columns_to_keep]
-    
-    # Save and Inject into App
-    df_hourly.to_csv(real_csv_path, index=False)
-    print(f"Real API data successfully calculated and injected into: {real_csv_path}")
+    for index, row in df_islands.iterrows():
+        island_name = row["island"]
+        
+        # SHIFT COORDINATES TO DEEP SEA
+        # Shifting 0.04 degrees (~4.4 km) East to get off the shallow atoll reefs
+        deep_sea_lat = float(row["lat_deg_N"])
+        deep_sea_lon = float(row["lon_deg_E"]) + 0.04
+        
+        print(f"[{index+1}/{len(df_islands)}] Fetching {island_name} at Deep Sea coords ({deep_sea_lat:.4f}, {deep_sea_lon:.4f})...")
+        
+        try:
+            # 1. Fetch API Data
+            df_hourly = fetch_open_meteo_data(deep_sea_lat, deep_sea_lon)
+            
+            # 2. Calculate Physics
+            df_hourly = convert_to_capacity_factors(df_hourly)
+            
+            # 3. Add flat load dummy data (temporarily until dynamic load modeling is built)
+            peak_demand = float(row.get("peak_demand_kW_DUMMY", 1000))
+            df_hourly["load_flat_kW"] = peak_demand
+            
+            # Clean and save
+            cols = ["timestamp_IST", "cf_wind", "cf_fpv", "cf_otec", "cf_wave", "load_flat_kW"]
+            csv_path = hourly_dir / f"{island_name.lower().replace(' ', '_')}.csv"
+            df_hourly[cols].to_csv(csv_path, index=False)
+            
+            # Sleep briefly to respect API rate limits (Open-Meteo allows 10,000 calls/day, but it's polite to pause)
+            time.sleep(1.5)
+            
+        except Exception as e:
+            print(f"  -> Error fetching data for {island_name}: {e}")
+
+    print("All island data successfully generated!")
