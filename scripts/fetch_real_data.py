@@ -7,6 +7,7 @@ def fetch_open_meteo_hourly(lat, lon, year="2023"):
     """Fetches 8760 hourly data for Wind Speed, Solar GHI, and Temperature."""
     url = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=Asia%2FKolkata"
     response = requests.get(url)
+    print(url)
     data = response.json()
     
     df = pd.DataFrame({
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     print("Fetching actual data for Kadmat Island...")
     
     # Fetch and Calculate Physics
-    df_hourly = fetch_open_meteo_hourly(11.22, 72.78)
+    df_hourly = fetch_open_meteo_hourly(11.13408, 72.43113)
     df_hourly = convert_to_capacity_factors(df_hourly)
     
     # Locate Data Directories dynamically
