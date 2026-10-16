@@ -1,5 +1,3 @@
-'''Change this script to fetch real data from the API and save it to a CSV file. We will replace the mock data with actual API calls.'''
-
 import pandas as pd
 import requests
 
@@ -17,10 +15,48 @@ def fetch_open_meteo_hourly(lat, lon, year="2023"):
     })
     return df
 
+def convert_to_capacity_factors(df):
+    """Converts raw weather physics into Net Capacity Factors."""
+    
+    # Solar FPV Capacity Factor
+    # CF = (GHI / Standard Test Condition Irradiance) * Performance Ratio
+    # Standard STC is 1000 W/m2. Assume a PR of 0.80 for floating marine solar.
+    STC_W_M2 = 1000.0
+    PERFORMANCE_RATIO = 0.80
+    
+    # Temperature derating: panels lose ~0.4% efficiency per degree over 25C
+    temp_penalty = 1 - (0.004 * (df["temp_c"] - 25).clip(lower=0))
+    
+    df["cf_fpv"] = (df["ghi_w_m2"] / STC_W_M2) * PERFORMANCE_RATIO * temp_penalty
+    df["cf_fpv"] = df["cf_fpv"].clip(lower=0.0, upper=1.0)
+    
+    # Wind Capacity Factor (Simplified Power Curve mapping)
+    # Using a standard 1.5MW offshore/island turbine profile
+    cut_in = 3.0    # m/s
+    rated = 11.0    # m/s
+    cut_out = 25.0  # m/s
+    
+    def wind_power_curve(v):
+        if v < cut_in or v > cut_out:
+            return 0.0
+        elif v >= rated:
+            return 1.0
+        else:
+            # Cubic relationship between cut-in and rated speed
+            return ((v**3 - cut_in**3) / (rated**3 - cut_in**3))
+            
+    df["cf_wind_gross"] = df["wind_speed_100m_ms"].apply(wind_power_curve)
+    
+    # Apply standard wake, electrical, and availability losses (assume 12% total loss)
+    df["cf_wind"] = df["cf_wind_gross"] * 0.88 
+    
+    return df
+
 if __name__ == "__main__":
     print("Fetching actual data for Kadmat Island...")
     # Kadmat coordinates
     df_hourly = fetch_open_meteo_hourly(11.22, 72.78)
+    df_hourly = convert_to_capacity_factors(df_hourly)
     
     # Keep the dummy OTEC, Wave, and Load for now
     df_dummy = pd.read_csv("../data/hourly/kadmat.csv") 
@@ -28,6 +64,6 @@ if __name__ == "__main__":
     df_hourly["cf_wave"] = df_dummy["cf_wave"]
     df_hourly["load_flat_kW"] = df_dummy["load_flat_kW"]
     
-    # Save the real data back to the app's data folder
+    # Save the realistic 8760 data back to the app's data folder
     df_hourly.to_csv("../data/hourly/kadmat_real.csv", index=False)
     print("Real data saved successfully lalala!")
