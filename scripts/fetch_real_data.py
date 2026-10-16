@@ -1,25 +1,40 @@
-"""Fetch real 8760 weather data and calculate Capacity Factors for BlueGrid."""
+"""Fetch real 8760 weather and marine data for BlueGrid."""
 import pandas as pd
 import requests
 from pathlib import Path
 
-def fetch_open_meteo_hourly(lat, lon, year="2023"):
-    """Fetches 8760 hourly data for Wind Speed, Solar GHI, and Temperature."""
-    url = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=Asia%2FKolkata"
-    response = requests.get(url)
-    print(url)
-    data = response.json()
+def fetch_open_meteo_data(lat, lon, year="2023"):
+    """Fetches 8760 hourly atmospheric and marine data and merges them."""
+    # Fetch Atmospheric Data (Wind, Solar, Temp)
+    url_weather = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=Asia%2FKolkata"
+    res_weather = requests.get(url_weather).json()
     
-    df = pd.DataFrame({
-        "timestamp_IST": pd.to_datetime(data["hourly"]["time"]),
-        "wind_speed_100m_ms": data["hourly"]["wind_speed_100m"],
-        "ghi_w_m2": data["hourly"]["shortwave_radiation"],
-        "temp_c": data["hourly"]["temperature_2m"]
+    df_weather = pd.DataFrame({
+        "timestamp_IST": pd.to_datetime(res_weather["hourly"]["time"]),
+        "wind_speed_100m_ms": res_weather["hourly"]["wind_speed_100m"],
+        "ghi_w_m2": res_weather["hourly"]["shortwave_radiation"],
+        "temp_c": res_weather["hourly"]["temperature_2m"]
     })
-    return df
+    
+    # Fetch Marine Data (Waves)
+    url_marine = f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wave_height,wave_period&timezone=Asia%2FKolkata"
+    res_marine = requests.get(url_marine).json()
+    
+    df_marine = pd.DataFrame({
+        "timestamp_IST": pd.to_datetime(res_marine["hourly"]["time"]),
+        "wave_height_m": res_marine["hourly"]["wave_height"],
+        "wave_period_s": res_marine["hourly"]["wave_period"]
+    })
+    
+    # Fill any missing marine data (e.g., if coordinates are too close to shore) with 0
+    df_marine.fillna(0, inplace=True)
+    
+    # Merge on timestamp
+    df_merged = pd.merge(df_weather, df_marine, on="timestamp_IST", how="inner")
+    return df_merged
 
 def convert_to_capacity_factors(df):
-    """Converts raw weather physics into Net Capacity Factors."""
+    """Converts raw physics into Net Capacity Factors."""
     
     # Solar FPV Capacity Factor
     # CF = (GHI / Standard Test Condition Irradiance) * Performance Ratio
@@ -71,13 +86,29 @@ def convert_to_capacity_factors(df):
     # Final CF is Thermodynamic Output * 92% Mechanical Availability
     df["cf_otec"] = nof * 0.92
 
+    # WAVE
+    # J = 0.49 * H^2 * T (Wave Power Flux in kW/m)
+    df["wave_power_flux"] = 0.49 * (df["wave_height_m"]**2) * df["wave_period_s"]
+    
+    rated_wave_flux = 25.0 # kW/m
+    availability = 0.85
+    
+    def wave_cf(row):
+        h = row["wave_height_m"]
+        j = row["wave_power_flux"]
+        if h < 0.5 or h > 4.0:
+            return 0.0
+        return min(1.0, j / rated_wave_flux) * availability
+        
+    df["cf_wave"] = df.apply(wave_cf, axis=1)
+
     return df
 
 if __name__ == "__main__":
-    print("Fetching actual data for Kadmat Island...")
+    print("Fetching actual atmospheric and marine data for Kadmat Island...")
     
-    # Fetch and Calculate Physics
-    df_hourly = fetch_open_meteo_hourly(11.13408, 72.43113)
+    # Fetch and Calculate
+    df_hourly = fetch_open_meteo_data(11.13408, 72.43113)
     df_hourly = convert_to_capacity_factors(df_hourly)
     
     # Locate Data Directories dynamically
@@ -87,10 +118,9 @@ if __name__ == "__main__":
     dummy_csv_path = hourly_dir / "kadmat.csv"
     real_csv_path = hourly_dir / "kadmat.csv" # Overwriting the file directly
     
-    # Port over the remaining Dummy Data (Wave & Load)
-    print(f"Reading dummy wave/load data from: {dummy_csv_path}")
+    # Port over the remaining Dummy Data (Load)
+    print(f"Reading dummy load data from: {dummy_csv_path}")
     df_dummy = pd.read_csv(dummy_csv_path) 
-    df_hourly["cf_wave"] = df_dummy["cf_wave"]
     df_hourly["load_flat_kW"] = df_dummy["load_flat_kW"]
     
     # Clean up temporary columns
