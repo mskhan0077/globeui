@@ -1,4 +1,4 @@
-"""Fetch real 8760 weather and marine data for ALL Lakshadweep islands."""
+"""Fetch real 8760 weather and marine data for ALL Lakshadweep islands + Brest, France."""
 import pandas as pd
 import requests
 import time
@@ -6,7 +6,7 @@ from pathlib import Path
 
 def fetch_open_meteo_data(lat, lon, year="2023"):
     """Fetches 8760 hourly atmospheric and marine data and merges them."""
-    # Fetch Atmospheric Data - ADDED &wind_speed_unit=ms to fix the cut-out bug!
+    # Fetch Atmospheric Data (Wind in m/s)
     url_weather = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=Asia%2FKolkata&wind_speed_unit=ms"
     res_weather = requests.get(url_weather).json()
     
@@ -67,10 +67,20 @@ if __name__ == "__main__":
     excel_path = project_root / "Data" / "Dummy" / "BlueGrid_Lakshadweep_Dummy_Data (1).xlsx"
     df_islands = pd.read_excel(excel_path, sheet_name="Islands")
     
+    # ADD BREST, FRANCE DYNAMICALLY
+    brest_data = {
+        "island": "Brest France",
+        "lat_deg_N": 48.20, 
+        # Base is -5.54. When the loop adds 0.04 to push it into deep water, it becomes -5.50 (Celtic Sea)
+        "lon_deg_E": -5.54, 
+        "peak_demand_kW_DUMMY": 5000
+    }
+    df_islands = pd.concat([df_islands, pd.DataFrame([brest_data])], ignore_index=True)
+    
     hourly_dir = project_root / "Data" / "processed" / "hourly"
     hourly_dir.mkdir(parents=True, exist_ok=True)
     
-    print(f"Beginning deep-sea data extraction for {len(df_islands)} islands...")
+    print(f"Beginning deep-sea data extraction for {len(df_islands)} locations...")
     
     for index, row in df_islands.iterrows():
         island_name = row["island"]
@@ -88,7 +98,7 @@ if __name__ == "__main__":
             # 2. Calculate Physics
             df_hourly = convert_to_capacity_factors(df_hourly)
             
-            # 3. Add flat load dummy data (temporarily until dynamic load modeling is built)
+            # 3. Add flat load dummy data
             peak_demand = float(row.get("peak_demand_kW_DUMMY", 1000))
             df_hourly["load_flat_kW"] = peak_demand
             
