@@ -1,0 +1,1 @@
+"""Pure calculation functions. No Flask imports allowed here."""

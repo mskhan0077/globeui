@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}BlueGrid — Planner{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Island &amp; load</h2>
+  <div class="grid-2">
+    <label>Island <span id="timezone-badge" class="tz-badge"></span>
+      <select id="island">
+        {% for i in islands %}<option value="{{ i }}" {% if i == selected %}selected{% endif %}>{{ i }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Target net AC load (kW)
+      <input type="number" id="load_kW" value="{{ defaults.load_kW }}" min="100" step="100">
+    </label>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Capacity (kW / kWp / kWh)</h2>
+  <div id="sliders"></div>
+  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button id="btn-evaluate">Evaluate</button>
+      <button id="btn-optimize" class="secondary">Find optimal mix</button>
+      <button id="btn-compare" class="secondary">Compare all islands</button>
+      <button id="btn-reset" class="secondary">Reset</button>
+      <button id="btn-export-csv" class="secondary" disabled>Export CSV</button>
+      <button id="btn-export-pdf" class="secondary" disabled>Export PDF</button>
+      <span id="status" class="muted"></span>
+    </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>KPIs</h2>
+    <button type="button" class="fin-badge" data-info="dcf" aria-label="About the nominal DCF cost model">💡 Nominal DCF model (inflation-adjusted)</button>
+  </div>
+  <div id="kpis" class="kpi-grid"></div>
+</section>
+
+<section class="panel">
+  <h2>Monthly energy balance <button type="button" class="info-btn" data-info="monthly" aria-label="About the monthly energy balance">i</button></h2>
+  <div id="chart-monthly" style="height:360px;"></div>
+</section>
+
+<section class="panel">
+  <h2>Technology viability scores (0–100) <button type="button" class="info-btn" data-info="viability" aria-label="About the technology viability scores">i</button></h2>
+  <div class="radar-grid">
+    <div class="radar-cell"><h3>Wind</h3><div id="chart-radar-wind" class="radar-chart"></div></div>
+    <div class="radar-cell"><h3>Floating solar</h3><div id="chart-radar-fpv" class="radar-chart"></div></div>
+    <div class="radar-cell"><h3>OTEC</h3><div id="chart-radar-otec" class="radar-chart"></div></div>
+    <div class="radar-cell"><h3>Wave</h3><div id="chart-radar-wave" class="radar-chart"></div></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Ranked configurations <button type="button" class="info-btn" data-info="ranked" aria-label="About ranked configurations">i</button></h2>
+  <div id="ranked"></div>
+</section>
+
+<section class="panel" id="panel-compare" style="display: none;">
+  <h2>Multi-Island Comparison <button type="button" class="info-btn" data-info="compare" aria-label="About the multi-island comparison">i</button></h2>
+  <p class="muted panel-note">Comparing the current capacity mix across all islands.</p>
+  <div id="chart-compare" style="height:350px; margin-bottom: 20px;"></div>
+  <div id="table-compare"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<div id="busy-overlay" class="busy" role="status" aria-live="polite" hidden>
+  <div class="busy__spinner" aria-hidden="true"></div>
+  <p class="busy__label">Optimizing…</p>
+  <p class="busy__hint">This can take up to a minute.</p>
+</div>
+<script>
+  window.BLUEGRID = {
+    defaults: {{ defaults|tojson }},
+    places: {{ places|tojson }}  // island name -> [lat, lng], for the backdrop
+  };
+</script>
+<script src="{{ url_for('static', filename='js/planner.js') }}"></script>
+{% endblock %}

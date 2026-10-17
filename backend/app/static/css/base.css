@@ -1,0 +1,80 @@
+/* Planner layout and components. Colours come from the theme variables in glass.css. */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.container { max-width: 1200px; margin: 0 auto 16px; padding: 0 16px; }
+
+.panel { border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+.panel h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+label { display: block; font-size: 13px; color: var(--muted); }
+
+input, select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+button {
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:disabled { opacity: 0.45; cursor: default; }
+
+.muted { color: var(--muted); font-size: 13px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.kpi { border-radius: 8px; padding: 12px; }
+.kpi-label { font-size: 12px; color: var(--muted); }
+.kpi-value { font-size: 20px; font-weight: 600; margin: 4px 0; font-variant-numeric: tabular-nums; }
+.kpi-sub { font-size: 11px; color: var(--muted); }
+
+.ranked-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.ranked-table th,
+.ranked-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.ranked-table th { font-weight: 600; }
+
+#sliders .slider-row { margin-bottom: 10px; }
+#sliders .slider-head { display: flex; align-items: center; font-size: 13px; color: var(--muted); }
+#sliders input[type=range] { width: 100%; margin-top: 4px; padding: 0; border: 0; }
+#sliders output { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.panel-note { margin: -8px 0 16px; }
+
+.tz-badge { margin-left: 10px; font-size: 0.85em; font-weight: normal; color: var(--muted); }
+
+/* Technology viability: one small radar per technology. */
+.radar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 8px; }
+.radar-cell h3 { margin: 0; text-align: center; font-size: 14px; font-weight: 600; color: var(--ink); }
+.radar-chart { height: 260px; }
+
+@media (max-width: 640px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* References page (templates/references.html) */
+.references { list-style: none; margin: 16px 0 0; padding: 0; counter-reset: none; }
+.references li { display: grid; grid-template-columns: 3.2em 1fr; gap: 4px; padding: 10px 6px; border-top: 1px solid var(--border); line-height: 1.55; scroll-margin-top: 110px; }
+.references li:target { background: rgba(85, 242, 232, 0.10); border-radius: 8px; }
+.references__n { font-weight: 700; color: var(--muted); }
+.references a { word-break: break-all; color: #8cc8ff; }

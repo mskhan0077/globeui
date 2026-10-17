@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}BlueGrid — References{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>References</h2>
+  <p>Figures shown in BlueGrid cite these works by number, as in a research paper, e.g. [1] or [2, 3].</p>
+  <ol class="references">
+    {% for ref in references %}
+    <li id="ref-{{ ref.n }}" value="{{ ref.n }}">
+      <span class="references__n">[{{ ref.n }}]</span>
+      <span>{{ ref.authors }} ({{ ref.year }}). <em>{{ ref.title }}</em>. {{ ref.source }}.
+        {% if ref.url %}<a href="{{ ref.url }}"{% if ref.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{{ ref.url | replace('https://', '') }}</a>{% endif %}
+      </span>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

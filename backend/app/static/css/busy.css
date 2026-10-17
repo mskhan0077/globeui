@@ -1,0 +1,53 @@
+/* "Optimizing…" loading screen: blurs the planner and shows a spinner while
+   Find optimal mix runs (planner.js toggles the `hidden` attribute). */
+.busy {
+  position: fixed;
+  inset: 0;
+  z-index: 50; /* above everything on the planner page, incl. the menu bar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(6, 17, 29, 0.45);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  color: var(--ink, #eef2f7);
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.busy[hidden] { display: none; }
+
+.busy__spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.15);   /* track */
+  border-top-color: var(--primary, #3987e5);      /* moving arc, the planner's accent blue */
+  border-right-color: var(--primary, #3987e5);
+  animation: busy-spin 0.9s linear infinite;
+  box-shadow: 0 0 24px rgba(57, 135, 229, 0.35);
+}
+
+.busy__label {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.busy__hint {
+  margin: -6px 0 0;
+  font-size: 13px;
+  color: var(--muted, #b4c0cd);
+}
+
+@keyframes busy-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .busy__spinner { animation-duration: 2.4s; }
+}

@@ -1,0 +1,41 @@
+/* Dark glass theme for the planner, standalone and embedded alike: translucent
+   tinted panels over a view of the selected island. */
+:root {
+  color-scheme: dark; /* dark native controls; the globe's iframe uses the same scheme */
+  --panel: rgba(12, 22, 36, 0.58);
+  --ink: #eef2f7;
+  --muted: #b4c0cd;
+  --border: rgba(255, 255, 255, 0.14);
+  --primary: #3987e5;
+  --primary-2: #2a78d6;
+  --field: rgba(255, 255, 255, 0.07);
+  --radius: 14px;
+}
+
+.panel {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 45%), var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+input,
+select { background: var(--field); color: var(--ink); }
+select option { background: #12202f; color: var(--ink); }
+input:focus,
+select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+#sliders input[type=range] { background: transparent; accent-color: var(--primary); }
+
+button { background: var(--primary); color: #fff; }
+button:hover { background: var(--primary-2); }
+button.secondary { background: var(--field); border: 1px solid var(--border); color: var(--ink); }
+button.secondary:hover { background: rgba(255, 255, 255, 0.14); }
+
+.kpi { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border); }
+
+.ranked-table th { background: rgba(255, 255, 255, 0.06); color: var(--muted); }
+.ranked-table tr:hover { background: rgba(255, 255, 255, 0.05); }
+
+/* Embedded in the globe (/planner?embed=1): transparent page, the globe behind
+   it supplies the island view and the blur. */
+html.embed,
+html.embed body { background: transparent; }

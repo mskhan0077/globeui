@@ -1,0 +1,27 @@
+/* Standalone planner page (/planner, /about): its own frosted globe backdrop
+   (backdrop.js) and room for the fixed menu bar. Credits: /css/map-credits.css. */
+body { background: #06111d; }
+
+.backdrop {
+  position: fixed;
+  inset: -24px; /* bleed past the edges so the blur has no light rim */
+  z-index: -1;
+  pointer-events: none; /* background only: the panels get all input */
+  background: #06111d;
+  filter: blur(6px) saturate(130%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.backdrop.is-loaded { opacity: 1; }
+
+/* Same darkening as the globe's overlay, so both views match. */
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* over the globe canvas */
+  background: rgba(4, 14, 28, 0.35);
+}
+
+.page { padding-top: calc(var(--menubar-bottom, 76px) + 24px); }

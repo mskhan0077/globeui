@@ -1,0 +1,116 @@
+/* (i) info buttons and the info box (info.js). */
+.info-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink, #eef2f7);
+  font: italic 700 11px/1 Georgia, "Times New Roman", serif;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.info-btn:hover,
+.info-btn[aria-expanded="true"] {
+  background: var(--primary, #3987e5);
+  border-color: var(--primary, #3987e5);
+}
+
+.info-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.info-box {
+  position: fixed;
+  z-index: 40;
+  width: min(380px, calc(100vw - 16px));
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(14, 26, 42, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  color: var(--ink, #eef2f7);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.info-box[hidden] { display: none; }
+
+.info-box__title { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+
+.info-box__list {
+  display: grid;
+  grid-template-columns: minmax(130px, auto) 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.info-box__list dt { color: var(--muted, #b4c0cd); }
+.info-box__list dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+.info-box__muted { margin: 0; color: var(--muted, #b4c0cd); }
+
+.info-box__source {
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  color: var(--muted, #b4c0cd);
+}
+
+.info-box p { margin: 0 0 8px; }
+.info-box p:last-child { margin-bottom: 0; }
+
+.info-box__formula {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+/* Explanations: definitions are wordier than the technology table, so stack less tightly. */
+.info-box__list dd { overflow-wrap: anywhere; }
+.info-box__list + p { margin-top: 8px; }
+
+/* (i) next to a panel heading or KPI label. */
+.panel h2 .info-btn,
+.kpi-label .info-btn { margin-left: 6px; }
+
+/* Term above its (longer) definition, left-aligned (e.g. the viability criteria). */
+.info-box__defs { margin: 0; }
+.info-box__defs dt { font-weight: 600; color: #fff; }
+.info-box__defs dd { margin: 0 0 8px; color: var(--muted, #b4c0cd); }
+.info-box__defs dd:last-child { margin-bottom: 0; }
+
+/* Keep the source line's spacing (the generic `.info-box p` margin above would reset it). */
+.info-box .info-box__source { margin: 10px 0 0; }
+
+/* Space between a definitions block and the paragraph after it. */
+.info-box .info-box__defs + p { margin-top: 10px; }
+
+/* Heading row with a badge on the right (KPIs: "Nominal DCF model" opens its info box) */
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.panel-head h2 { margin: 0; }
+.fin-badge {
+  padding: 4px 12px;
+  border: 1px solid rgba(85, 242, 232, 0.45);
+  border-radius: 999px;
+  background: rgba(85, 242, 232, 0.08);
+  color: #cafff3;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: help;
+  transition: background 0.2s, border-color 0.2s;
+}
+.fin-badge:hover, .fin-badge[aria-expanded="true"] { background: rgba(85, 242, 232, 0.18); border-color: #55f2e8; }
+.fin-badge:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Numbered citations, e.g. References [3, 7] (info.js), linking to /references */
+.info-box__source a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.info-box__source a:hover { color: #fff; }

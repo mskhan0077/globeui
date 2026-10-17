@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"{% if embed %} class="embed"{% endif %}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}BlueGrid{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/glass.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/busy.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}">
+  {% if not embed %}
+  {# shared with the globe page (frontend/css) #}
+  <link rel="stylesheet" href="/css/menubar.css">
+  <link rel="stylesheet" href="/css/map-credits.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Widgets/widgets.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/page.css') }}">
+  {% endif %}
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/info-content.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/info.js') }}"></script>
+</head>
+<body{% if not embed %} class="page"{% endif %}>
+  {% if not embed %}
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+  <div id="mapCredits" class="map-credits"></div>
+  {% set current = request.endpoint %}
+  <header class="menubar">
+    <a href="/" class="menubar__brand" aria-label="BlueGrid home">
+      <span class="menubar__word">Blue<span>Grid</span></span>
+    </a>
+    <nav class="menubar__nav" aria-label="Main">
+      <a href="/">Globe</a>
+      <a href="{{ url_for('main.index') }}" class="menubar__cta"{% if current == 'main.index' %} aria-current="page"{% endif %}>Planner <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+      <a href="{{ url_for('main.references') }}"{% if current == 'main.references' %} aria-current="page"{% endif %}>References</a>
+      <a href="{{ url_for('main.about') }}"{% if current == 'main.about' %} aria-current="page"{% endif %}>About</a>
+    </nav>
+  </header>
+  {% endif %}
+
+  <main class="container">{% block content %}{% endblock %}</main>
+
+
+  {% block scripts %}{% endblock %}
+  {% if embed %}
+  <script src="{{ url_for('static', filename='js/embed-bridge.js') }}"></script>
+  {% else %}
+  <script>window.CESIUM_BASE_URL = 'https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/';</script>
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Cesium.js"></script>
+  <script type="module" src="{{ url_for('static', filename='js/backdrop.js') }}"></script>
+  {% endif %}
+</body>
+</html>
