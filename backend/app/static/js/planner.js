@@ -116,30 +116,8 @@
     window.BlueGrid.info?.attach(els.kpis);
   }
 
-  // Volume (bulk) discount per technology: list CAPEX vs discounted, from the evaluate result
-  function renderDiscount(r) {
-    const panel = document.getElementById("panel-discount");
-    const vd = SLIDERS.map(({ key }) => (r.volume_discount || {})[key]).filter((d) => d && d.list_INR > 0);
-    panel.hidden = !vd.length;
-    if (!vd.length) return;
-    const cr = (x) => `₹${(x / 1e7).toFixed(2)} Cr`;
-    const list = vd.reduce((sum, d) => sum + d.list_INR, 0);
-    const net = vd.reduce((sum, d) => sum + d.discounted_INR, 0);
-    const row = (name, units, l, pct, n) =>
-      `<tr><td>${name}</td><td>${units}</td><td>${cr(l)}</td><td>${(pct * 100).toFixed(1)}%</td><td>${cr(l - n)}</td><td>${cr(n)}</td></tr>`;
-    document.getElementById("table-discount").innerHTML = `
-      <table class="ranked-table">
-        <thead><tr><th>Technology</th><th>Units bought</th><th>List CAPEX</th><th>Discount</th><th>Saving</th><th>Discounted CAPEX</th></tr></thead>
-        <tbody>
-          ${vd.map((d) => row(d.tech, `${d.units.toFixed(1)} × ${d.unit_size} ${d.unit_basis}`, d.list_INR, d.discount_pct, d.discounted_INR)).join("")}
-          <tr class="total-row">${row("Total", "", list, 1 - net / list, net).slice(4)}
-        </tbody>
-      </table>`;
-  }
-
-  // Data statistics panel: (1) mean / median / spread of each source's monthly generation
-  // and of the load, as in BoobWorld; (2) the place's resource (capacity factors), which
-  // doesn't depend on the sliders.
+  // Data statistics panel: mean / median / spread of each source's monthly generation
+  // and of the load, as in BoobWorld.
   function renderStats(r) {
     const panel = document.getElementById("panel-stats");
     const labels = { wind: "Wind", solar: "Floating solar", otec: "OTEC", wave: "Wave", load: "Load" };
@@ -153,18 +131,6 @@
         <div class="stat-title">${labels[k] || k}</div>
         ${line("Mean", st.mean)}${line("Median", st.median)}${line("Std dev", st.std)}${line("Min", st.min)}${line("Max", st.max)}
       </div>`).join("");
-
-    const pct = (x) => `${(x * 100).toFixed(1)}%`;
-    const rows = SLIDERS.filter(({ tech }) => r.tech_scores?.[tech]).map(({ label, tech }) => {
-      const t = r.tech_scores[tech];
-      return `<tr><td>${label}</td><td>${pct(t.cf_annual)}</td><td>${pct(t.firmness * t.cf_annual)}</td><td>${pct(t.cf_min)}</td><td>${pct(t.cf_max)}</td></tr>`;
-    }).join("");
-    document.getElementById("resource-basis").textContent = r.reliability?.lpsp_hourly != null ? "hourly data" : "monthly averages";
-    document.getElementById("resource-stats").innerHTML = rows ? `
-      <table class="ranked-table">
-        <thead><tr><th>Technology</th><th>Average</th><th>10th percentile</th><th>Lowest</th><th>Highest</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>` : "";
   }
 
   function renderMonthly(r) {
@@ -319,7 +285,6 @@
     if (tzBadge && resp.result.timezone) tzBadge.textContent = `(Timezone: ${resp.result.timezone})`;
 
     renderKPIs(resp.result);
-    renderDiscount(resp.result);
     renderMonthly(resp.result);
     renderStats(resp.result);
     renderRadar(resp.result.tech_scores);

@@ -49,13 +49,8 @@
     stats: {
       title: "Data statistics",
       html: () =>
-        `<dl class="info-box__defs">
-          <dt>Monthly generation and load</dt>
-          <dd>For each source on the sliders and for the load: the mean, median, standard deviation, lowest and highest of its 12 monthly totals (MWh). A large spread or a low minimum means a seasonal source that needs storage or backup in its weak months.</dd>
-          <dt>Resource at this place</dt>
-          <dd>Capacity factor: the share of its rated output a technology would actually produce here (average over the year, the level it beats 90% of the time, and its lowest and highest). From hourly data where the place has it, otherwise monthly averages. It depends only on the place, not on the sliders.</dd>
-        </dl>`,
-      refs: ["eia-capacity-factor"],
+        p("For each source on the sliders and for the load: the mean, median, standard deviation, lowest and highest of its 12 monthly totals (MWh).",
+          "A large spread or a low minimum means a seasonal source that needs storage or backup in its weak months."),
     },
     minmix: {
       title: "Minimum share in Find optimal mix",
@@ -63,14 +58,6 @@
         p("Forces Find optimal mix to include at least this much of a technology, e.g. to keep a diverse mix or test a technology you want on the island.") +
         formula("capacity ≥ minimum % × target load (kW)") +
         p("At 1,000 kW and 20% wind, every mix it considers has at least 200 kW of wind. 0% does not exclude a technology: it just sets no minimum, and the optimizer still uses it wherever it’s cost-effective. Minimums can only raise the cost of the best mix."),
-    },
-    discount: {
-      title: "Volume discount on CAPEX",
-      html: () =>
-        p("Each technology is bought in standard units (e.g. 500 kW wind turbines, 1 MWh battery blocks). Every doubling of the number of units cuts the next unit’s price to a set share of the first one’s, the economies-of-volume factor χ (0.95 here, so 5% cheaper per doubling).") +
-        formula("average price factor = (1/n) Σ<sub>N=1..n</sub> N<sup>ln χ / ln 2</sup>, n = capacity ÷ unit size") +
-        p("The table shows each technology’s list CAPEX (at the single-unit price), the average discount, the saving and the discounted CAPEX, which is what all the KPIs use. One unit or less pays the list price."),
-      refs: ["oconnor-2013", "oliveira-pinto-2019"],
     },
     viability: {
       title: "Technology viability scores (0–100)",
@@ -192,7 +179,7 @@
       html: ({ finance: f, fmt }) =>
         p("Upfront investment for the capacities on the sliders, using island-adjusted unit costs (marine logistics, cyclone-rated foundations, etc.).") +
         formula("Σ capacity × island CAPEX per kW (per kWh for the battery) × volume-discount factor − subsidies") +
-        p("Buying many identical units is cheaper per unit; see Volume discount on CAPEX for the saving.") +
+        p("The volume-discount factor makes many identical units cheaper per unit: every doubling of the number of units (e.g. 500 kW turbines, 1 MWh battery blocks) cuts the next unit’s price to 95%. The saving is shown under the CAPEX figure.") +
         p(Number(f.apply_subsidies_flag) > 0.5
             ? `Subsidies are on: ${fmt.inr(f.fpv_cfa_subsidy_INR_per_kW)}/kW for floating solar and ${fmt.inr(f.bess_vgf_INR_per_kWh)}/kWh for the battery.`
             : "Subsidies are currently off.",

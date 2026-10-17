@@ -78,6 +78,10 @@
 .scene-divider { position: absolute; top: 11%; bottom: 13%; width: 1px; background: linear-gradient(transparent, #c8f9ec99 20%, #c8f9ec99 80%, transparent); z-index: 2; pointer-events: none; transition: left 0.08s linear; }
 .scene-divider > button { position: absolute; left: -20px; top: 38%; display: grid; place-items: center; width: 41px; height: 55px; padding: 0; background: #103a4ac9; border: 1px solid #9df0e37a; box-shadow: 0 0 24px #001f2e66; border-radius: 24px; color: #cafff3; cursor: ew-resize; pointer-events: auto; touch-action: none; backdrop-filter: blur(8px); }
 .scene-divider > button { animation: opening-handle-nudge 2.4s ease-in-out 1s infinite; }
+/* Dr Octopus (js/story/octopus.js): drawn over the scene and the handle, never blocking it */
+.octopus { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; overflow: visible; pointer-events: none; opacity: 0; filter: drop-shadow(0 6px 10px #00111c88); }
+.scene-divider.is-held { transition: none; }                 /* follow the octopus frame by frame */
+.scene-divider.is-held > button { animation: none; }
 
 /* "slide right" hint beside the handle: chevrons that light up left to right */
 .divider-hint {

@@ -16,6 +16,7 @@
 
    goTo(id): flies the globe to a region/place id once the globe is ready. */
 import { OPENING } from '../config.js';
+import { createOctopus } from './octopus.js';
 
 export function initOpening(root, { goTo }) {
   if (!root) return;
@@ -28,6 +29,8 @@ export function initOpening(root, { goTo }) {
   const divider = root.querySelector('.scene-divider');
   const handle = divider.querySelector('button');
   let transition = 0.5; // divider position: share of the scene shown in daylight
+  // Violet octopus that tugs the divider back right whenever it's slid left (octopus.js)
+  const octopus = createOctopus(stage, handle, { setTransition: (v) => setTransition(v), getTransition: () => transition });
   let scene = null;     // Promise of the island scene while the landing is showing
   let introTimer = 0;
   let fadeTimer = 0;
@@ -54,6 +57,7 @@ export function initOpening(root, { goTo }) {
 
   // ---------- landing ----------
   function showLanding() {
+    octopus.hide();
     window.clearTimeout(introTimer);
     window.clearTimeout(fadeTimer);
     introTimer = fadeTimer = 0;
@@ -71,6 +75,7 @@ export function initOpening(root, { goTo }) {
   }
 
   function hideLanding() {
+    octopus.hide();
     window.clearTimeout(introTimer);
     introTimer = 0;
     root.classList.add('is-leaving');
@@ -101,19 +106,33 @@ export function initOpening(root, { goTo }) {
     if (!isShowing() || fadeTimer) return; // leaving: the stage is fading out or already hidden
     const bounds = stage.getBoundingClientRect();
     setTransition((event.clientX - bounds.left) / bounds.width);
+    octopus.moved();
   }
   handle.addEventListener('pointerdown', (event) => {
     root.classList.add('has-slid'); // hide the "slide right" hint
     handle.setPointerCapture(event.pointerId);
+    octopus.grab();                 // remembers where the drag starts
     drag(event);
   });
   handle.addEventListener('pointermove', drag);
-  handle.addEventListener('pointerup', (event) => {
+  const letGo = (event) => {
     if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
-  });
+    octopus.release();              // tugs back to the drag's start if it went left
+  };
+  handle.addEventListener('pointerup', letGo);
+  handle.addEventListener('pointercancel', letGo);
+  // Keys: a run of presses counts as one drag; the octopus tugs once they pause.
+  let keyRun = 0;
   handle.addEventListener('keydown', (event) => {
     const keys = { ArrowLeft: transition - 0.02, ArrowRight: transition + 0.02, Home: 0, End: 1 };
-    if (event.key in keys) { event.preventDefault(); root.classList.add('has-slid'); setTransition(keys[event.key]); }
+    if (!(event.key in keys)) return;
+    event.preventDefault();
+    root.classList.add('has-slid');
+    if (!keyRun) octopus.grab();
+    clearTimeout(keyRun);
+    setTransition(keys[event.key]);
+    octopus.moved();
+    keyRun = setTimeout(() => { keyRun = 0; octopus.release(); }, 600);
   });
   setTransition(transition);
 
