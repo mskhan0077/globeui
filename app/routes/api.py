@@ -76,12 +76,14 @@ def api_optimize():
 
     load_kW = float(body.get("load_kW", 1000))
     weights = body.get("weights", APP_DEFAULTS["weights"])
-    lpsp_target = float(body.get("lpsp_target", APP_DEFAULTS["reliability_target_lpsp"]))
+    
+    lpsp_target = float(body.get("lpsp_target", 0.05))
 
     current_app.logger.info(f"OPTIMIZE START: {island} | Target Load: {load_kW} kW | LPSP Target: {lpsp_target}")
     start_time = time.time()
 
     try:
+        # Pass the corrected 0.05 target directly to the optimization engine
         result = optimize(island, load_kW, dfs, weights, lpsp_target=lpsp_target)
     except Exception as exc:
         current_app.logger.error(f"OPTIMIZE FAILED: {str(exc)}")

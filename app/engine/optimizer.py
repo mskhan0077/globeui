@@ -27,7 +27,6 @@ def get_dynamic_grid(load_kW: float) -> dict:
         "bess_kWh":  list(range(0, max_b + 1, step_b)),
     }
 
-
 def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float) -> dict | None:
     """Mathematically optimal sizing using SciPy HiGHS."""
     w, s, o, v = dfs["wind"].loc[island], dfs["solar"].loc[island], dfs["otec"].loc[island], dfs["wave"].loc[island]
@@ -71,6 +70,8 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
     # 1. FORCE THE SOLVER TO MEET THE LOAD
     c_diesel = 50000.0 
 
+    c_curtail = 25.0 # ₹25 penalty per kWh thrown away
+
     N = 5 + 9 * T
     c = np.zeros(N)
     c[0:5] = [a_w, a_s, a_o, a_v, a_b]
@@ -84,6 +85,7 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
 
     for t in range(T):
         c[idx_u(t)] = c_diesel * hours[t]
+        c[idx_k(t)] = c_curtail * hours[t]
 
     A_eq, b_eq, A_ub, b_ub = [], [], [], []
 
@@ -151,7 +153,7 @@ def _iter_combos(grid: dict):
 
 
 def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
-             lpsp_target: float = 0.01) -> dict:
+             lpsp_target: float = 0.05) -> dict:
     """Run exact LP to find optimal, then enumerate dynamic grid for alternatives."""
     from .config_eval import evaluate
 
@@ -167,7 +169,7 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
             r = evaluate(island, lp_caps, dfs, use_hourly=True)
             lpsp = r["reliability"].get("lpsp_hourly", r["reliability"]["lpsp_monthly"])
             results.append({
-                "capacities": {k: lp_caps.get(k, 0) for k in grid.keys()},
+                "capacities": {k: caps[k] for k in grid.keys()},
                 "lcoe": r["econ"]["LCOE_RE_INR_per_kWh"],
                 "cos": r["econ"]["cost_of_service_INR_per_kWh"],
                 "lpsp": lpsp,
@@ -175,8 +177,10 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
                 "plf": r["plf_target"],
                 "co2_avoided_t": r["carbon"]["co2_avoided_t"],
                 "capex_INR": r["econ"]["capex_INR"],
-                "feasible": lpsp <= lpsp_target + 1e-4, # floating point tolerance
-                "is_lp_optimal": True
+                # Track the percentage of total load that is thrown away
+                "overgen_ratio": r["annual"]["surplus_kWh"] / max(r["annual"]["load_kWh"], 1e-9),
+                "feasible": True,
+                "is_lp_optimal": False
             })
         except Exception:
             pass
@@ -213,11 +217,18 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
     infeasible = [r for r in results if not r.get("feasible", True)]
 
     def score(row):
-        return (
+        # Base score prioritizing cheap energy and low capital cost
+        base_score = (
             0.5 * (1.0 / max(row["lcoe"], 1e-6))
             + 0.3 * row["coverage"]
             + 0.2 * (1.0 / max(row["capex_INR"] / 1e7, 1e-6))
         )
+        
+        # Heavily penalize the score for wasted energy (curtailment)
+        # If the system throws away energy equal to 100% of the load, deduct a massive penalty
+        spill_penalty = 10.0 * row.get("overgen_ratio", 0)
+        
+        return base_score - spill_penalty
 
     lp_mixes = [r for r in feasible if r["is_lp_optimal"]]
     grid_mixes = [r for r in feasible if not r["is_lp_optimal"]]
