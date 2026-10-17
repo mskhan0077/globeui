@@ -29,7 +29,13 @@ def get_dynamic_grid(load_kW: float) -> dict:
 def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float) -> dict | None:
     """Mathematically optimal sizing using SciPy HiGHS."""
     w, s, o, v = dfs["wind"].loc[island], dfs["solar"].loc[island], dfs["otec"].loc[island], dfs["wave"].loc[island]
-    tech, finance = dfs["tech"], dfs["finance"]
+    finance = dfs["finance"]
+    
+    # Localize Tech Parameters for Brest France
+    tech = dfs["tech"].copy()
+    if "france" in island.lower() or "brest" in island.lower():
+        tech["capex_island_INR"] *= 2.5
+        tech["opex_INR_per_unit_yr"] *= 2.5
 
     hours = w["hours"].astype(float).values
     T = len(hours)
@@ -165,7 +171,6 @@ def _iter_combos(grid: dict):
     keys = list(grid.keys())
     for values in itertools.product(*(grid[k] for k in keys)):
         yield dict(zip(keys, values))
-
 
 def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
              lpsp_target: float = 0.05) -> dict:

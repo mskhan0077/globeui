@@ -6,7 +6,6 @@ import pandas as pd
 
 from . import generation, bess, economics, carbon, scoring
 
-
 def evaluate(island: str, capacities: dict, dfs: dict,
              use_hourly: bool | None = None, fast: bool = False) -> dict:
     """Full pipeline for one configuration."""
@@ -22,10 +21,17 @@ def evaluate(island: str, capacities: dict, dfs: dict,
 
     do_hourly = use_hourly if use_hourly is not None else (hourly_key is not None)
     finance = dfs["finance"]
+    
+    # --- FIX: Localize Tech Parameters for Brest France ---
+    tech = dfs["tech"].copy()
+    if "france" in island_norm or "brest" in island_norm:
+        # Apply 2.5x multiplier to Europe marine costs
+        tech["capex_island_INR"] *= 2.5
+        tech["opex_INR_per_unit_yr"] *= 2.5
+
     hr_result = None
 
-    # 1. Base Generation (Fallback to rough monthly model)
-    # Skip this entirely if we are running fast and have hourly data
+    # Base Generation (Fallback to rough monthly model)
     if not (fast and do_hourly and hourly_key):
         monthly = generation.monthly_generation(island, capacities, dfs)
         annual = {
@@ -44,7 +50,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         monthly = None
         annual = {}
 
-    # 2. Hourly Refinement
+    # Hourly Refinement
     if do_hourly and hourly_key:
         h = dfs["hourly"][hourly_key]
         
@@ -95,9 +101,9 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                 if col in monthly.columns:
                     monthly[col] = df_agg[col].values
 
-    # 3. Economics
-    capex, subsidy = economics.compute_capex(capacities, dfs["tech"], finance)
-    opex = economics.compute_annual_opex(capacities, dfs["tech"])
+    # Economics (using localized tech data)
+    capex, subsidy = economics.compute_capex(capacities, tech, finance)
+    opex = economics.compute_annual_opex(capacities, tech)
     repl = economics.bess_replacement_pv(capex.get("bess_kWh", 0), finance)
 
     econ = economics.cost_metrics(
@@ -134,11 +140,28 @@ def evaluate(island: str, capacities: dict, dfs: dict,
             "plf_target": plf_target,
         }
 
-    # 4. Full UI Result
+    # Build Statistics (Mean, Median, StdDev, Min, Max)
+    stats = {}
+    if monthly is not None:
+        for tech_name, col_name in [("wind", "gen_wind_kWh"), ("solar", "gen_fpv_kWh"), 
+                                    ("otec", "gen_otec_kWh"), ("wave", "gen_wave_kWh"), 
+                                    ("load", "load_kWh")]:
+            if col_name in monthly.columns:
+                vals = monthly[col_name].values / 1000.0 # Convert to MWh
+                stats[tech_name] = {
+                    "mean": float(np.mean(vals)),
+                    "median": float(np.median(vals)), # Median is better than Mode for continuous
+                    "std": float(np.std(vals)),
+                    "min": float(np.min(vals)),
+                    "max": float(np.max(vals)),
+                }
+
+    # Full UI Result
     result = {
         "island": island,
         "capacities": dict(capacities),
         "monthly": monthly.reset_index().to_dict(orient="records"),
+        "stats": stats,
         "annual": annual,
         "capex": capex,
         "econ": econ,

@@ -75,6 +75,42 @@
     ].join("");
   }
 
+  function renderStats(r) {
+    const container = document.getElementById("stats-container");
+    const grid = document.getElementById("stats-grid");
+    
+    if (!r.stats || Object.keys(r.stats).length === 0) {
+      container.style.display = "none";
+      return;
+    }
+    
+    container.style.display = "block";
+    
+    const labels = {
+      "wind": "Wind", "solar": "Floating Solar", 
+      "otec": "OTEC", "wave": "Wave", "load": "System Load"
+    };
+
+    let html = "";
+    for (const [key, s] of Object.entries(r.stats)) {
+      // Skip techs with zero generation to keep it clean
+      if (key !== "load" && s.max === 0) continue; 
+
+      html += `
+        <div class="stat-card">
+          <div class="stat-title">${labels[key] || key}</div>
+          <div class="stat-row"><span>Mean</span> <span>${s.mean.toFixed(1)}</span></div>
+          <div class="stat-row"><span>Median</span> <span>${s.median.toFixed(1)}</span></div>
+          <div class="stat-row"><span>Std Dev</span> <span>${s.std.toFixed(1)}</span></div>
+          <div class="stat-row"><span>Min</span> <span>${s.min.toFixed(1)}</span></div>
+          <div class="stat-row"><span>Max</span> <span>${s.max.toFixed(1)}</span></div>
+        </div>
+      `;
+    }
+    
+    grid.innerHTML = html;
+  }
+
   function renderMonthly(r) {
     const months = r.monthly.map((m) => m.month_num);
     const trace = (key, name) => ({
@@ -203,6 +239,7 @@
     }
 
     renderKPIs(resp.result);
+    renderStats(resp.result);
     renderMonthly(resp.result);
     renderRadar(resp.result.tech_scores);
   }
@@ -323,7 +360,6 @@
         modal.classList.remove("show");
       });
       
-      // Close when clicking outside the modal content
       window.addEventListener("click", (e) => {
         if (e.target === modal) {
           modal.classList.remove("show");
