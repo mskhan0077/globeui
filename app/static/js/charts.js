@@ -55,14 +55,14 @@
 
   function renderKPIs(r) {
     const e = r.econ, c = r.carbon, rel = r.reliability, a = r.annual;
-    const lpsp = rel.lpsp_hourly ?? rel.lpsp_monthly;
+    const lpsp = rel.lpsp_hourly ?? rel.lpsp_annual ?? rel.lpsp_monthly;
     const inr = (x) => x.toLocaleString("en-IN", { maximumFractionDigits: 0 });
     const num = (x, d = 2) => Number(x).toFixed(d);
     els.kpis.innerHTML = [
       kpiCard("LCOE (RE only)", `₹${num(e.LCOE_RE_INR_per_kWh)}`, "per kWh delivered"),
       kpiCard("System cost", `₹${num(e.cost_of_service_INR_per_kWh)}`, "incl. diesel top-up"),
       kpiCard("PLF vs target", `${num(r.plf_target * 100, 1)}%`, `${inr(a.delivered_kWh / 1000)} MWh served`),
-      kpiCard("LPSP", `${num(lpsp * 100)}%`, rel.lpsp_hourly != null ? "hourly" : "monthly"),
+      kpiCard("LPSP", `${num(lpsp * 100)}%`, rel.lpsp_hourly != null ? "hourly" : "annual"),
       kpiCard("CO₂ avoided", `${inr(c.co2_avoided_t)} t`, "per year"),
       kpiCard("Carbon credit", `₹${inr(c.carbon_credit_INR)}`, "per year"),
       kpiCard("CAPEX", `₹${num(e.capex_INR / 1e7, 1)} Cr`, "island-adjusted"),
@@ -117,16 +117,29 @@
                 theta: [...cats, cats[0]],
                 fill: "toself",
                 name: key,
-                line: { color: color }
+                line: { color: color },
+                // Add hover text to see exact scores
+                hovertemplate: "<b>%{theta}</b>: %{r:.1f}<extra></extra>"
             };
             
             Plotly.newPlot(id, [trace], {
                 polar: {
-                    radialaxis: { range: [0, 100], visible: true },
-                    angularaxis: { direction: "clockwise", rotation: 90 },
+                    radialaxis: { 
+                        range: [0, 100], 
+                        visible: true,
+                        tickfont: { size: 9 },
+                        angle: 90,       // Puts numbers at top to prevent overlap
+                        tickangle: 0
+                    },
+                    angularaxis: { 
+                        direction: "clockwise", 
+                        rotation: 90,
+                        tickfont: { size: 11 }
+                    },
                 },
                 showlegend: false,
-                margin: { l: 30, r: 30, t: 20, b: 20 },
+                // INCREASED MARGINS: Prevents cutting off "Reliability" and "CAPEX"
+                margin: { l: 60, r: 60, t: 30, b: 30 }, 
             }, { responsive: true, displaylogo: false });
         }
     });
@@ -276,7 +289,7 @@
           <th>Island</th>
           <th>LCOE (RE)</th>
           <th>System CoS</th>
-          <th>LPSP (Monthly)</th>
+          <th>LPSP</th>
           <th>PLF</th>
           <th>CAPEX</th>
         </tr></thead>
