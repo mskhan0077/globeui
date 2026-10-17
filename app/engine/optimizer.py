@@ -9,21 +9,21 @@ from . import economics
 
 def get_dynamic_grid(load_kW: float) -> dict:
     """Scale the grid search space dynamically based on target load."""
-    # Significantly expanded max limits so the solver can find a 100% reliable system
-    max_w_s = max(5000, int(load_kW * 8))
-    max_o   = max(2000, int(load_kW * 2))
-    max_b   = max(30000, int(load_kW * 30)) # Allow up to 30 hours of storage
+    max_w_s = max(2000, int(load_kW * 4))
+    max_o   = max(1000, int(load_kW * 1.5))
+    max_v   = max(1000, int(load_kW * 2)) 
+    max_b   = max(15000, int(load_kW * 15))
     
-    # Target roughly 5-6 points per dimension
-    step_w_s = max(500, int(np.ceil((max_w_s / 5) / 100) * 100))
-    step_o   = max(500, int(np.ceil((max_o / 4) / 100) * 100))
-    step_b   = max(2000, int(np.ceil((max_b / 6) / 500) * 500))
+    step_w_s = max(500, int(np.ceil((max_w_s / 4) / 100) * 100))
+    step_o   = max(500, int(np.ceil((max_o / 3) / 100) * 100))
+    step_v   = max(500, int(np.ceil((max_v / 3) / 100) * 100))
+    step_b   = max(3000, int(np.ceil((max_b / 5) / 500) * 500))
     
     return {
         "wind_kW":   list(range(0, max_w_s + 1, step_w_s)),
         "solar_kWp": list(range(0, max_w_s + 1, step_w_s)),
         "otec_kW":   list(range(0, max_o + 1, step_o)),
-        "wave_kW":   [0],
+        "wave_kW":   list(range(0, max_v + 1, step_v)), 
         "bess_kWh":  list(range(0, max_b + 1, step_b)),
     }
 

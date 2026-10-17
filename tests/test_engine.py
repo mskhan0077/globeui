@@ -1,19 +1,16 @@
 import pytest
 from app import create_app
 
-
 @pytest.fixture(scope="module")
 def client():
     app = create_app({"TESTING": True})
     return app.test_client()
-
 
 def test_health(client):
     r = client.get("/api/health")
     j = r.get_json()
     assert j["ok"] is True
     assert j["islands"] >= 36
-
 
 def test_evaluate_basic(client):
     r = client.post("/api/evaluate", json={
@@ -32,7 +29,6 @@ def test_evaluate_basic(client):
     assert 0 <= res["reliability"]["lpsp_monthly"] < 1
     assert res["carbon"]["co2_avoided_t"] > 0
     assert "hourly" in res  # Kadmat has hourly data
-
 
 def test_optimize_runs(client):
     r = client.post("/api/optimize", json={
