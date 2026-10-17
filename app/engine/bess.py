@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import numpy as np
 
-
 def dispatch_hourly(
     gen_kW: np.ndarray,
     load_kW: np.ndarray,
@@ -15,12 +14,12 @@ def dispatch_hourly(
     """Dispatch BESS over hourly generation and load profiles."""
     eta = float(np.sqrt(rte))
     pmax = c_rate * bess_kWh
+    
+    # ALIGNED WITH LP: Max SOC is DoD * Capacity. Min SOC is 0.
     smax = dod * bess_kWh
-    smin = (1 - dod) * bess_kWh
+    smin = 0.0 
     n = len(gen_kW)
     
-    # 1.5% hourly self-discharge ensures the BESS fully empties in ~3 days
-    # This prevents the solver from treating BESS as a seasonal energy source.
     self_discharge_rate = 0.015 
 
     soc = 0.5 * smax
@@ -59,7 +58,6 @@ def dispatch_hourly(
         "lpsp": total_unmet / max(total_load, 1e-9),
         "lole_hours": int((unmet > 1e-9).sum()),
         "soc_kWh": soc_hist.tolist(),
-        # CRITICAL FIX: Pass the actual arrays back to the orchestrator
         "hourly_delivered": delivered,
         "hourly_unmet": unmet,
         "hourly_curtailed": curtailed,

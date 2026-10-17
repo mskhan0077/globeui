@@ -44,19 +44,15 @@ def evaluate(island: str, capacities: dict, dfs: dict,
     if do_hourly and hourly_key:
         h = dfs["hourly"][hourly_key]
         
-        # Generate accurate hourly arrays using real API physical data
         gen_wind = float(capacities.get("wind_kW", 0)) * h["cf_wind"].to_numpy()
         gen_fpv = float(capacities.get("solar_kWp", 0)) * h["cf_fpv"].to_numpy()
         gen_otec = float(capacities.get("otec_kW", 0)) * h["cf_otec"].to_numpy()
         gen_wave = float(capacities.get("wave_kW", 0)) * h["cf_wave"].to_numpy()
         gen = gen_wind + gen_fpv + gen_otec + gen_wave
         
-        # CRITICAL FIX: Dynamically generate the load array based on the UI input
-        # instead of relying on the potentially empty CSV column.
         target_load = float(capacities.get("load_kW", 1000.0))
         load = np.full(len(gen), target_load)
         
-        # Run Chronological Dispatch
         hr_result = bess.dispatch_hourly(
             gen, load, float(capacities.get("bess_kWh", 0)),
             rte=float(finance["bess_round_trip_eff"]),
@@ -64,7 +60,6 @@ def evaluate(island: str, capacities: dict, dfs: dict,
             c_rate=float(finance["bess_max_c_rate"]),
         )
         
-        # OVERRIDE annual metrics with highly accurate 8760 physical data
         annual["gen_wind_kWh"] = float(gen_wind.sum())
         annual["gen_fpv_kWh"] = float(gen_fpv.sum())
         annual["gen_otec_kWh"] = float(gen_otec.sum())
@@ -75,7 +70,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         annual["unmet_kWh"] = float(hr_result["unmet_kWh"])
         annual["surplus_kWh"] = float(hr_result["curtailed_kWh"])
         
-        # OVERRIDE the monthly dataframe directly so UI charts reflect chronological API data
+        # OVERRIDE the monthly dataframe directly
         if "timestamp_local" in h.columns:
             df_agg = pd.DataFrame({
                 "month_num": h["timestamp_local"].dt.month,
@@ -85,13 +80,14 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                 "gen_wave_kWh": gen_wave,
                 "gen_total_kWh": gen,
                 "load_kWh": load,
-                # CRITICAL FIX: Inject the true hourly BESS tracking into the UI charts
                 "delivered_kWh": hr_result["hourly_delivered"],
                 "surplus_kWh": hr_result["hourly_curtailed"],
                 "unmet_kWh": hr_result["hourly_unmet"]
             }).groupby("month_num").sum()
             
-            # Safely inject the precise API aggregations into the UI payload
+            # Reindex to safely fill missing months with 0 without breaking alignment
+            df_agg = df_agg.reindex(monthly.index, fill_value=0.0)
+            
             for col in df_agg.columns:
                 if col in monthly.columns:
                     monthly[col] = df_agg[col].values
@@ -111,17 +107,19 @@ def evaluate(island: str, capacities: dict, dfs: dict,
     carb = carbon.carbon_metrics(annual["delivered_kWh"], finance)
 
     # 6. Reliability Metrics
+        # 6. Reliability Metrics
     lpsp_annual = annual["unmet_kWh"] / max(annual["load_kWh"], 1e-9)
     reliability = {
-        "lpsp_monthly": lpsp_annual, 
+        "lpsp_annual": lpsp_annual, 
+        "lpsp_monthly": lpsp_annual, # Kept for backward compatibility
+        "coverage_annual": 1.0 - lpsp_annual,
         "coverage_monthly": 1.0 - lpsp_annual,
         "worst_month_coverage": float(monthly["coverage"].min()) if "coverage" in monthly else 1.0,
     }
 
     if hr_result:
         reliability["lpsp_hourly"] = hr_result["lpsp"]
-        reliability["lpsp_monthly"] = hr_result["lpsp"]
-        reliability["coverage_monthly"] = 1.0 - hr_result["lpsp"]
+        reliability["coverage_hourly"] = 1.0 - hr_result["lpsp"]
 
     # 7. Build Final Result
     result = {
@@ -136,7 +134,6 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "plf_target": annual["delivered_kWh"] / (float(capacities.get("load_kW", 1000.0)) * 8760.0),
     }
 
-    # Extract the timezone to the result dictionary
     resolved_tz = "Unknown"
     if do_hourly and hourly_key and "timezone" in dfs["hourly"][hourly_key].columns:
         resolved_tz = dfs["hourly"][hourly_key]["timezone"].iloc[0]
