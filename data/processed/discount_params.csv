@@ -1,0 +1,6 @@
+technology,typical_unit_size,unit_basis,eov,source_note
+Wind,500,kW,0.95,OPERA default; Vestas/Gamesa observed ~0.936
+Floating Solar PV,250,kWp,0.95,Assumption; calibrate to supplier tiers if available
+OTEC,500,kW net,0.95,"Assumption; pre-commercial, high uncertainty"
+Wave,250,kW,0.95,OPERA default for wave arrays
+BESS,1000,kWh,0.95,Assumption; BESS priced in MWh blocks

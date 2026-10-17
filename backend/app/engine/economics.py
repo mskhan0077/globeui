@@ -1,7 +1,8 @@
-"""Annualized cost model with Inflation and DCF."""
+"""Annualized cost model with inflation and DCF."""
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 
 
 CAPACITY_TO_TECH = {
@@ -27,11 +28,46 @@ def get_nominal_rate(finance: dict) -> float:
     pi_gen = float(finance.get("inflation_rate_general", 0.05))
     return (1 + r_real) * (1 + pi_gen) - 1
 
-def compute_capex(capacities: dict, tech, finance: dict) -> tuple[dict, float]:
-    """Return ({cap_key: INR}, subsidy_INR)."""
+def annual_opex_per_unit(tech, tech_name: str) -> float:
+    row = tech.loc[tech_name]
+    if "opex_INR_per_unit_yr" in tech.columns:
+        value = row["opex_INR_per_unit_yr"]
+        if pd.notna(value):
+            return float(value)
+    if "opex_pct_of_capex" in tech.columns:
+        value = row["opex_pct_of_capex"]
+        if pd.notna(value):
+            return float(row["capex_island_INR"]) * float(value)
+    return 0.0
+
+def volume_discount_factor(capacity: float, unit_size: float, eov: float) -> float:
+    """Average CAPEX multiplier when `capacity` is bought in blocks of `unit_size`.
+
+    The N-th unit costs N**log2(eov) times the first one, i.e. every doubling of
+    units cuts the unit price to `eov` (bulk discount, O'Connor et al. 2013):
+        C_T = UC * sum_{N=1..n} N**(ln(eov)/ln 2)
+    A part-block at the end is priced at the next unit's marginal cost.
+    """
+    n = capacity / unit_size if unit_size > 0 else 0.0
+    if n <= 1.0:
+        return 1.0
+    b = np.log2(eov)
+    whole = int(n)
+    total = np.sum(np.arange(1, whole + 1) ** b) + (n - whole) * (whole + 1) ** b
+    return float(total / n)
+
+def compute_capex(capacities: dict, tech, finance: dict, discount=None) -> tuple[dict, float]:
+    """Return ({cap_key: INR}, subsidy_INR). `discount` (discount_params.csv) applies
+    the volume discount; without it CAPEX is at list price."""
     capex = {}
     for cap_key, tech_name in CAPACITY_TO_TECH.items():
         unit_cost = float(tech.loc[tech_name, "capex_island_INR"])
+        if discount is not None and tech_name in discount.index:
+            unit_cost *= volume_discount_factor(
+                float(capacities[cap_key]),
+                float(discount.loc[tech_name, "typical_unit_size"]),
+                float(discount.loc[tech_name, "eov"]),
+            )
         capex[cap_key] = float(capacities[cap_key]) * unit_cost
 
     subsidy = 0.0
@@ -43,11 +79,10 @@ def compute_capex(capacities: dict, tech, finance: dict) -> tuple[dict, float]:
     return capex, subsidy
 
 def compute_annual_opex(capacities: dict, tech) -> float:
-    om = 0.0
-    for cap_key, tech_name in CAPACITY_TO_TECH.items():
-        if "opex_INR_per_unit_yr" in tech.columns:
-            om += float(capacities[cap_key]) * float(tech.loc[tech_name, "opex_INR_per_unit_yr"])
-    return om
+    return sum(
+        float(capacities[cap_key]) * annual_opex_per_unit(tech, tech_name)
+        for cap_key, tech_name in CAPACITY_TO_TECH.items()
+    )
 
 def bess_replacement_pv(capex_bess_INR: float, finance: dict) -> float:
     """Present value of the one-time BESS replacement."""
@@ -55,8 +90,6 @@ def bess_replacement_pv(capex_bess_INR: float, finance: dict) -> float:
     pi_bess = float(finance.get("inflation_rate_bess", -0.05))
     repl_yr = float(finance["bess_replacement_year"])
     cost_fraction = float(finance["bess_replacement_cost_fraction"])
-    
-    # Future cost escalates (or deflates) over time
     future_cost = capex_bess_INR * cost_fraction * ((1 + pi_bess) ** repl_yr)
     return future_cost / ((1 + r_nom) ** repl_yr)
 
@@ -75,8 +108,6 @@ def cost_metrics(
     crf_val = crf(r_nom, n)
 
     capex_total = sum(capex.values()) - subsidy_INR
-    
-    # PV of OPEX (Escalating)
     pi_opex = float(finance.get("inflation_rate_opex", 0.04))
     pv_factor_opex = growing_annuity_pv(r_nom, pi_opex, n)
     pv_opex = opex_annual_INR * pv_factor_opex
@@ -93,18 +124,18 @@ def cost_metrics(
     # LCOE uses Equivalent Annual Cost / Annual Energy
     lcoe_re = (capex_total + bess_repl_pv_INR) * crf_val + (pv_opex * crf_val)
     lcoe_re = lcoe_re / max(delivered_kWh, 1e-9)
-    
+
     cos = eac_total / max(load_kWh, 1e-9)
 
     return {
         "capex_INR": capex_total,
         "subsidy_INR": subsidy_INR,
-        "opex_annual_INR": opex_annual_INR, # Nominal Year 1
+        "opex_annual_INR": opex_annual_INR,
         "bess_repl_pv_INR": bess_repl_pv_INR,
         "annualized_capital_INR": capex_total * crf_val,
-        "diesel_fuel_cost_INR": pv_diesel * crf_val, # Levelized annual diesel
+        "diesel_fuel_cost_INR": pv_diesel * crf_val,
         "LCOE_RE_INR_per_kWh": lcoe_re,
         "cost_of_service_INR_per_kWh": cos,
         "crf": crf_val,
-        "nominal_discount_rate": r_nom
+        "nominal_discount_rate": r_nom,
     }

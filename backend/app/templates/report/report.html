@@ -66,13 +66,70 @@
 
 <section class="keep">
   <h2>Monthly energy balance</h2>
-  <p class="caption">Generation stacked by technology against the demand (dashed). Gaps below the line are covered by the battery, then diesel.</p>
+  <p class="caption">Generation stacked by technology against the demand (dashed). Gaps below the line are covered by the battery, then diesel.
+    {% if deficit_months %}Months marked <span class="deficit-mark">!</span> generate less than the load in total ({{ deficit_months | join(', ') }}): they rely on stored energy or diesel.{% else %}Every month generates at least the load in total.{% endif %}</p>
   <img class="chart" src="data:image/svg+xml;base64,{{ monthly_svg }}" alt="Monthly generation by technology against demand">
 </section>
 
-<section class="keep">
+{# ---------- page 2: data and costs ---------- #}
+{% if stat_rows %}
+<section class="keep page-break">
+  <h2>Data statistics</h2>
+  <p class="caption">Monthly generation of each source on this mix and the load: mean, median, standard deviation, lowest and highest of the 12 months (MWh).</p>
+  <table class="data stats">
+    <thead><tr><th>Source</th><th class="n">Mean</th><th class="n">Median</th><th class="n">Std dev</th><th class="n">Min</th><th class="n">Max</th></tr></thead>
+    <tbody>
+      {% for r in stat_rows %}<tr><td>{{ r.name }}</td>{% for c in r.cells %}<td class="n">{{ c }}</td>{% endfor %}</tr>{% endfor %}
+    </tbody>
+  </table>
+  {% if resource_rows %}
+  <p class="caption caption--gap">Resource at this site, independent of the mix: capacity factor ({{ resource_basis }}), the share of rated output each technology would produce.</p>
+  <table class="data stats">
+    <thead><tr><th>Technology</th><th class="n">Average</th><th class="n">10th percentile</th><th class="n">Lowest</th><th class="n">Highest</th></tr></thead>
+    <tbody>
+      {% for r in resource_rows %}<tr><td><span class="swatch" style="background: {{ r.color }}"></span>{{ r.name }}</td>{% for c in r.cells %}<td class="n">{{ c }}</td>{% endfor %}</tr>{% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if discount_rows %}
+<section class="keep{{ '' if stat_rows else ' page-break' }}">
+  <h2>CAPEX and volume discount</h2>
+  <p class="caption">Each technology is bought in standard units; every doubling of the number of units cuts the next unit’s price (economies of volume). The discounted CAPEX is what all costs in this report use.</p>
+  <table class="data">
+    <thead><tr><th>Technology</th><th class="n">Units bought</th><th class="n">List CAPEX</th><th class="n">Discount</th><th class="n">Saving</th><th class="n">Discounted CAPEX</th></tr></thead>
+    <tbody>
+      {% for d in discount_rows %}
+      <tr><td>{% if d.color %}<span class="swatch" style="background: {{ d.color }}"></span>{% else %}<span class="swatch swatch--battery"></span>{% endif %}{{ d.name }}</td>
+        <td class="n">{{ d.units }}</td><td class="n">{{ d.list }}</td><td class="n">{{ d.pct }}</td><td class="n">{{ d.saving }}</td><td class="n">{{ d.net }}</td></tr>
+      {% endfor %}
+      <tr class="total"><td>Total</td><td></td><td class="n">{{ discount_total.list }}</td><td class="n">{{ discount_total.pct }}</td><td class="n">{{ discount_total.saving }}</td><td class="n">{{ discount_total.net }}</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<section class="cols keep">
+  <div>
+    <h2>Economics</h2>
+    <table class="data facts">
+      {% for k, v in economics %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
+    </table>
+  </div>
+  <div>
+    <h2>Energy per year</h2>
+    <table class="data facts">
+      {% for k, v in energy %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
+    </table>
+  </div>
+</section>
+
+{# ---------- page 3: options and assumptions ---------- #}
+<section class="keep page-break">
   <h2>Technology viability</h2>
-  <p class="caption">Scores from 0 to 100 for this site, relative to the other technologies (higher is better). Independent of the capacities chosen.</p>
+  <p class="caption">Scores from 0 to 100 for this site, relative to the other technologies (higher is better), independent of the capacities chosen. Reliability rewards steady output: with hourly data, sources that stop at night (solar) score low.</p>
   <table class="data scores">
     <thead>
       <tr><th>Technology</th>{% for c in criteria %}<th>{{ c }}</th>{% endfor %}</tr>
@@ -98,7 +155,7 @@
 {% if ranked %}
 <section class="keep">
   <h2>Optimised alternatives</h2>
-  <p class="caption">Best mixes from Find optimal mix for this site and load: hour-by-hour simulated, LPSP ≤ {{ lpsp_target }}, ranked by LCOE with CAPEX breaking near-ties.</p>
+  <p class="caption">Best mixes from Find optimal mix for this site and load: hour-by-hour simulated, meeting the whole load (LPSP {{ lpsp_target }}), ranked by LCOE with a penalty for wasted over-generation.{% if minimums %} Minimum shares required: {{ minimums }}.{% endif %}</p>
   <table class="data ranked">
     <thead>
       <tr><th class="n">#</th><th class="n">Wind / Solar / OTEC / Wave (kW)</th><th class="n">Battery (kWh)</th>
@@ -122,23 +179,8 @@
 
 <section class="cols keep">
   <div>
-    <h2>Economics</h2>
-    <table class="data facts">
-      {% for k, v in economics %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
-    </table>
-  </div>
-  <div>
-    <h2>Energy per year</h2>
-    <table class="data facts">
-      {% for k, v in energy %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
-    </table>
-  </div>
-</section>
-
-<section class="cols keep">
-  <div>
     <h2>Assumptions</h2>
-    <table class="data facts">
+    <table class="data facts facts--wide-label">
       {% for k, v in assumptions %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
     </table>
   </div>
@@ -147,8 +189,27 @@
     <table class="data facts">
       {% for k, v in site %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
     </table>
-    <p class="note">Costs use a nominal discounted cash flow: every cost over the project life, with its own inflation, is discounted at the nominal rate and spread into an equal yearly cost (× CRF). LCOE = yearly cost of capital and O&amp;M ÷ renewable energy delivered. System cost adds diesel fuel for unmet demand and divides by total demand. Costs are island-adjusted (marine logistics, cyclone-rated foundations).</p>
+    <p class="note">Costs use a nominal discounted cash flow: every cost over the project life, with its own inflation, is discounted at the nominal rate and spread into an equal yearly cost (× CRF). Costs are island-adjusted (marine logistics, cyclone-rated foundations).</p>
   </div>
+</section>
+
+{# ---------- definitions and references ---------- #}
+<section class="keep">
+  <h2>Definitions</h2>
+  <table class="data defs">
+    {% for d in definitions %}
+    <tr><th>{{ d.term }}</th><td>{{ d.text }}{% if d.refs %} <span class="cite">({{ d.refs | join('; ') }})</span>{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="keep">
+  <h2>References</h2>
+  <ul class="refs">
+    {% for r in references %}
+    <li>{{ r.authors }} ({{ r.year }}). <em>{{ r.title }}</em>{% if r.title[-1] not in '?.!' %}.{% endif %} {{ r.source }}. <a href="{{ r.url }}">{{ r.url | replace('https://', '') }}</a></li>
+    {% endfor %}
+  </ul>
 </section>
 
 </body>

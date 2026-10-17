@@ -22,6 +22,7 @@ INK = "#1c2733"
 MUTED = "#6b7a8c"
 GRID = "#e3e9ef"
 SURFACE = "#ffffff"
+DEFICIT = "#c62828"  # generation-below-demand marker
 
 
 def nice_ticks(vmax: float, target: int = 5) -> list[float]:
@@ -46,9 +47,16 @@ def _rounded_top(x: float, y: float, w: float, h: float, r: float) -> str:
             f"H{x + w - r:.2f} Q{x + w:.2f},{y:.2f} {x + w:.2f},{y + r:.2f} V{y + h:.2f} Z")
 
 
+def _deficit_mark(cx: float, cy: float) -> str:
+    """A small red '!' disc marking a month whose generation is below the load."""
+    return (f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="6.5" fill="{DEFICIT}"/>'
+            f'<text x="{cx:.2f}" y="{cy + 3.6:.2f}" font-size="10" font-weight="700" fill="#fff" '
+            f'text-anchor="middle">!</text>')
+
+
 def monthly_balance_svg(monthly: list[dict], width: int = 680, height: int = 250) -> str:
     """Stacked monthly generation by technology (MWh) with the demand as a dashed step line."""
-    left, right, top, bottom = 52, 14, 34, 24
+    left, right, top, bottom = 52, 14, 44, 24  # top: legend + room for deficit marks
     pw, ph = width - left - right, height - top - bottom
 
     rows = sorted(monthly, key=lambda m: m["month_num"])[:12]
@@ -71,6 +79,11 @@ def monthly_balance_svg(monthly: list[dict], width: int = 680, height: int = 250
         lx += 15 + 5.6 * len(t["name"]) + 14
     out.append(f'<line x1="{lx}" y1="13" x2="{lx + 18}" y2="13" stroke="{INK}" stroke-width="2" stroke-dasharray="4 3"/>'
                f'<text x="{lx + 23}" y="17" font-size="10" fill="{INK}">Demand</text>')
+    deficit = [sum(g) < l for g, l in zip(gen, load)]  # months generating less than the load
+    if any(deficit):
+        lx += 23 + 6.2 * len("Demand") + 14
+        out.append(_deficit_mark(lx + 6, 13) +
+                   f'<text x="{lx + 17}" y="17" font-size="10" fill="{INK}">Generation below demand</text>')
 
     # Recessive grid + y axis labels.
     for v in ticks:
@@ -97,6 +110,8 @@ def monthly_balance_svg(monthly: list[dict], width: int = 680, height: int = 250
             base += v
         out.append(f'<text x="{x + bw / 2:.2f}" y="{height - 8}" font-size="9" fill="{MUTED}" '
                    f'text-anchor="middle">{MONTHS[int(rows[i]["month_num"]) - 1]}</text>')
+        if deficit[i]:  # mark the month above whichever is taller, its bar or the demand line
+            out.append(_deficit_mark(x + bw / 2, min(y(sum(g)), y(load[i])) - 12))
 
     # Demand: a step line across each month's slot (hours differ by month), with a halo.
     d = " ".join(f"{'M' if i == 0 else 'L'}{left + i * slot:.2f},{y(v):.2f} H{left + (i + 1) * slot:.2f}"

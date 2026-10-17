@@ -6,6 +6,7 @@ import pandas as pd
 
 from app.engine.config_eval import evaluate
 from app.engine.optimizer import optimize
+from app.engine import economics
 from app.config import APP_DEFAULTS
 from app.references import citations
 import time
@@ -27,7 +28,10 @@ def health():
         "islands": len(d["islands"]),
         "tech": list(d["tech"].index),
         "hourly_islands": list(d["hourly"].keys()),
-        "crf": d["finance"]["capital_recovery_factor"],
+        "crf": economics.crf(  # at the nominal rate the costs use (DCF model)
+            economics.get_nominal_rate(d["finance"]),
+            float(d["finance"]["project_life_yr"]),
+        ),
     })
 
 
@@ -100,14 +104,20 @@ def api_optimize():
         return jsonify({"ok": False, "error": f"unknown island: {island}"}), 400
 
     load_kW = float(body.get("load_kW", 1000))
-    weights = body.get("weights", APP_DEFAULTS["weights"])
-    lpsp_target = float(body.get("lpsp_target", APP_DEFAULTS["reliability_target_lpsp"]))
+    # The whole load must be met (LPSP 0), as in the team's main
+    lpsp_target = float(APP_DEFAULTS["reliability_target_lpsp"])
+    mins = {k: float(body.get(k, APP_DEFAULTS[k]))
+            for k in ("min_wind_pct", "min_solar_pct", "min_otec_pct", "min_wave_pct")}
 
-    current_app.logger.info(f"OPTIMIZE START: {island} | Target Load: {load_kW} kW | LPSP Target: {lpsp_target}")
+    current_app.logger.info(
+        f"OPTIMIZE START: {island} | Target Load: {load_kW} kW | LPSP Target: {lpsp_target:.0%} | "
+        f"Min Wind: {mins['min_wind_pct']} | Min Solar: {mins['min_solar_pct']} | "
+        f"Min OTEC: {mins['min_otec_pct']} | Min Wave: {mins['min_wave_pct']}"
+    )
     start_time = time.time()
 
     try:
-        result = optimize(island, load_kW, dfs, weights, lpsp_target=lpsp_target)
+        result = optimize(island, load_kW, dfs, lpsp_target=lpsp_target, **mins)
     except Exception as exc:
         current_app.logger.error(f"OPTIMIZE FAILED: {str(exc)}")
         return jsonify({"ok": False, "error": str(exc)}), 500
@@ -125,6 +135,7 @@ def api_optimize():
     opt_id = str(uuid.uuid4())
     current_app.config.setdefault("OPT_CACHE", {})[opt_id] = {
         "island": island, "load_kW": load_kW, "feasible": result.get("feasible", [])[:10],
+        "minimums": {k: v for k, v in mins.items() if v > 0},  # shown in the PDF report
     }
 
     return jsonify({"ok": True, "result": result, "opt_id": opt_id})
@@ -148,7 +159,7 @@ def api_compare():
     # Evaluate the mix for every island in the dataset
     for island in dfs["islands"].index:
         try:
-            res = evaluate(island, capacities, dfs, use_hourly=False)
+            res = evaluate(island, capacities, dfs, use_hourly=None)
             results.append({
                 "island": island,
                 "lcoe": res["econ"]["LCOE_RE_INR_per_kWh"],

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import numpy as np
+from .common import SELF_DISCHARGE_PER_HOUR
 
 def dispatch_hourly(
     gen_kW: np.ndarray,
@@ -17,17 +18,13 @@ def dispatch_hourly(
     smax = dod * bess_kWh
     smin = 0.0
     n = len(gen_kW)
-    
-    self_discharge_rate = 0.015 
 
     soc = 0.5 * smax
     delivered = np.zeros(n)
     unmet = np.zeros(n)
     curtailed = np.zeros(n)
-    soc_hist = np.zeros(n)
 
-    # Local variable assignment for speed
-    _sd = 1.0 - self_discharge_rate
+    _sd = 1.0 - SELF_DISCHARGE_PER_HOUR
     _eta = eta
     _pmax = pmax
     _smax = smax
@@ -37,7 +34,7 @@ def dispatch_hourly(
     for t in range(n):
         if soc > smin:
             soc = max(smin, soc * _sd)
-            
+
         net = _gen[t] - _load[t]
         if net >= 0:
             room = _smax - soc
@@ -49,7 +46,7 @@ def dispatch_hourly(
                 charge = room_eta
             if _pmax < charge:
                 charge = _pmax
-                
+
             soc += _eta * charge
             spill = net - charge
             curtailed[t] = spill if spill > 0.0 else 0.0
@@ -64,25 +61,22 @@ def dispatch_hourly(
                 discharge = avail
             if _pmax < discharge:
                 discharge = _pmax
-                
+
             soc -= discharge / _eta
             served = _gen[t] + discharge
             delivered[t] = served if served < _load[t] else _load[t]
             short = _load[t] - served
             unmet[t] = short if short > 0.0 else 0.0
-            
-        soc_hist[t] = soc
 
     total_load = float(np.sum(_load))
     total_unmet = float(np.sum(unmet))
-    
+
     return {
         "delivered_kWh": float(np.sum(delivered)),
         "unmet_kWh": total_unmet,
         "curtailed_kWh": float(np.sum(curtailed)),
         "lpsp": total_unmet / max(total_load, 1e-9),
         "lole_hours": int(np.sum(unmet > 1e-9)),
-        "soc_kWh": soc_hist.tolist(),
         "hourly_delivered": delivered,
         "hourly_unmet": unmet,
         "hourly_curtailed": curtailed,

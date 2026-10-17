@@ -43,6 +43,7 @@ def load_all(data_dir: str | Path = "data/processed") -> dict:
     return {
         "islands": table("islands.csv").set_index("island"),
         "tech":    _read(d, "tech_params.csv").set_index("technology"),
+        "discount": _read(d, "discount_params.csv").set_index("technology"),  # volume-discount blocks
         "finance": finance,
         "wind":    table("wind_monthly.csv").set_index(["island", "month_num"]),
         "solar":   table("solar_monthly.csv").set_index(["island", "month_num"]),

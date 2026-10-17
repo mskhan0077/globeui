@@ -31,7 +31,46 @@
       html: () =>
         p("How much electricity each technology generates in each month (MWh) for the capacities on the sliders, stacked by technology.",
           "The dashed line is the demand: target load × hours in the month. Where the bars rise above it there is surplus (stored in the battery or curtailed); below it, the battery and then diesel must cover the gap.",
-          "When the place has hourly data, each month is the total of an hour-by-hour (8,760-hour) simulation; otherwise it uses monthly average capacity factors."),
+          "When the place has hourly data, each month is the total of an hour-by-hour (8,760-hour) simulation; otherwise it uses monthly average capacity factors.",
+          "Data statistics, below, summarises the same months."),
+    },
+    deficit: {
+      title: "Months below demand: alternative marine technologies",
+      html: () => {
+        const months = window.BlueGrid.deficitMonths || [];
+        return p(`${months.length ? `In ${months.join(", ")}` : "In some months"} the mix on the sliders generates less energy than the load in total, so those months depend on stored energy or diesel. Adding capacity or storage is the usual fix; these emerging marine technologies could also help:`) +
+          `<dl class="info-box__defs">
+            <dt>Tidal stream</dt><dd>Turbines driven by tidal currents. Tides are predictable years ahead, so output is too; first commercial arrays are operating. Needs strong tidal flows near the site.</dd>
+            <dt>Salinity gradient (RED / PRO)</dt><dd>Steady power from mixing fresh and salt water (reverse electrodialysis or pressure-retarded osmosis). Needs a freshwater source such as a river mouth, which small coral islands usually lack.</dd>
+            <dt>Ocean current</dt><dd>Turbines in steady, one-way ocean currents: continuous and predictable, but still experimental and only where a strong current runs close by.</dd>
+          </dl>`;
+      },
+    },
+    stats: {
+      title: "Data statistics",
+      html: () =>
+        `<dl class="info-box__defs">
+          <dt>Monthly generation and load</dt>
+          <dd>For each source on the sliders and for the load: the mean, median, standard deviation, lowest and highest of its 12 monthly totals (MWh). A large spread or a low minimum means a seasonal source that needs storage or backup in its weak months.</dd>
+          <dt>Resource at this place</dt>
+          <dd>Capacity factor: the share of its rated output a technology would actually produce here (average over the year, the level it beats 90% of the time, and its lowest and highest). From hourly data where the place has it, otherwise monthly averages. It depends only on the place, not on the sliders.</dd>
+        </dl>`,
+      refs: ["eia-capacity-factor"],
+    },
+    minmix: {
+      title: "Minimum share in Find optimal mix",
+      html: () =>
+        p("Forces Find optimal mix to include at least this much of a technology, e.g. to keep a diverse mix or test a technology you want on the island.") +
+        formula("capacity ≥ minimum % × target load (kW)") +
+        p("At 1,000 kW and 20% wind, every mix it considers has at least 200 kW of wind. 0% does not exclude a technology: it just sets no minimum, and the optimizer still uses it wherever it’s cost-effective. Minimums can only raise the cost of the best mix."),
+    },
+    discount: {
+      title: "Volume discount on CAPEX",
+      html: () =>
+        p("Each technology is bought in standard units (e.g. 500 kW wind turbines, 1 MWh battery blocks). Every doubling of the number of units cuts the next unit’s price to a set share of the first one’s, the economies-of-volume factor χ (0.95 here, so 5% cheaper per doubling).") +
+        formula("average price factor = (1/n) Σ<sub>N=1..n</sub> N<sup>ln χ / ln 2</sup>, n = capacity ÷ unit size") +
+        p("The table shows each technology’s list CAPEX (at the single-unit price), the average discount, the saving and the discounted CAPEX, which is what all the KPIs use. One unit or less pays the list price."),
+      refs: ["oconnor-2013", "oliveira-pinto-2019"],
     },
     viability: {
       title: "Technology viability scores (0–100)",
@@ -40,7 +79,7 @@
         `<dl class="info-box__defs">
           <dt>Resource</dt><dd>100 × its average capacity factor ÷ the best technology’s</dd>
           <dt>CAPEX</dt><dd>100 × cheapest island CAPEX per kW ÷ its CAPEX</dd>
-          <dt>Reliability</dt><dd>100 × (10th-percentile month’s capacity factor ÷ its average) × TRL ÷ 9: steadiness and maturity</dd>
+          <dt>Reliability</dt><dd>100 × (10th-percentile capacity factor ÷ its average) × TRL ÷ 9: steadiness and maturity. With hourly data this is the 10th-percentile hour, so sources that stop at night (solar) score low</dd>
           <dt>Sustainability</dt><dd>100 × (1 − its lifecycle gCO₂/kWh ÷ the highest)</dd>
         </dl>`,
     },
@@ -51,11 +90,11 @@
         p("The best capacity mixes found by Find optimal mix for this place and load, best first. The top one is applied to the sliders and evaluated.") +
         `<dl class="info-box__defs">
           <dt>1. Search</dt>
-          <dd>An exact linear program (cheapest mix on monthly totals, with battery self-discharge and the inflating diesel price), plus a coarse grid of mixes: wind and floating solar up to 10× the load, OTEC up to 2×, wave up to 4×, battery up to 50 hours of load. Grid mixes that couldn’t generate enough energy in a year even with no losses are skipped.</dd>
+          <dd>An exact linear program (cheapest mix on monthly totals, with battery self-discharge and the inflating diesel price), plus a coarse grid of mixes: wind and floating solar up to 15× the load, OTEC up to 3×, wave up to 5×, battery up to 100 hours of load. Mixes below the minimum shares you set, or that couldn’t generate enough energy in a year even with no losses, are skipped.</dd>
           <dt>2. Check</dt>
-          <dd>Every mix, including the linear program’s, is simulated hour by hour (8,760 h) with the battery. Only mixes with LPSP ≤ ${fmt.pct(d.reliability_target_lpsp ?? 0.05, 0)} are kept.</dd>
+          <dd>Every mix, including the linear program’s, is simulated hour by hour (8,760 h) with the battery. Only mixes that meet the whole load${(d.reliability_target_lpsp ?? 0) > 0 ? ` (LPSP ≤ ${fmt.pct(d.reliability_target_lpsp, 0)})` : " (LPSP 0%)"} are kept.</dd>
           <dt>3. Rank</dt>
-          <dd>score = 1 ÷ LCOE + 0.1 × (1 ÷ CAPEX in ₹ Cr): the cheapest electricity wins, lower CAPEX breaks near-ties. Wasted (curtailed) energy isn’t penalised.</dd>
+          <dd>score = (1 ÷ LCOE) ÷ (1 + over-generation): the cheapest electricity wins, and wasted surplus counts against a mix (10% over-generation makes it rank as if 10% dearer). The top 20 are kept.</dd>
         </dl>` +
         p("Columns: capacities (kW, battery in kWh), then LCOE, coverage (1 − LPSP), PLF, CO₂ avoided and CAPEX for that mix; see the KPI (i)s for how each is calculated. The top 10 are shown."),
     },
@@ -132,8 +171,10 @@
       html: ({ finance: f, defaults: d, fmt }) =>
         p("Share of the year’s demand that goes unmet.") +
         formula("unmet energy ÷ total demand") +
-        p(`<strong>hourly</strong>: from an hour-by-hour simulation with battery dispatch (round-trip efficiency ${fmt.pct(f.bess_round_trip_eff, 0)}, usable up to ${fmt.pct(f.bess_depth_of_discharge, 0)} of capacity, max C-rate ${num(f.bess_max_c_rate, 1)}, 1.5% self-discharge per hour). <strong>annual</strong>: from monthly totals only (no hourly data for the place), which is optimistic because it can’t see night-time gaps.`,
-          d.reliability_target_lpsp != null ? `Find optimal mix only accepts mixes with LPSP ≤ ${fmt.pct(d.reliability_target_lpsp, 0)}.` : ""),
+        p(`<strong>hourly</strong>: from an hour-by-hour simulation with battery dispatch (round-trip efficiency ${fmt.pct(f.bess_round_trip_eff, 0)}, usable up to ${fmt.pct(f.bess_depth_of_discharge, 0)} of capacity, max C-rate ${num(f.bess_max_c_rate, 1)}, 0.01% self-discharge per hour). <strong>annual</strong>: from monthly totals only (no hourly data for the place), which is optimistic because it can’t see night-time gaps.`,
+          d.reliability_target_lpsp != null ? (d.reliability_target_lpsp > 0
+            ? `Find optimal mix only accepts mixes with LPSP ≤ ${fmt.pct(d.reliability_target_lpsp, 0)}.`
+            : "Find optimal mix only accepts mixes that meet the whole load (LPSP 0%).") : ""),
       refs: ["borowy-1996", "yang-2007"],
     },
     co2: {
@@ -150,12 +191,13 @@
       needsFinance: true,
       html: ({ finance: f, fmt }) =>
         p("Upfront investment for the capacities on the sliders, using island-adjusted unit costs (marine logistics, cyclone-rated foundations, etc.).") +
-        formula("Σ capacity × island CAPEX per kW (per kWh for the battery) − subsidies") +
+        formula("Σ capacity × island CAPEX per kW (per kWh for the battery) × volume-discount factor − subsidies") +
+        p("Buying many identical units is cheaper per unit; see Volume discount on CAPEX for the saving.") +
         p(Number(f.apply_subsidies_flag) > 0.5
             ? `Subsidies are on: ${fmt.inr(f.fpv_cfa_subsidy_INR_per_kW)}/kW for floating solar and ${fmt.inr(f.bess_vgf_INR_per_kWh)}/kWh for the battery.`
             : "Subsidies are currently off.",
           "Each technology’s unit cost is in its (i) next to the sliders. Shown in crore (1 Cr = ₹1,00,00,000)."),
-      refs: ["eia-capital-cost-2024"],
+      refs: ["eia-capital-cost-2024", "oconnor-2013"],
     },
     unmet: {
       title: "Unmet energy",

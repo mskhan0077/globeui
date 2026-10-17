@@ -1,13 +1,10 @@
-"""Monthly generation + BESS reservoir.
-
-This module computes the monthly energy balance for one configuration.
-BESS is modelled as a monthly reservoir (energy shifted between months,
-not intra-day). For hourly dispatch, see bess.py.
-"""
+"""Monthly generation + BESS reservoir."""
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+
+from .common import SELF_DISCHARGE_PER_HOUR
 
 def monthly_generation(island: str, capacities: dict, dfs: dict) -> pd.DataFrame:
     """Return a DataFrame indexed by month with generation / load / BESS flows."""
@@ -54,6 +51,7 @@ def monthly_generation(island: str, capacities: dict, dfs: dict) -> pd.DataFrame
         curtailed = np.zeros(len(months))
 
         for i, n in enumerate(net):
+            soc *= (1.0 - (1.0 - SELF_DISCHARGE_PER_HOUR) ** hours[i])
             if n >= 0:
                 charge = min(n, (soc_max - soc) / eta)
                 soc += eta * charge
@@ -71,7 +69,7 @@ def monthly_generation(island: str, capacities: dict, dfs: dict) -> pd.DataFrame
         delivered = np.minimum(gen_total, load)
         unmet = np.maximum(load - gen_total, 0.0)
         surplus = np.maximum(gen_total - load, 0.0)
-        curtailed = np.zeros_like(surplus)
+        curtailed = surplus.copy()
 
     df = pd.DataFrame(
         {

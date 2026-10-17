@@ -66,11 +66,11 @@ def export_pdf(run_id):
             "population": row.get("population_2011_approx"), "land_area": row.get("land_area_km2")}
 
     opt = current_app.config.get("OPT_CACHE", {}).get(request.args.get("opt", ""))
-    ranked = None
+    ranked, minimums = None, {}
     if opt and opt["island"] == res["island"] and abs(opt["load_kW"] - res["capacities"]["load_kW"]) < 1e-6:
-        ranked = opt["feasible"]
+        ranked, minimums = opt["feasible"], opt.get("minimums", {})
 
-    pdf = render_pdf(build_context(res, site, dfs["finance"], ranked))
+    pdf = render_pdf(build_context(res, site, dfs["finance"], ranked, minimums))
     return Response(
         pdf,
         mimetype="application/pdf",

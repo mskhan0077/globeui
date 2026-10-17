@@ -4,7 +4,7 @@ def test_health(client):
     j = r.get_json()
     assert j["ok"] is True
     assert j["islands"] > 0
-    assert 0.09 < j["crf"] < 0.10   # CRF(0.08, 25) ≈ 0.0937
+    assert 0.13 < j["crf"] < 0.15   # CRF at the nominal rate: (1.08 × 1.05 − 1 = 13.4%, 25 yr) ≈ 0.140
 
 def test_index(client):
     r = client.get("/")

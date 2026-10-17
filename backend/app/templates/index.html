@@ -19,6 +19,10 @@
 <section class="panel">
   <h2>Capacity (kW / kWp / kWh)</h2>
   <div id="sliders"></div>
+  <div class="mix-constraints">
+    <h3 class="mix-constraints__title">Minimum share in Find optimal mix <button type="button" class="info-btn" data-info="minmix" aria-label="About the minimum shares">i</button></h3>
+    <div class="grid-2" id="mix-sliders"></div>
+  </div>
   <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
       <button id="btn-evaluate">Evaluate</button>
       <button id="btn-optimize" class="secondary">Find optimal mix</button>
@@ -38,9 +42,27 @@
   <div id="kpis" class="kpi-grid"></div>
 </section>
 
+<section class="panel" id="panel-discount" hidden>
+  <h2>Volume discount on CAPEX <button type="button" class="info-btn" data-info="discount" aria-label="About the volume discount on CAPEX">i</button></h2>
+  <div id="table-discount"></div>
+</section>
+
 <section class="panel">
   <h2>Monthly energy balance <button type="button" class="info-btn" data-info="monthly" aria-label="About the monthly energy balance">i</button></h2>
   <div id="chart-monthly" style="height:360px;"></div>
+  <p class="deficit-note" id="deficit-note" hidden>
+    <span class="deficit-note__icon" aria-hidden="true">❗</span>
+    <span id="deficit-text"></span>
+    <button type="button" class="deficit-note__link" id="btn-deficit" data-info="deficit" aria-label="Alternative marine technologies for these months">Alternative marine technologies</button>
+  </p>
+</section>
+
+<section class="panel" id="panel-stats" hidden>
+  <h2>Data statistics <button type="button" class="info-btn" data-info="stats" aria-label="About the data statistics">i</button></h2>
+  <h3 class="stats-title">Monthly generation and load (MWh)</h3>
+  <div class="stats-grid" id="stats-grid"></div>
+  <h3 class="stats-title">Resource at this place (capacity factor, <span id="resource-basis">hourly data</span>)</h3>
+  <div id="resource-stats"></div>
 </section>
 
 <section class="panel">

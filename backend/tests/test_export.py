@@ -50,3 +50,19 @@ def test_monthly_chart_svg():
     assert svg.startswith("<svg") and svg.endswith("</svg>")
     assert "Dec" in svg and "Demand" in svg
     assert nice_ticks(744)[-1] >= 744
+
+
+def test_pdf_context_has_stats_discount_and_definitions(client):
+    """The report's data statistics, volume-discount table, deficit months and definitions."""
+    from app.reports.pdf import build_context
+    r = client.post("/api/evaluate", json={"island": "Kadmat", "load_kW": 1000, "capacities": MIX}).get_json()
+    res = client.application.config["CACHE"][r["run_id"]]
+    ctx = build_context(res, {"lat": 11.2, "lon": 72.8}, client.application.config["DATA"]["finance"],
+                        None, {"min_wind_pct": 0.3})
+    assert [row["name"] for row in ctx["stat_rows"]][-1] == "Load"
+    assert len(ctx["resource_rows"]) == 4
+    assert ctx["discount_rows"] and ctx["discount_total"]["net"].startswith("₹")
+    assert ctx["deficit_months"]                       # this small mix falls short in some months
+    assert ctx["minimums"] == "wind ≥ 30% of the load"
+    assert all(d["refs"] for d in ctx["definitions"])  # every definition cites its sources
+    assert len(ctx["kpis"]) == 8

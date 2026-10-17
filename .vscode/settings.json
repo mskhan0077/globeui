@@ -1,0 +1,25 @@
+{
+  // The Python environment lives in backend/ (uv project: backend/pyproject.toml + uv.lock).
+  // Recreate it with:  cd backend && uv sync
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+
+  // Imports like `from app.engine ...` resolve from backend/
+  "python.analysis.extraPaths": ["${workspaceFolder}/backend"],
+
+  // Testing panel: run pytest from backend/ (backend/pytest.ini, backend/tests/)
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}/backend",
+  "python.testing.pytestArgs": ["tests"],
+
+  // Keep generated folders out of search and the explorer
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "backend/uv.lock": true
+  }
+}

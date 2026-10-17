@@ -151,6 +151,12 @@ $$
 $$
 C_b = E_b \cdot \mathrm{CAPEX}^{\text{bess}}_{\text{island}}
 $$
+
+**Volume (bulk) discount** — each $C_i$ and $C_b$ is multiplied by $\bar d_i$, with $n_i = P_i / u_i$ units of block size $u_i$ and economies-of-volume factor $\chi_i$ (`Discount_Params`; each doubling of units cuts unit price to $\chi_i$):
+$$
+\bar d_i = \frac{1}{n_i} \sum_{N=1}^{n_i} N^{\ln \chi_i / \ln 2} \qquad (\bar d_i = 1 \text{ for } n_i \le 1)
+$$
+*(O'Connor, Lewis & Dalton, Renew. Energy 50 (2013) 1119–1131; $\chi$ typically 0.85–0.95, Oliveira-Pinto et al., Energ. Conv. Manage. 186 (2019) 556–569)*
 $$
 \mathrm{Sub} = \mathrm{flag} \cdot \left( P_s \cdot \mathrm{CFA}_{\text{fpv}} + E_b \cdot \mathrm{VGF}_{\text{bess}} \right)
 $$

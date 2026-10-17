@@ -77,3 +77,28 @@ button:disabled { opacity: 0.45; cursor: default; }
 .references li { padding: 10px 6px 10px 2.2em; text-indent: -1.6em; border-top: 1px solid var(--border); line-height: 1.55; scroll-margin-top: 110px; }
 .references li:target { background: rgba(85, 242, 232, 0.10); border-radius: 8px; }
 .references a { word-break: break-all; color: #8cc8ff; }
+
+/* Monthly statistics under the monthly chart, and the volume-discount table total */
+.stats-title { margin: 20px 0 10px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.stat-card { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: rgba(255, 255, 255, 0.04); font-variant-numeric: tabular-nums; }
+.stat-title { margin-bottom: 6px; font-size: 13px; font-weight: 700; }
+.stat-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.stat-row span:last-child { color: var(--ink, #eef2f7); }
+.ranked-table tr.total-row td { font-weight: 700; border-top: 1px solid var(--border); }
+
+/* "Minimum share in Find optimal mix" sliders, under the capacity sliders */
+.mix-constraints { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.mix-constraints__title { display: flex; align-items: center; margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.mix-constraints .slider-row { margin-bottom: 4px; }
+.mix-constraints .slider-head { display: flex; align-items: center; font-size: 13px; color: var(--muted); }
+.mix-constraints input[type=range] { width: 100%; margin-top: 4px; accent-color: var(--primary); background: transparent; }
+
+/* Months below demand (monthly chart): note + link to the alternatives box */
+.deficit-note { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.deficit-note__icon { font-size: 15px; }
+.deficit-note__link {
+  padding: 0; border: 0; background: none; color: #8cc8ff; font: inherit; font-weight: 600;
+  text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.deficit-note__link:hover, .deficit-note__link[aria-expanded="true"] { color: #fff; background: none; }

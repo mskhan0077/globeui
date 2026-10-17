@@ -10,6 +10,16 @@
     { key: "bess_kWh",  label: "BESS",           tech: "BESS" },
   ];
 
+  // Optimizer diversity constraints: minimum capacity of a technology as a % of the load.
+  const MIX_SLIDERS = [
+    { key: "min_wind_pct",  label: "Wind" },
+    { key: "min_solar_pct", label: "Floating solar" },
+    { key: "min_otec_pct",  label: "OTEC" },
+    { key: "min_wave_pct",  label: "Wave" },
+  ];
+  const defaultMix = () => Object.fromEntries(
+    MIX_SLIDERS.map(({ key }) => [key, Math.round((window.BLUEGRID.defaults[key] || 0) * 100)]));
+
   // Chart rendering (dark glass theme) lives in theme.js.
   const plot = window.BlueGrid.plot;
 
@@ -18,6 +28,7 @@
     lastResult: null,
     lastRunId: null,
     lastOptimize: null, // { id, island, load_kW } of the last Find optimal mix
+    mix: defaultMix(),  // minimum shares for Find optimal mix, in % of the load
   };
 
   const els = {
@@ -57,6 +68,23 @@
     });
   }
 
+  // "Minimum share" sliders (0–100% of the load, step 5) for Find optimal mix
+  function buildMixSliders() {
+    const host = document.getElementById("mix-sliders");
+    host.innerHTML = MIX_SLIDERS.map(({ key, label }) => `
+      <div class="slider-row">
+        <div class="slider-head"><span id="lbl-${key}">${label} — at least <output id="out-${key}">${state.mix[key]}</output>%</span></div>
+        <input type="range" id="sl-${key}" min="0" max="100" step="5" value="${state.mix[key]}" aria-labelledby="lbl-${key}">
+      </div>`).join("");
+    MIX_SLIDERS.forEach(({ key }) => {
+      const el = document.getElementById("sl-" + key);
+      el.addEventListener("input", () => {
+        state.mix[key] = Number(el.value);
+        document.getElementById("out-" + key).textContent = el.value;
+      });
+    });
+  }
+
   // `info` is the key of the KPI's (i) explanation in info-content.js.
   function kpiCard(label, value, sub, info) {
     const btn = info ? `<button type="button" class="info-btn" data-info="${info}" aria-label="About ${label}">i</button>` : "";
@@ -70,6 +98,10 @@
     const lpsp = rel.lpsp_hourly ?? rel.lpsp_annual ?? rel.lpsp_monthly;
     const inr = (x) => x.toLocaleString("en-IN", { maximumFractionDigits: 0 });
     const num = (x, d = 2) => Number(x).toFixed(d);
+    // CAPEX already includes the bulk (volume) discount; show how much it saved
+    const vd = Object.values(r.volume_discount || {});
+    const saving = vd.reduce((sum, d) => sum + d.list_INR - d.discounted_INR, 0);
+    const capexSub = saving > 0 ? `island-adjusted, −₹${num(saving / 1e7, 2)} Cr volume discount` : "island-adjusted";
     els.kpis.innerHTML = [
       kpiCard("LCOE (RE only)", `₹${num(e.LCOE_RE_INR_per_kWh)}`, "per kWh delivered", "lcoe"),
       kpiCard("System cost", `₹${num(e.cost_of_service_INR_per_kWh)}`, "incl. diesel top-up", "cos"),
@@ -77,11 +109,62 @@
       kpiCard("PLF vs target", `${num(r.plf_target * 100, 1)}%`, `${inr(a.delivered_kWh / 1000)} MWh served`, "plf"),
       kpiCard("LPSP", `${num(lpsp * 100)}%`, rel.lpsp_hourly != null ? "hourly" : "annual", "lpsp"),
       kpiCard("CO₂ avoided", `${inr(c.co2_avoided_t)} t`, "per year", "co2"),
-      kpiCard("CAPEX", `₹${num(e.capex_INR / 1e7, 1)} Cr`, "island-adjusted", "capex"),
+      kpiCard("CAPEX", `₹${num(e.capex_INR / 1e7, 1)} Cr`, capexSub, "capex"),
       kpiCard("Unmet", `${inr(a.unmet_kWh / 1000)} MWh`, "diesel top-up", "unmet"),
     ].join("");
     window.BlueGrid.info?.close(); // its button may just have been replaced
     window.BlueGrid.info?.attach(els.kpis);
+  }
+
+  // Volume (bulk) discount per technology: list CAPEX vs discounted, from the evaluate result
+  function renderDiscount(r) {
+    const panel = document.getElementById("panel-discount");
+    const vd = SLIDERS.map(({ key }) => (r.volume_discount || {})[key]).filter((d) => d && d.list_INR > 0);
+    panel.hidden = !vd.length;
+    if (!vd.length) return;
+    const cr = (x) => `₹${(x / 1e7).toFixed(2)} Cr`;
+    const list = vd.reduce((sum, d) => sum + d.list_INR, 0);
+    const net = vd.reduce((sum, d) => sum + d.discounted_INR, 0);
+    const row = (name, units, l, pct, n) =>
+      `<tr><td>${name}</td><td>${units}</td><td>${cr(l)}</td><td>${(pct * 100).toFixed(1)}%</td><td>${cr(l - n)}</td><td>${cr(n)}</td></tr>`;
+    document.getElementById("table-discount").innerHTML = `
+      <table class="ranked-table">
+        <thead><tr><th>Technology</th><th>Units bought</th><th>List CAPEX</th><th>Discount</th><th>Saving</th><th>Discounted CAPEX</th></tr></thead>
+        <tbody>
+          ${vd.map((d) => row(d.tech, `${d.units.toFixed(1)} × ${d.unit_size} ${d.unit_basis}`, d.list_INR, d.discount_pct, d.discounted_INR)).join("")}
+          <tr class="total-row">${row("Total", "", list, 1 - net / list, net).slice(4)}
+        </tbody>
+      </table>`;
+  }
+
+  // Data statistics panel: (1) mean / median / spread of each source's monthly generation
+  // and of the load, as in BoobWorld; (2) the place's resource (capacity factors), which
+  // doesn't depend on the sliders.
+  function renderStats(r) {
+    const panel = document.getElementById("panel-stats");
+    const labels = { wind: "Wind", solar: "Floating solar", otec: "OTEC", wave: "Wave", load: "Load" };
+    const entries = Object.keys(labels).filter((k) => r.stats?.[k])       // fixed order: sources, then load
+      .map((k) => [k, r.stats[k]]).filter(([k, st]) => k === "load" || st.max > 0); // skip unused sources
+    panel.hidden = !entries.length;
+    if (!entries.length) return;
+    const line = (label, v) => `<div class="stat-row"><span>${label}</span><span>${v.toFixed(1)}</span></div>`;
+    document.getElementById("stats-grid").innerHTML = entries.map(([k, st]) => `
+      <div class="stat-card">
+        <div class="stat-title">${labels[k] || k}</div>
+        ${line("Mean", st.mean)}${line("Median", st.median)}${line("Std dev", st.std)}${line("Min", st.min)}${line("Max", st.max)}
+      </div>`).join("");
+
+    const pct = (x) => `${(x * 100).toFixed(1)}%`;
+    const rows = SLIDERS.filter(({ tech }) => r.tech_scores?.[tech]).map(({ label, tech }) => {
+      const t = r.tech_scores[tech];
+      return `<tr><td>${label}</td><td>${pct(t.cf_annual)}</td><td>${pct(t.firmness * t.cf_annual)}</td><td>${pct(t.cf_min)}</td><td>${pct(t.cf_max)}</td></tr>`;
+    }).join("");
+    document.getElementById("resource-basis").textContent = r.reliability?.lpsp_hourly != null ? "hourly data" : "monthly averages";
+    document.getElementById("resource-stats").innerHTML = rows ? `
+      <table class="ranked-table">
+        <thead><tr><th>Technology</th><th>Average</th><th>10th percentile</th><th>Lowest</th><th>Highest</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>` : "";
   }
 
   function renderMonthly(r) {
@@ -101,12 +184,34 @@
         line: { color: "#d62728", width: 2 },
       },
     ];
+    // ❗ above each month whose total generation is below the load (as in BoobWorld);
+    // clicking one, or the link under the chart, opens the alternatives box.
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const deficit = r.monthly.filter((m) => m.gen_total_kWh < m.load_kWh);
+    window.BlueGrid.deficitMonths = deficit.map((m) => MONTHS[m.month_num - 1]);
+    const annotations = deficit.map((m) => ({
+      x: m.month_num, y: 1.06, yref: "paper", text: "❗", showarrow: false, font: { size: 18 },
+      hovertext: "Generation is below the load this month. Click for alternative marine technologies.",
+      captureevents: true,
+    }));
+    const note = document.getElementById("deficit-note");
+    note.hidden = !deficit.length;
+    document.getElementById("deficit-text").textContent = deficit.length
+      ? `Generation is below the load in ${window.BlueGrid.deficitMonths.join(", ")}.` : "";
+
     plot("chart-monthly", traces, {
       barmode: "stack",
-      margin: { l: 50, r: 20, t: 20, b: 40 },
+      margin: { l: 50, r: 20, t: deficit.length ? 40 : 20, b: 40 },
       yaxis: { title: "MWh" },
       xaxis: { title: "Month", dtick: 1 },
-    }, { responsive: true, displaylogo: false });
+      annotations,
+    }, { responsive: true, displaylogo: false }).then((gd) => {
+      gd.removeAllListeners?.("plotly_clickannotation");
+      gd.on("plotly_clickannotation", (e) => {
+        // after this click has finished: the info box closes on clicks outside it
+        if (e.annotation?.text === "❗") setTimeout(() => document.getElementById("btn-deficit").click(), 0);
+      });
+    });
   }
 
   // One small radar per technology (colours come from the theme, by technology name).
@@ -214,7 +319,9 @@
     if (tzBadge && resp.result.timezone) tzBadge.textContent = `(Timezone: ${resp.result.timezone})`;
 
     renderKPIs(resp.result);
+    renderDiscount(resp.result);
     renderMonthly(resp.result);
+    renderStats(resp.result);
     renderRadar(resp.result.tech_scores);
   }
 
@@ -242,6 +349,8 @@
     const body = {
       island: els.island.value,
       load_kW: Number(els.load.value),
+      // minimum shares, % → fraction of the load
+      ...Object.fromEntries(MIX_SLIDERS.map(({ key }) => [key, state.mix[key] / 100])),
     };
     const resp = await postJSON("/api/optimize", body);
     els.status.textContent = resp.ok ? "" : "error";
@@ -335,10 +444,13 @@
   function resetAll() {
     state.capacities = { wind_kW: 1500, solar_kWp: 1500, otec_kW: 500, wave_kW: 0, bess_kWh: 4000 };
     buildSliders();
+    state.mix = defaultMix();
+    buildMixSliders();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     buildSliders();
+    buildMixSliders();
     document.getElementById("btn-evaluate").addEventListener("click", doEvaluate);
     document.getElementById("btn-optimize").addEventListener("click", doOptimize);
     document.getElementById("btn-compare").addEventListener("click", doCompare);

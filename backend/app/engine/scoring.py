@@ -1,10 +1,11 @@
-"""Scoring matrix — resource, capex, reliability, sustainability."""
+"""Technology viability scores."""
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 import re
 
+from .common import find_hourly_key
 
 def _parse_trl(val) -> float:
     """Extract the first integer from string TRL values like '6-7' or '9 inland'."""
@@ -13,25 +14,33 @@ def _parse_trl(val) -> float:
     match = re.search(r'(\d+)', str(val))
     return float(match.group(1)) if match else 9.0
 
-
 def technology_scores(island: str, dfs: dict) -> dict:
     """Score each technology 0-10 on the four criteria."""
     tech = dfs["tech"]
-    cf_map = {
-        "Wind":              dfs["wind"].loc[island, "cf_net_after_losses"].astype(float),
-        "Floating Solar PV": dfs["solar"].loc[island, "cf_fpv"].astype(float),
-        "OTEC":              dfs["otec"].loc[island, "cf_otec"].astype(float),
-        "Wave":              dfs["wave"].loc[island, "cf_wec_net"].astype(float),
-    }
+    hourly_key = find_hourly_key(island, dfs)
+
+    if hourly_key:
+        h = dfs["hourly"][hourly_key]
+        cf_map = {
+            "Wind":              h["cf_wind"].astype(float),
+            "Floating Solar PV": h["cf_fpv"].astype(float),
+            "OTEC":              h["cf_otec"].astype(float),
+            "Wave":              h["cf_wave"].astype(float),
+        }
+    else:
+        cf_map = {
+            "Wind":              dfs["wind"].loc[island, "cf_net_after_losses"].astype(float),
+            "Floating Solar PV": dfs["solar"].loc[island, "cf_fpv"].astype(float),
+            "OTEC":              dfs["otec"].loc[island, "cf_otec"].astype(float),
+            "Wave":              dfs["wave"].loc[island, "cf_wec_net"].astype(float),
+        }
 
     metrics = {}
     for name, cfs in cf_map.items():
         cf_annual = float(cfs.mean())
-        
-        # FIXED FIRMNESS: Use 10th percentile instead of absolute minimum to prevent 0-scores
-        cf_floor = float(np.percentile(cfs, 10)) 
+        cf_floor = float(np.percentile(cfs, 10))
         firmness = cf_floor / max(cf_annual, 1e-9)
-        
+
         metrics[name] = {
             "cf_annual": cf_annual,
             "cf_min": float(cfs.min()),
@@ -56,39 +65,3 @@ def technology_scores(island: str, dfs: dict) -> dict:
             **m,
         }
     return out
-
-
-def weighted_score(scores: dict, weights: dict) -> float:
-    return (
-        weights["resource"] * scores["resource"]
-        + weights["capex"] * scores["capex"]
-        + weights["reliability"] * scores["reliability"]
-        + weights["sustainability"] * scores["sustainability"]
-    )
-
-
-def config_scores(annual: dict, econ: dict, carbon: dict, reliability: dict,
-                  weights: dict, benchmark: dict) -> dict:
-    """Score a full configuration, normalizing against a benchmark."""
-    gen_total = max(annual["gen_total_kWh"], 1e-9)
-    installed_kW = max(benchmark["installed_kW"], 1e-9)
-    fleet_cf = gen_total / (installed_kW * 8760.0)
-    resource = 10.0 * fleet_cf / max(benchmark["fleet_cf"], 1e-9)
-
-    lcoe = max(econ["LCOE_RE_INR_per_kWh"], 1e-9)
-    capex = 10.0 * benchmark["lcoe_min"] / lcoe
-
-    lpsp = min(max(reliability.get("lpsp_hourly", reliability.get("lpsp_annual", 0.0)), 0.0), 1.0)
-    reliability_score = 10.0 * (1.0 - lpsp)
-
-    gco2 = carbon["co2_avoided_t"]
-    sustain = 10.0 * min(gco2 / max(benchmark["co2_max"], 1e-9), 1.0)
-
-    s = {
-        "resource": resource,
-        "capex": capex,
-        "reliability": reliability_score,
-        "sustainability": sustain,
-    }
-    s["weighted"] = weighted_score(s, weights)
-    return s
