@@ -9,11 +9,10 @@ from . import economics
 
 def get_dynamic_grid(load_kW: float) -> dict:
     """Scale the grid search space dynamically based on target load."""
-    # WIDENED BOUNDS: Allow the system to overbuild renewables to meet LPSP
-    max_w_s = max(4000, int(load_kW * 10))  # Up to 10x load
-    max_o   = max(1500, int(load_kW * 2))   # Reduced OTEC allowance
-    max_v   = max(2000, int(load_kW * 4))   # Up to 4x load
-    max_b   = max(20000, int(load_kW * 50)) # Up to 50x load for massive BESS
+    max_w_s = max(4000, int(load_kW * 10))
+    max_o   = max(1500, int(load_kW * 2))
+    max_v   = max(2000, int(load_kW * 4))
+    max_b   = max(20000, int(load_kW * 50))
     
     step_w_s = max(500, int(np.ceil((max_w_s / 5) / 100) * 100))
     step_o   = max(500, int(np.ceil((max_o / 3) / 100) * 100))
@@ -27,7 +26,6 @@ def get_dynamic_grid(load_kW: float) -> dict:
         "wave_kW":   list(range(0, max_v + 1, step_v)), 
         "bess_kWh":  list(range(0, max_b + 1, step_b)),
     }
-
 
 def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float) -> dict | None:
     """Mathematically optimal sizing using SciPy HiGHS."""
@@ -43,23 +41,35 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
         v["cf_wec_net"].astype(float).values,
     ]
 
-    r = float(finance["discount_rate_real"])
     n_proj = float(finance["project_life_yr"])
-    crf_proj = economics.crf(r, n_proj)
+    r_nom = economics.get_nominal_rate(finance)
+    crf_proj = economics.crf(r_nom, n_proj)
+    
+    pi_opex = float(finance.get("inflation_rate_opex", 0.04))
+    pv_factor_opex = economics.growing_annuity_pv(r_nom, pi_opex, n_proj)
 
     def calc_a(name, is_solar=False, is_bess=False):
         c_base = float(tech.loc[name, "capex_island_INR"])
         lifetime = float(tech.loc[name, "lifetime_yr"])
-        crf_val = economics.crf(r, lifetime)
+        # Use nominal rate for asset lifetime CRF
+        crf_val = economics.crf(r_nom, lifetime)
+        
         if is_bess:
-            # Use consistent O&M
-            opex = c_base * float(tech.loc[name, "opex_pct_of_capex"])
+            opex_nominal = c_base * float(tech.loc[name, "opex_pct_of_capex"])
             repl_yr = float(finance["bess_replacement_year"])
-            repl_pv = c_base * float(finance["bess_replacement_cost_fraction"]) / (1+r)**repl_yr
-            return c_base * crf_val + opex + repl_pv * crf_proj - float(finance["bess_vgf_INR_per_kWh"]) * crf_proj
+            pi_bess = float(finance.get("inflation_rate_bess", -0.05))
+            repl_future = c_base * float(finance["bess_replacement_cost_fraction"]) * ((1+pi_bess)**repl_yr)
+            repl_pv = repl_future / ((1+r_nom)**repl_yr)
+            
+            # Annualized OPEX and Replacement
+            a = c_base * crf_val 
+            a += (opex_nominal * pv_factor_opex + repl_pv) * crf_proj
+            a -= float(finance["bess_vgf_INR_per_kWh"]) * crf_proj
+            return a
         else:
-            opex = float(tech.loc[name, "opex_INR_per_unit_yr"])
-            a = c_base * crf_val + opex
+            opex_nominal = float(tech.loc[name, "opex_INR_per_unit_yr"])
+            a = c_base * crf_val
+            a += opex_nominal * pv_factor_opex * crf_proj
             if is_solar:
                 a -= float(finance["fpv_cfa_subsidy_INR_per_kW"]) * crf_proj
             return a
@@ -70,8 +80,11 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
     a_v = calc_a("Wave")
     a_b = calc_a("BESS", is_bess=True)
     
-    # REDUCED PENALTY: High enough to force reliability, low enough to not overbuild OTEC
-    c_diesel = 500.0 
+    # Calculate true levelized EAC of Diesel (Year 1 fuel cost * PV factor * CRF)
+    pi_diesel = float(finance.get("inflation_rate_diesel", 0.07))
+    pv_factor_diesel = economics.growing_annuity_pv(r_nom, pi_diesel, n_proj)
+    c_diesel = float(finance["diesel_fuel_cost_INR_per_kWh"]) * pv_factor_diesel * crf_proj
+    
     c_curtail = 0.1 
 
     N = 5 + 9 * T
@@ -110,7 +123,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
     dod = float(finance["bess_depth_of_discharge"])
     rho = float(finance["bess_max_c_rate"])
     
-    # ADDED SELF-DISCHARGE to LP (scaled to monthly hours)
     sigma_hourly = 0.015
     for t in range(T):
         sigma_monthly = 1.0 - (1.0 - sigma_hourly) ** hours[t]
@@ -122,16 +134,12 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
         A_eq.append(row); b_eq.append(0)
 
     for t in range(T):
-        # SOC max limit
         row = np.zeros(N); row[idx_soc(t)] = 1; row[4] = -dod
         A_ub.append(row); b_ub.append(0)
-        # Charge limit
         row = np.zeros(N); row[idx_ch(t)] = 1; row[4] = -rho
         A_ub.append(row); b_ub.append(0)
-        # Discharge limit
         row = np.zeros(N); row[idx_dis(t)] = 1; row[4] = -rho
         A_ub.append(row); b_ub.append(0)
-        # Unmet limit
         row = np.zeros(N); row[idx_u(t)] = 1
         A_ub.append(row); b_ub.append(load_kW)
 
@@ -141,7 +149,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
     A_ub.append(row); b_ub.append(lpsp_target * load_kW * np.sum(hours))
 
     bounds = [(0, None)] * N
-    # WIDENED LP BOUNDS
     bounds[0] = (0, max(10000, load_kW * 20.0))  
     bounds[1] = (0, max(10000, load_kW * 20.0))  
     bounds[2] = (0, max(3000, load_kW * 3.0))   
@@ -232,11 +239,8 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
     infeasible = [r for r in results if not r.get("feasible", True)]
 
     def score(row):
-        # Pure economic ranking: Maximize inverse LCOE (cheapest wins)
-        # Small tie-breaker for CAPEX to favor less capital-intensive builds
         return (1.0 / max(row["lcoe"], 1e-6)) + 0.1 * (1.0 / max(row["capex_INR"] / 1e7, 1e-6))
 
-    # Sort ALL feasible results strictly by the economic score, ignoring whether they came from LP or Grid
     feasible_sorted = sorted(feasible, key=score, reverse=True)
     infeasible.sort(key=lambda r: r["lpsp"])
 

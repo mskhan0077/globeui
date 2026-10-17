@@ -48,9 +48,11 @@
   }
 
   function kpiCard(label, value, sub) {
-    return `<div class="kpi"><div class="kpi-label">${label}</div>
-            <div class="kpi-value">${value}</div>
-            <div class="kpi-sub">${sub || ""}</div></div>`;
+    return `<div class="kpi">
+              <div class="kpi-label">${label}</div>
+              <div class="kpi-value">${value}</div>
+              <div class="kpi-sub">${sub || ""}</div>
+            </div>`;
   }
 
   function renderKPIs(r) {
@@ -58,13 +60,16 @@
     const lpsp = rel.lpsp_hourly ?? rel.lpsp_annual ?? rel.lpsp_monthly;
     const inr = (x) => x.toLocaleString("en-IN", { maximumFractionDigits: 0 });
     const num = (x, d = 2) => Number(x).toFixed(d);
+    
+    const nomRate = e.nominal_discount_rate ? (e.nominal_discount_rate * 100).toFixed(2) : "N/A";
+
     els.kpis.innerHTML = [
       kpiCard("LCOE (RE only)", `₹${num(e.LCOE_RE_INR_per_kWh)}`, "per kWh delivered"),
       kpiCard("System cost", `₹${num(e.cost_of_service_INR_per_kWh)}`, "incl. diesel top-up"),
+      kpiCard("Nominal Rate", `${nomRate}%`, "WACC + Inflation"),
       kpiCard("PLF vs target", `${num(r.plf_target * 100, 1)}%`, `${inr(a.delivered_kWh / 1000)} MWh served`),
       kpiCard("LPSP", `${num(lpsp * 100)}%`, rel.lpsp_hourly != null ? "hourly" : "annual"),
       kpiCard("CO₂ avoided", `${inr(c.co2_avoided_t)} t`, "per year"),
-      kpiCard("Carbon credit", `₹${inr(c.carbon_credit_INR)}`, "per year"),
       kpiCard("CAPEX", `₹${num(e.capex_INR / 1e7, 1)} Cr`, "island-adjusted"),
       kpiCard("Unmet", `${inr(a.unmet_kWh / 1000)} MWh`, "diesel top-up"),
     ].join("");
@@ -97,8 +102,6 @@
 
   function renderRadar(techScores) {
     const cats = ["Resource", "CAPEX", "Reliability", "Sustainability"];
-    
-    // Map individual technologies to their specific chart divs
     const configs = [
         { key: "Wind", id: "chart-radar-wind", color: "#1f77b4" },
         { key: "Floating Solar PV", id: "chart-radar-fpv", color: "#ff7f0e" },
@@ -118,27 +121,15 @@
                 fill: "toself",
                 name: key,
                 line: { color: color },
-                // Add hover text to see exact scores
                 hovertemplate: "<b>%{theta}</b>: %{r:.1f}<extra></extra>"
             };
             
             Plotly.newPlot(id, [trace], {
                 polar: {
-                    radialaxis: { 
-                        range: [0, 100], 
-                        visible: true,
-                        tickfont: { size: 9 },
-                        angle: 90,       // Puts numbers at top to prevent overlap
-                        tickangle: 0
-                    },
-                    angularaxis: { 
-                        direction: "clockwise", 
-                        rotation: 90,
-                        tickfont: { size: 11 }
-                    },
+                    radialaxis: { range: [0, 100], visible: true, tickfont: { size: 9 }, angle: 90, tickangle: 0 },
+                    angularaxis: { direction: "clockwise", rotation: 90, tickfont: { size: 11 } },
                 },
                 showlegend: false,
-                // INCREASED MARGINS: Prevents cutting off "Reliability" and "CAPEX"
                 margin: { l: 60, r: 60, t: 30, b: 30 }, 
             }, { responsive: true, displaylogo: false });
         }
@@ -206,7 +197,6 @@
     document.getElementById("btn-export-csv").disabled = false;
     document.getElementById("btn-export-pdf").disabled = false;
 
-    // Inject Timezone badge
     const tzBadge = document.getElementById("timezone-badge");
     if (tzBadge && resp.result.timezone) {
         tzBadge.textContent = "(Timezone: " + resp.result.timezone + ")";
@@ -318,5 +308,27 @@
     document.getElementById("btn-export-pdf").addEventListener("click", () => {
       if (state.lastRunId) window.location.href = `/export/pdf/${state.lastRunId}`;
     });
+
+    // Modal Logic
+    const modal = document.getElementById("dcf-modal");
+    const btnOpen = document.getElementById("btn-open-dcf");
+    const btnClose = document.querySelector(".close-btn");
+
+    if (btnOpen && modal && btnClose) {
+      btnOpen.addEventListener("click", () => {
+        modal.classList.add("show");
+      });
+      
+      btnClose.addEventListener("click", () => {
+        modal.classList.remove("show");
+      });
+      
+      // Close when clicking outside the modal content
+      window.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modal.classList.remove("show");
+        }
+      });
+    }
   });
 })();

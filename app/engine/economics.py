@@ -1,5 +1,8 @@
-"""Annualized cost model."""
+"""Annualized cost model with Inflation and DCF."""
 from __future__ import annotations
+
+import numpy as np
+
 
 CAPACITY_TO_TECH = {
     "wind_kW":   "Wind",
@@ -12,6 +15,17 @@ CAPACITY_TO_TECH = {
 def crf(rate: float, years: float) -> float:
     """Capital recovery factor."""
     return rate * (1 + rate) ** years / ((1 + rate) ** years - 1)
+
+def growing_annuity_pv(rate_nom: float, rate_inf: float, years: float) -> float:
+    """Present value of a growing annuity (1 unit per year)."""
+    if abs(rate_nom - rate_inf) < 1e-6:
+        return years / (1 + rate_nom)
+    return (1 - ((1 + rate_inf) / (1 + rate_nom)) ** years) / (rate_nom - rate_inf)
+
+def get_nominal_rate(finance: dict) -> float:
+    r_real = float(finance["discount_rate_real"])
+    pi_gen = float(finance.get("inflation_rate_general", 0.05))
+    return (1 + r_real) * (1 + pi_gen) - 1
 
 def compute_capex(capacities: dict, tech, finance: dict) -> tuple[dict, float]:
     """Return ({cap_key: INR}, subsidy_INR)."""
@@ -37,11 +51,14 @@ def compute_annual_opex(capacities: dict, tech) -> float:
 
 def bess_replacement_pv(capex_bess_INR: float, finance: dict) -> float:
     """Present value of the one-time BESS replacement."""
-    return (
-        capex_bess_INR
-        * float(finance["bess_replacement_cost_fraction"])
-        / (1 + float(finance["discount_rate_real"])) ** float(finance["bess_replacement_year"])
-    )
+    r_nom = get_nominal_rate(finance)
+    pi_bess = float(finance.get("inflation_rate_bess", -0.05))
+    repl_yr = float(finance["bess_replacement_year"])
+    cost_fraction = float(finance["bess_replacement_cost_fraction"])
+    
+    # Future cost escalates (or deflates) over time
+    future_cost = capex_bess_INR * cost_fraction * ((1 + pi_bess) ** repl_yr)
+    return future_cost / ((1 + r_nom) ** repl_yr)
 
 def cost_metrics(
     capex: dict,
@@ -53,26 +70,41 @@ def cost_metrics(
     unmet_kWh: float,
     finance: dict,
 ) -> dict:
-    r = float(finance["discount_rate_real"])
     n = float(finance["project_life_yr"])
-    crf_val = crf(r, n)
+    r_nom = get_nominal_rate(finance)
+    crf_val = crf(r_nom, n)
 
     capex_total = sum(capex.values()) - subsidy_INR
-    a_cap = (capex_total + bess_repl_pv_INR) * crf_val
+    
+    # PV of OPEX (Escalating)
+    pi_opex = float(finance.get("inflation_rate_opex", 0.04))
+    pv_factor_opex = growing_annuity_pv(r_nom, pi_opex, n)
+    pv_opex = opex_annual_INR * pv_factor_opex
 
-    diesel_cost = unmet_kWh * float(finance["diesel_fuel_cost_INR_per_kWh"])
+    # PV of Diesel (Escalating)
+    pi_diesel = float(finance.get("inflation_rate_diesel", 0.07))
+    pv_factor_diesel = growing_annuity_pv(r_nom, pi_diesel, n)
+    pv_diesel = unmet_kWh * float(finance["diesel_fuel_cost_INR_per_kWh"]) * pv_factor_diesel
 
-    lcoe_re = (a_cap + opex_annual_INR) / max(delivered_kWh, 1e-9)
-    cos = (a_cap + opex_annual_INR + diesel_cost) / max(load_kWh, 1e-9)
+    # Total PV and EAC
+    total_pv = capex_total + bess_repl_pv_INR + pv_opex + pv_diesel
+    eac_total = total_pv * crf_val
+
+    # LCOE uses Equivalent Annual Cost / Annual Energy
+    lcoe_re = (capex_total + bess_repl_pv_INR) * crf_val + (pv_opex * crf_val)
+    lcoe_re = lcoe_re / max(delivered_kWh, 1e-9)
+    
+    cos = eac_total / max(load_kWh, 1e-9)
 
     return {
         "capex_INR": capex_total,
         "subsidy_INR": subsidy_INR,
-        "opex_annual_INR": opex_annual_INR,
+        "opex_annual_INR": opex_annual_INR, # Nominal Year 1
         "bess_repl_pv_INR": bess_repl_pv_INR,
-        "annualized_capital_INR": a_cap,
-        "diesel_fuel_cost_INR": diesel_cost,
+        "annualized_capital_INR": capex_total * crf_val,
+        "diesel_fuel_cost_INR": pv_diesel * crf_val, # Levelized annual diesel
         "LCOE_RE_INR_per_kWh": lcoe_re,
         "cost_of_service_INR_per_kWh": cos,
         "crf": crf_val,
+        "nominal_discount_rate": r_nom
     }

@@ -85,7 +85,6 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                 "unmet_kWh": hr_result["hourly_unmet"]
             }).groupby("month_num").sum()
             
-            # Reindex to safely fill missing months with 0 without breaking alignment
             df_agg = df_agg.reindex(monthly.index, fill_value=0.0)
             
             for col in df_agg.columns:
@@ -107,7 +106,6 @@ def evaluate(island: str, capacities: dict, dfs: dict,
     carb = carbon.carbon_metrics(annual["delivered_kWh"], finance)
 
     # Reliability Metrics
-        # Reliability Metrics
     lpsp_annual = annual["unmet_kWh"] / max(annual["load_kWh"], 1e-9)
     reliability = {
         "lpsp_annual": lpsp_annual, 
@@ -121,7 +119,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         reliability["lpsp_hourly"] = hr_result["lpsp"]
         reliability["coverage_hourly"] = 1.0 - hr_result["lpsp"]
 
-    # 7. Build Final Result
+    # Build Final Result
     result = {
         "island": island,
         "capacities": dict(capacities),
