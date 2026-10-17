@@ -1,12 +1,12 @@
 """Fetch real 8760 weather and marine data for ALL locations in local time."""
 import pandas as pd
+import numpy as np
 import requests
 import time
 from pathlib import Path
 
 def fetch_open_meteo_data(lat, lon, year="2023"):
     """Fetches 8760 hourly data in automatically resolved Local Time."""
-    # CRITICAL: timezone=auto resolves local time so solar aligns with local daylight
     url_weather = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={year}-01-01&end_date={year}-12-31&hourly=wind_speed_100m,shortwave_radiation,temperature_2m&timezone=auto&wind_speed_unit=ms"
     res_weather = requests.get(url_weather).json()
     
@@ -37,10 +37,13 @@ def fetch_open_meteo_data(lat, lon, year="2023"):
 
 def convert_to_capacity_factors(df):
     """Converts raw physics into Net Capacity Factors."""
+    
+    # Floating Solar PV
     STC_W_M2 = 1000.0
     df["cf_fpv"] = (df["ghi_w_m2"] / STC_W_M2) * 0.80 * (1 - (0.004 * (df["temp_c"] - 25).clip(lower=0)))
     df["cf_fpv"] = df["cf_fpv"].clip(lower=0.0, upper=1.0)
     
+    # Wind Turbine
     cut_in, rated, cut_out = 3.0, 11.0, 25.0
     def wind_curve(v):
         if v < cut_in or v > cut_out: return 0.0
@@ -48,10 +51,25 @@ def convert_to_capacity_factors(df):
         else: return ((v**3 - cut_in**3) / (rated**3 - cut_in**3))
     df["cf_wind"] = df["wind_speed_100m_ms"].apply(wind_curve) * 0.88 
     
+    # OTEC
     df["sst_proxy_c"] = df["temp_c"].rolling(window=24, min_periods=1).mean()
-    delta_t = df["sst_proxy_c"] - 4.0 
-    df["cf_otec"] = (((delta_t / 22.0)**2 - 0.30) / 0.70).clip(lower=0.0, upper=1.05) * 0.92
+    
+    deep_water_temp_c = 7.0 
+    delta_t = (df["sst_proxy_c"] - deep_water_temp_c).clip(lower=0.0)
+    
+    # Gross Output Factor scales with ΔT^2 (Heat transfer * Carnot efficiency)
+    gof = (delta_t / 22.0) ** 2
+    
+    # Parasitic load scales linearly with ΔT (Fixed pump flow rates)
+    parasitic = 0.30 * (delta_t / 22.0)
+    
+    # Net Output Factor cannot be negative
+    nof = (gof - parasitic).clip(lower=0.0)
+    
+    # Scale to 92% availability at the 22°C design point, and CLAMP to max 1.0
+    df["cf_otec"] = (nof * (0.92 / 0.70)).clip(lower=0.0, upper=1.0)
 
+    # 4. Wave Energy Converter
     df["wave_power_flux"] = 0.49 * (df["wave_height_m"]**2) * df["wave_period_s"]
     def wave_cf(row):
         h, j = row["wave_height_m"], row["wave_power_flux"]
