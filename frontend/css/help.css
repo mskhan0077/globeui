@@ -1,0 +1,96 @@
+/* "How to use" box on the left of the globe (fact bubbles are on the right): translucent #97b5d1 glass. */
+.help {
+  --help-tint: 151, 181, 209; /* #97b5d1 */
+  position: fixed;
+  top: calc(var(--menubar-bottom, 76px) + 12px); /* below the menu bar */
+  left: 16px;
+  z-index: 4; /* above the map, below the planner overlay */
+  width: min(330px, calc(100% - 32px));
+  max-height: calc(100% - var(--menubar-bottom, 76px) - 44px);
+  overflow-y: auto;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--help-tint), 0.55);
+  /* #97b5d1 tint over a dark base, so white text stays readable even over bright land. */
+  background:
+    linear-gradient(rgba(var(--help-tint), 0.3), rgba(var(--help-tint), 0.3)),
+    rgba(8, 18, 30, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  color: #f4f8fc;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); /* stays legible over bright land */
+  transition: opacity 0.4s ease, visibility 0s linear 0s;
+}
+
+/* Out of the way while the planner is open. */
+.place-overlay.is-visible ~ .help {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+}
+
+.help__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.help__title::-webkit-details-marker { display: none; }
+
+/* Fold indicator. */
+.help__title::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.2s ease;
+}
+
+.help details:not([open]) .help__title::after { transform: rotate(-45deg); }
+.help__title:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 4px; }
+
+.help__steps {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.help__steps li {
+  position: relative;
+  padding-left: 30px;
+  margin-top: 8px;
+  counter-increment: step;
+}
+
+/* Numbered badges. */
+.help__steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  text-shadow: none;
+  color: #0d2236;
+  background: rgb(var(--help-tint));
+}
+
+.help strong { font-weight: 600; color: #fff; }

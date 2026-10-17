@@ -1,0 +1,13 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Lakshadweep", "iso_a3": "IND-LD" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[71.5, 7.9], [71.5, 12.6], [74.2, 12.6], [74.2, 7.9], [71.5, 7.9]]]
+      }
+    }
+  ]
+}

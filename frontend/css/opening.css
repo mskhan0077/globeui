@@ -1,0 +1,141 @@
+/* Opening before the globe: intro (logo reveal) and the day/night island story.
+   Ported from BlenderEarth (src/styles/global.css, story-reference.css, story-scene.css),
+   scoped to .opening, in Helvetica like the ribbon. Markup in index.html, behaviour in js/story/opening.js. */
+
+/* ---------- shell: full screen above everything, fades out to the globe ---------- */
+.opening {
+  --navy: #041827;
+  --cyan: #55f2e8;
+  --muted: #99b8c9;
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100; /* above the menu bar (10) and the globe */
+  overflow: hidden auto;
+  background: var(--navy);
+  color: #f3faff;
+  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif; /* same as the ribbon (menubar.css) */
+  font-synthesis: none;
+  color-scheme: dark;
+  transition: opacity 0.8s ease; /* = OPENING.fadeMs in js/config.js */
+}
+.has-opening .opening, .opening.is-leaving { display: block; }
+.opening.is-leaving { opacity: 0; pointer-events: none; }
+.has-opening body { overflow: hidden; }
+
+.opening *, .opening *::before, .opening *::after { box-sizing: border-box; }
+.opening h1, .opening p { margin: 0; }
+.opening h1 { font-weight: 600; letter-spacing: -0.045em; }
+.opening p { line-height: 1.8; }
+.opening a { color: inherit; text-decoration: none; }
+.opening button { font: inherit; color: inherit; cursor: pointer; }
+.opening svg { flex-shrink: 0; }
+.opening a:focus-visible, .opening button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 5px; }
+.opening [hidden] { display: none !important; }
+
+.opening .button { display: inline-flex; justify-content: center; align-items: center; gap: 15px; min-height: 46px; padding: 12px 21px; border: 1px solid var(--cyan); border-radius: 5px; background: var(--cyan); color: #042232; font-size: 12px; font-weight: 700; transition: background 0.2s, transform 0.2s, box-shadow 0.2s; }
+.opening .button:hover { background: #a2fff5; transform: translateY(-2px); box-shadow: 0 8px 24px #34dcec20; }
+
+/* ---------- 1. intro ---------- */
+.intro {
+  position: absolute; inset: 0; z-index: 2;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  background: radial-gradient(ellipse at 50% 85%, #0d4961 0, transparent 60%), var(--navy);
+  transition: opacity 0.5s ease;
+}
+.intro.is-leaving { opacity: 0; pointer-events: none; }
+.intro-grid {
+  position: absolute; inset: -50%;
+  background-image: linear-gradient(#34dcec0e 1px, transparent 1px), linear-gradient(90deg, #34dcec0e 1px, transparent 1px);
+  background-size: 70px 70px;
+  transform: perspective(800px) rotateX(57deg) translateY(30%);
+  animation: opening-grid-emerge 2.6s ease-out both;
+}
+.intro-pulse { position: absolute; width: 400px; height: 400px; border: 1px solid #34dcec30; border-radius: 50%; animation: opening-pulse 2.6s ease-out both; box-shadow: 0 0 80px #34dcec10; }
+.intro-logo { font-size: clamp(58px, 12vw, 166px); letter-spacing: 0.09em; z-index: 1; animation: opening-reveal 1s 0.35s both; }
+.intro-logo span { color: var(--cyan); font-weight: 400; }
+.intro > p { font-size: clamp(11px, 1.5vw, 18px); color: #a1c7d4; letter-spacing: 0.045em; animation: opening-reveal 1s 0.8s both; z-index: 1; }
+.intro-skip { position: absolute; bottom: 35px; right: 4.4%; display: flex; align-items: center; gap: 12px; background: none; border: 0; font-size: 12px; padding: 10px; color: #d4e7ef; }
+
+/* ---------- 2. story: day/night island ---------- */
+.story {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 45% 35%, #0d4f6055, transparent 65%), var(--navy);
+  animation: opening-fade-in 0.6s ease both;
+}
+.story-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(#54879805 1px, transparent 1px), linear-gradient(90deg, #54879805 1px, transparent 1px);
+  background-size: 70px 70px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+.story-visual { position: absolute; z-index: 1; inset: var(--menubar-bottom, 76px) 0 0; pointer-events: none; } /* below the ribbon */
+.story-scene { position: absolute; inset: 0; }
+
+.scene-divider { position: absolute; top: 11%; bottom: 13%; width: 1px; background: linear-gradient(transparent, #c8f9ec99 20%, #c8f9ec99 80%, transparent); z-index: 2; pointer-events: none; transition: left 0.08s linear; }
+.scene-divider > button { position: absolute; left: -20px; top: 38%; display: grid; place-items: center; width: 41px; height: 55px; padding: 0; background: #103a4ac9; border: 1px solid #9df0e37a; box-shadow: 0 0 24px #001f2e66; border-radius: 24px; color: #cafff3; cursor: ew-resize; pointer-events: auto; touch-action: none; backdrop-filter: blur(8px); }
+.scene-divider > button { animation: opening-handle-nudge 2.4s ease-in-out 1s infinite; }
+
+/* "slide right" hint beside the handle: chevrons that light up left to right */
+.divider-hint {
+  position: absolute; left: 30px; top: calc(38% + 27px); transform: translateY(-50%);
+  display: flex; align-items: center; gap: 10px;
+  color: var(--cyan); white-space: nowrap; pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.divider-hint__arrows { display: flex; filter: drop-shadow(0 0 6px #55f2e899); }
+.divider-hint__arrows svg { width: 22px; height: 22px; margin-right: -9px; opacity: 0.2; animation: opening-chevron 1.4s ease-in-out infinite; }
+.divider-hint__arrows svg:nth-child(2) { animation-delay: 0.18s; }
+.divider-hint__arrows svg:nth-child(3) { animation-delay: 0.36s; }
+.divider-hint__label { margin-left: 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #cafff3; text-shadow: 0 1px 6px #00111c; }
+.opening.has-slid .divider-hint { opacity: 0; }
+.opening.has-slid .scene-divider > button { animation: none; }
+
+/* the single call to action, lower centre */
+.opening .story-explore {
+  position: absolute; z-index: 3; left: 50%; bottom: 7%;
+  transform: translateX(-50%);
+  border-radius: 30px; padding: 14px 26px; font-size: 13px; letter-spacing: 0.02em; white-space: nowrap;
+  box-shadow: 0 10px 40px #00111c55;
+}
+.opening .story-explore:hover { transform: translate(-50%, -2px); }
+
+/* island scene (js/story/island-scene.js): SVG placeholder, then the WebGL canvas fades in */
+.island-scene { isolation: isolate; overflow: hidden; pointer-events: none; }
+.island-scene__canvas, .island-scene__fallback { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.island-scene__canvas { z-index: 1; opacity: 0; transition: opacity 1s ease; }
+.island-scene.is-ready .island-scene__canvas { opacity: 1; }
+.island-scene__fallback { opacity: 1; transition: opacity 0.65s ease; }
+.island-scene.is-ready .island-scene__fallback { opacity: 0; }
+.island-scene__fallback-note { position: absolute; z-index: 2; left: 50%; bottom: 1rem; transform: translateX(-50%); max-width: calc(100% - 2rem); padding: 0.5rem 0.8rem; border: 1px solid #8ec3c52b; border-radius: 5px; background: #051f2de6; color: #a8c2cb; font-size: 11px; text-align: center; letter-spacing: 0.02em; }
+
+@keyframes opening-reveal { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes opening-pulse { from { transform: scale(0.4); opacity: 0; } 40% { opacity: 1; } to { transform: scale(2.8); opacity: 0; } }
+@keyframes opening-grid-emerge { from { opacity: 0; } to { opacity: 1; } }
+@keyframes opening-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes opening-chevron { 0%, 100% { opacity: 0.2; transform: translateX(0); } 40% { opacity: 1; transform: translateX(4px); } }
+@keyframes opening-handle-nudge { 0%, 60%, 100% { transform: translateX(0); } 70% { transform: translateX(7px); } 80% { transform: translateX(0); } 88% { transform: translateX(4px); } }
+
+/* ---------- responsive ---------- */
+@media (min-width: 1600px) {
+  .opening .story-explore { font-size: 15px; padding: 16px 32px; }
+}
+@media (max-width: 800px) {
+  .scene-divider { top: 15%; bottom: 12%; }
+  .scene-divider > button { top: 35%; height: 47px; width: 35px; left: -17px; }
+  .divider-hint { left: 26px; top: calc(35% + 23px); }
+  .divider-hint__label { font-size: 10px; letter-spacing: 0.12em; }
+  .opening .story-explore { bottom: 6%; }
+}
+@media (max-width: 560px) { /* stack the label under the arrows so it fits on the night side */
+  .divider-hint { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .divider-hint__label { margin-left: 0; font-size: 9px; letter-spacing: 0.1em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .opening *, .opening *::before, .opening *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .opening { transition: none; }
+  .divider-hint__arrows svg { opacity: 0.85; }
+}

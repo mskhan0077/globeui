@@ -1,0 +1,13 @@
+island,month_num,month,hours,cf_otec
+Brest,1.0,Jan,744.0,0.0
+Brest,2.0,Feb,672.0,0.0
+Brest,3.0,Mar,744.0,0.0
+Brest,4.0,Apr,720.0,0.0
+Brest,5.0,May,744.0,0.0005
+Brest,6.0,Jun,720.0,0.0822
+Brest,7.0,Jul,744.0,0.1112
+Brest,8.0,Aug,744.0,0.1096
+Brest,9.0,Sep,720.0,0.1337
+Brest,10.0,Oct,744.0,0.0707
+Brest,11.0,Nov,720.0,0.0045
+Brest,12.0,Dec,744.0,0.0001

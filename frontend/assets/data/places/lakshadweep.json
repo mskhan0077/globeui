@@ -1,0 +1,321 @@
+{
+  "_generated": "by scripts/build_places.py from data/source/BlueGrid_Lakshadweep_Dummy_Data.xlsx; do not edit by hand",
+  "places": [
+    {
+      "id": "cherbaniani-reef",
+      "name": "Cherbaniani Reef",
+      "lat": 12.2943,
+      "lng": 71.8817,
+      "parent": "IND-LD",
+      "zoomHeight": 15000
+    },
+    {
+      "id": "cherbaniani-north",
+      "name": "Cherbaniani North",
+      "lat": 12.305,
+      "lng": 71.885,
+      "parent": "cherbaniani-reef"
+    },
+    {
+      "id": "cherbaniani-middle",
+      "name": "Cherbaniani Middle",
+      "lat": 12.295,
+      "lng": 71.882,
+      "parent": "cherbaniani-reef"
+    },
+    {
+      "id": "cherbaniani-south",
+      "name": "Cherbaniani South",
+      "lat": 12.283,
+      "lng": 71.878,
+      "parent": "cherbaniani-reef"
+    },
+    {
+      "id": "byramgore-reef",
+      "name": "Byramgore Reef",
+      "lat": 11.849,
+      "lng": 71.8345,
+      "parent": "IND-LD",
+      "zoomHeight": 15000
+    },
+    {
+      "id": "byramgore-middle",
+      "name": "Byramgore Middle",
+      "lat": 11.87,
+      "lng": 71.83,
+      "parent": "byramgore-reef"
+    },
+    {
+      "id": "byramgore-south",
+      "name": "Byramgore South",
+      "lat": 11.828,
+      "lng": 71.839,
+      "parent": "byramgore-reef"
+    },
+    {
+      "id": "chetlat",
+      "name": "Chetlat",
+      "lat": 11.693,
+      "lng": 72.71,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "bitra",
+      "name": "Bitra",
+      "lat": 11.6,
+      "lng": 72.18,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "kiltan",
+      "name": "Kiltan",
+      "lat": 11.4833,
+      "lng": 73.0,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "kadmat",
+      "name": "Kadmat",
+      "lat": 11.2236,
+      "lng": 72.7766,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "perumal-par",
+      "name": "Perumal Par",
+      "lat": 11.1857,
+      "lng": 72.0958,
+      "parent": "IND-LD",
+      "zoomHeight": 17000
+    },
+    {
+      "id": "perumal-par-north",
+      "name": "Perumal Par North",
+      "lat": 11.209,
+      "lng": 72.104,
+      "parent": "perumal-par"
+    },
+    {
+      "id": "perumal-par-middle",
+      "name": "Perumal Par Middle",
+      "lat": 11.198,
+      "lng": 72.096,
+      "parent": "perumal-par"
+    },
+    {
+      "id": "perumal-par-south",
+      "name": "Perumal Par South",
+      "lat": 11.15,
+      "lng": 72.0875,
+      "parent": "perumal-par"
+    },
+    {
+      "id": "amini",
+      "name": "Amini",
+      "lat": 11.1237,
+      "lng": 72.7262,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "pitti-bird-island",
+      "name": "Pitti (Bird Island)",
+      "lat": 10.833,
+      "lng": 72.633,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "bangaram-atoll",
+      "name": "Bangaram Atoll",
+      "lat": 10.9472,
+      "lng": 72.3115,
+      "parent": "IND-LD",
+      "zoomHeight": 17000
+    },
+    {
+      "id": "parali-i-eroded-2017",
+      "name": "Parali I (eroded 2017)",
+      "lat": 10.958,
+      "lng": 72.334,
+      "parent": "bangaram-atoll"
+    },
+    {
+      "id": "parali-ii",
+      "name": "Parali II",
+      "lat": 10.955,
+      "lng": 72.33,
+      "parent": "bangaram-atoll"
+    },
+    {
+      "id": "parali-iii",
+      "name": "Parali III",
+      "lat": 10.952,
+      "lng": 72.326,
+      "parent": "bangaram-atoll"
+    },
+    {
+      "id": "thinnakara",
+      "name": "Thinnakara",
+      "lat": 10.945,
+      "lng": 72.315,
+      "parent": "bangaram-atoll"
+    },
+    {
+      "id": "bangaram",
+      "name": "Bangaram",
+      "lat": 10.94,
+      "lng": 72.286,
+      "parent": "bangaram-atoll"
+    },
+    {
+      "id": "south-bangaram-cay",
+      "name": "South Bangaram Cay",
+      "lat": 10.933,
+      "lng": 72.278,
+      "parent": "bangaram-atoll"
+    },
+    {
+      "id": "agatti-atoll",
+      "name": "Agatti Atoll",
+      "lat": 10.8712,
+      "lng": 72.1998,
+      "parent": "IND-LD",
+      "zoomHeight": 15000
+    },
+    {
+      "id": "kalpitti",
+      "name": "Kalpitti",
+      "lat": 10.885,
+      "lng": 72.205,
+      "parent": "agatti-atoll"
+    },
+    {
+      "id": "agatti",
+      "name": "Agatti",
+      "lat": 10.8573,
+      "lng": 72.1946,
+      "parent": "agatti-atoll"
+    },
+    {
+      "id": "andrott",
+      "name": "Andrott",
+      "lat": 10.8167,
+      "lng": 73.68,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "kavaratti",
+      "name": "Kavaratti",
+      "lat": 10.5626,
+      "lng": 72.6369,
+      "parent": "IND-LD"
+    },
+    {
+      "id": "kalpeni-atoll",
+      "name": "Kalpeni Atoll",
+      "lat": 10.0876,
+      "lng": 73.6424,
+      "parent": "IND-LD",
+      "zoomHeight": 22000
+    },
+    {
+      "id": "cheriyam",
+      "name": "Cheriyam",
+      "lat": 10.142,
+      "lng": 73.664,
+      "parent": "kalpeni-atoll"
+    },
+    {
+      "id": "kodithala",
+      "name": "Kodithala",
+      "lat": 10.11,
+      "lng": 73.66,
+      "parent": "kalpeni-atoll"
+    },
+    {
+      "id": "kalpeni",
+      "name": "Kalpeni",
+      "lat": 10.076,
+      "lng": 73.646,
+      "parent": "kalpeni-atoll"
+    },
+    {
+      "id": "pitti-kalpeni",
+      "name": "Pitti (Kalpeni)",
+      "lat": 10.074,
+      "lng": 73.628,
+      "parent": "kalpeni-atoll"
+    },
+    {
+      "id": "koomel",
+      "name": "Koomel",
+      "lat": 10.073,
+      "lng": 73.635,
+      "parent": "kalpeni-atoll"
+    },
+    {
+      "id": "tilakkam-east",
+      "name": "Tilakkam East",
+      "lat": 10.069,
+      "lng": 73.633,
+      "parent": "kalpeni-atoll"
+    },
+    {
+      "id": "tilakkam-west",
+      "name": "Tilakkam West",
+      "lat": 10.069,
+      "lng": 73.631,
+      "parent": "kalpeni-atoll"
+    },
+    {
+      "id": "suheli-par",
+      "name": "Suheli Par",
+      "lat": 10.0867,
+      "lng": 72.2733,
+      "parent": "IND-LD",
+      "zoomHeight": 21000
+    },
+    {
+      "id": "suheli-cheriyakara",
+      "name": "Suheli Cheriyakara",
+      "lat": 10.12,
+      "lng": 72.3,
+      "parent": "suheli-par"
+    },
+    {
+      "id": "suheli-indira-shastri-dweep",
+      "name": "Suheli Indira-Shastri Dweep",
+      "lat": 10.09,
+      "lng": 72.25,
+      "parent": "suheli-par"
+    },
+    {
+      "id": "suheli-valiyakara",
+      "name": "Suheli Valiyakara",
+      "lat": 10.05,
+      "lng": 72.27,
+      "parent": "suheli-par"
+    },
+    {
+      "id": "minicoy-atoll",
+      "name": "Minicoy Atoll",
+      "lat": 8.2767,
+      "lng": 73.035,
+      "parent": "IND-LD",
+      "zoomHeight": 15000
+    },
+    {
+      "id": "minicoy",
+      "name": "Minicoy",
+      "lat": 8.2833,
+      "lng": 73.05,
+      "parent": "minicoy-atoll"
+    },
+    {
+      "id": "viringili",
+      "name": "Viringili",
+      "lat": 8.27,
+      "lng": 73.02,
+      "parent": "minicoy-atoll"
+    }
+  ]
+}

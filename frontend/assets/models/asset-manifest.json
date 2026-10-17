@@ -1,0 +1,20 @@
+{
+  "generator": "Blender 5.2.2 LTS",
+  "source": "tools/build_blender_assets.py",
+  "editable": "public/models/blue-grid-energy-kit.blend",
+  "runtime": "public/models/blue-grid-energy-kit.glb",
+  "mesh_objects": 47,
+  "evaluated_mesh_triangles": 19460,
+  "glb_bytes": 1360004,
+  "contents": [
+    "3 offshore wind turbines with named rotors",
+    "2 floating photovoltaic rafts",
+    "3 battery storage containers",
+    "OTEC platform and seawater intake",
+    "5 wave buoys",
+    "community rooftop PV",
+    "distribution cables"
+  ],
+  "license": "Original artwork for BLUE GRID; no third-party assets",
+  "scientific_status": "Artistic concept; not engineering specifications or simulated results"
+}

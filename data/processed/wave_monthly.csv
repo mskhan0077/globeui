@@ -1,0 +1,433 @@
+island,month_num,month,season,hours,hs_m,te_s,mean_wave_dir_deg,wave_power_kW_per_m,cf_wec_gross,cf_wec_net,energy_kWh_per_kW_net
+Cherbaniani North,1.0,Jan,NE monsoon / winter,744.0,1.37,6.5,320.0,6.0,0.1445,0.13,96.7
+Cherbaniani North,2.0,Feb,NE monsoon / winter,672.0,1.27,6.3,310.0,5.0,0.1203,0.1083,72.8
+Cherbaniani North,3.0,Mar,Pre-monsoon,744.0,1.28,6.2,300.0,5.0,0.1193,0.1074,79.9
+Cherbaniani North,4.0,Apr,Pre-monsoon,720.0,1.37,6.5,290.0,6.0,0.1439,0.1295,93.2
+Cherbaniani North,5.0,May,Pre-monsoon,744.0,1.81,7.5,260.0,12.0,0.2865,0.2578,191.8
+Cherbaniani North,6.0,Jun,SW monsoon,720.0,2.64,8.8,245.0,30.0,0.6674,0.6007,432.5
+Cherbaniani North,7.0,Jul,SW monsoon,744.0,2.78,9.0,250.0,34.0,0.7307,0.6576,489.3
+Cherbaniani North,8.0,Aug,SW monsoon,744.0,2.55,8.8,255.0,28.0,0.634,0.5706,424.5
+Cherbaniani North,9.0,Sep,SW monsoon,720.0,2.1,8.3,265.0,18.0,0.4315,0.3884,279.6
+Cherbaniani North,10.0,Oct,Post-monsoon,744.0,1.53,7.0,290.0,8.0,0.1917,0.1726,128.4
+Cherbaniani North,11.0,Nov,Post-monsoon,720.0,1.36,6.6,320.0,6.0,0.144,0.1296,93.3
+Cherbaniani North,12.0,Dec,NE monsoon / winter,744.0,1.37,6.5,330.0,6.0,0.1441,0.1297,96.5
+Cherbaniani Middle,1.0,Jan,NE monsoon / winter,744.0,1.37,6.5,320.0,6.0,0.1439,0.1295,96.4
+Cherbaniani Middle,2.0,Feb,NE monsoon / winter,672.0,1.27,6.3,310.0,5.0,0.1206,0.1085,72.9
+Cherbaniani Middle,3.0,Mar,Pre-monsoon,744.0,1.28,6.2,300.0,5.0,0.1196,0.1076,80.1
+Cherbaniani Middle,4.0,Apr,Pre-monsoon,720.0,1.37,6.5,290.0,6.0,0.1435,0.1291,93.0
+Cherbaniani Middle,5.0,May,Pre-monsoon,744.0,1.81,7.5,260.0,12.0,0.2886,0.2598,193.3
+Cherbaniani Middle,6.0,Jun,SW monsoon,720.0,2.64,8.8,245.0,30.0,0.6678,0.601,432.8
+Cherbaniani Middle,7.0,Jul,SW monsoon,744.0,2.78,9.0,250.0,34.0,0.7305,0.6575,489.2
+Cherbaniani Middle,8.0,Aug,SW monsoon,744.0,2.55,8.8,255.0,28.0,0.6351,0.5716,425.2
+Cherbaniani Middle,9.0,Sep,SW monsoon,720.0,2.1,8.3,265.0,18.0,0.4269,0.3842,276.6
+Cherbaniani Middle,10.0,Oct,Post-monsoon,744.0,1.53,7.0,290.0,8.0,0.1912,0.1721,128.0
+Cherbaniani Middle,11.0,Nov,Post-monsoon,720.0,1.36,6.6,320.0,6.0,0.1447,0.1303,93.8
+Cherbaniani Middle,12.0,Dec,NE monsoon / winter,744.0,1.37,6.5,330.0,6.0,0.1441,0.1297,96.5
+Cherbaniani South,1.0,Jan,NE monsoon / winter,744.0,1.37,6.5,320.0,6.0,0.1438,0.1294,96.3
+Cherbaniani South,2.0,Feb,NE monsoon / winter,672.0,1.27,6.3,310.0,5.0,0.1197,0.1077,72.4
+Cherbaniani South,3.0,Mar,Pre-monsoon,744.0,1.28,6.2,300.0,5.0,0.1202,0.1081,80.5
+Cherbaniani South,4.0,Apr,Pre-monsoon,720.0,1.37,6.5,290.0,6.0,0.1438,0.1294,93.2
+Cherbaniani South,5.0,May,Pre-monsoon,744.0,1.81,7.5,260.0,12.0,0.2854,0.2568,191.1
+Cherbaniani South,6.0,Jun,SW monsoon,720.0,2.64,8.8,245.0,30.0,0.6686,0.6018,433.3
+Cherbaniani South,7.0,Jul,SW monsoon,744.0,2.78,9.0,250.0,34.0,0.7305,0.6575,489.1
+Cherbaniani South,8.0,Aug,SW monsoon,744.0,2.55,8.8,255.0,28.0,0.6322,0.569,423.3
+Cherbaniani South,9.0,Sep,SW monsoon,720.0,2.1,8.3,265.0,18.0,0.4291,0.3862,278.1
+Cherbaniani South,10.0,Oct,Post-monsoon,744.0,1.53,7.0,290.0,8.0,0.1921,0.1729,128.6
+Cherbaniani South,11.0,Nov,Post-monsoon,720.0,1.36,6.6,320.0,6.0,0.1441,0.1297,93.4
+Cherbaniani South,12.0,Dec,NE monsoon / winter,744.0,1.37,6.5,330.0,6.0,0.1442,0.1298,96.6
+Byramgore Middle,1.0,Jan,NE monsoon / winter,744.0,1.37,6.5,320.0,6.0,0.1445,0.1301,96.8
+Byramgore Middle,2.0,Feb,NE monsoon / winter,672.0,1.27,6.3,310.0,5.0,0.1202,0.1082,72.7
+Byramgore Middle,3.0,Mar,Pre-monsoon,744.0,1.28,6.2,300.0,5.0,0.1201,0.1081,80.4
+Byramgore Middle,4.0,Apr,Pre-monsoon,720.0,1.37,6.5,290.0,6.0,0.1444,0.1299,93.6
+Byramgore Middle,5.0,May,Pre-monsoon,744.0,1.81,7.5,260.0,12.0,0.2879,0.2591,192.7
+Byramgore Middle,6.0,Jun,SW monsoon,720.0,2.64,8.8,245.0,30.0,0.6667,0.6,432.0
+Byramgore Middle,7.0,Jul,SW monsoon,744.0,2.78,9.0,250.0,34.0,0.7303,0.6572,489.0
+Byramgore Middle,8.0,Aug,SW monsoon,744.0,2.55,8.8,255.0,28.0,0.6348,0.5713,425.1
+Byramgore Middle,9.0,Sep,SW monsoon,720.0,2.1,8.3,265.0,18.0,0.4286,0.3858,277.8
+Byramgore Middle,10.0,Oct,Post-monsoon,744.0,1.53,7.0,290.0,8.0,0.1923,0.1731,128.8
+Byramgore Middle,11.0,Nov,Post-monsoon,720.0,1.36,6.6,320.0,6.0,0.1442,0.1298,93.5
+Byramgore Middle,12.0,Dec,NE monsoon / winter,744.0,1.37,6.5,330.0,6.0,0.1449,0.1304,97.0
+Byramgore South,1.0,Jan,NE monsoon / winter,744.0,1.37,6.5,320.0,6.0,0.1442,0.1298,96.5
+Byramgore South,2.0,Feb,NE monsoon / winter,672.0,1.27,6.3,310.0,5.0,0.1204,0.1083,72.8
+Byramgore South,3.0,Mar,Pre-monsoon,744.0,1.28,6.2,300.0,5.0,0.1197,0.1077,80.2
+Byramgore South,4.0,Apr,Pre-monsoon,720.0,1.37,6.5,290.0,6.0,0.1441,0.1297,93.4
+Byramgore South,5.0,May,Pre-monsoon,744.0,1.81,7.5,260.0,12.0,0.2889,0.2601,193.5
+Byramgore South,6.0,Jun,SW monsoon,720.0,2.64,8.8,245.0,30.0,0.6687,0.6019,433.3
+Byramgore South,7.0,Jul,SW monsoon,744.0,2.78,9.0,250.0,34.0,0.7329,0.6596,490.7
+Byramgore South,8.0,Aug,SW monsoon,744.0,2.55,8.8,255.0,28.0,0.6352,0.5717,425.4
+Byramgore South,9.0,Sep,SW monsoon,720.0,2.1,8.3,265.0,18.0,0.4285,0.3856,277.7
+Byramgore South,10.0,Oct,Post-monsoon,744.0,1.53,7.0,290.0,8.0,0.1913,0.1722,128.1
+Byramgore South,11.0,Nov,Post-monsoon,720.0,1.36,6.6,320.0,6.0,0.1442,0.1298,93.4
+Byramgore South,12.0,Dec,NE monsoon / winter,744.0,1.37,6.5,330.0,6.0,0.1441,0.1297,96.5
+Chetlat,1.0,Jan,NE monsoon / winter,744.0,1.32,6.5,320.0,5.52,0.1328,0.1196,88.9
+Chetlat,2.0,Feb,NE monsoon / winter,672.0,1.22,6.3,310.0,4.6,0.1104,0.0994,66.8
+Chetlat,3.0,Mar,Pre-monsoon,744.0,1.23,6.2,300.0,4.6,0.1114,0.1003,74.6
+Chetlat,4.0,Apr,Pre-monsoon,720.0,1.32,6.5,290.0,5.52,0.1323,0.119,85.7
+Chetlat,5.0,May,Pre-monsoon,744.0,1.73,7.5,260.0,11.04,0.2658,0.2392,178.0
+Chetlat,6.0,Jun,SW monsoon,720.0,2.53,8.8,245.0,27.6,0.628,0.5652,406.9
+Chetlat,7.0,Jul,SW monsoon,744.0,2.66,9.0,250.0,31.28,0.6931,0.6238,464.1
+Chetlat,8.0,Aug,SW monsoon,744.0,2.44,8.8,255.0,25.76,0.5911,0.532,395.8
+Chetlat,9.0,Sep,SW monsoon,720.0,2.02,8.3,265.0,16.56,0.3943,0.3549,255.5
+Chetlat,10.0,Oct,Post-monsoon,744.0,1.46,7.0,290.0,7.36,0.1769,0.1592,118.4
+Chetlat,11.0,Nov,Post-monsoon,720.0,1.31,6.6,320.0,5.52,0.132,0.1188,85.5
+Chetlat,12.0,Dec,NE monsoon / winter,744.0,1.32,6.5,330.0,5.52,0.132,0.1188,88.4
+Bitra,1.0,Jan,NE monsoon / winter,744.0,1.34,6.5,320.0,5.7,0.137,0.1233,91.7
+Bitra,2.0,Feb,NE monsoon / winter,672.0,1.24,6.3,310.0,4.75,0.1138,0.1024,68.8
+Bitra,3.0,Mar,Pre-monsoon,744.0,1.25,6.2,300.0,4.75,0.1141,0.1027,76.4
+Bitra,4.0,Apr,Pre-monsoon,720.0,1.34,6.5,290.0,5.7,0.1366,0.1229,88.5
+Bitra,5.0,May,Pre-monsoon,744.0,1.76,7.5,260.0,11.4,0.2749,0.2474,184.1
+Bitra,6.0,Jun,SW monsoon,720.0,2.57,8.8,245.0,28.5,0.6418,0.5776,415.9
+Bitra,7.0,Jul,SW monsoon,744.0,2.71,9.0,250.0,32.3,0.7072,0.6365,473.5
+Bitra,8.0,Aug,SW monsoon,744.0,2.48,8.8,255.0,26.6,0.6092,0.5482,407.9
+Bitra,9.0,Sep,SW monsoon,720.0,2.05,8.3,265.0,17.1,0.4091,0.3682,265.1
+Bitra,10.0,Oct,Post-monsoon,744.0,1.49,7.0,290.0,7.6,0.1826,0.1643,122.2
+Bitra,11.0,Nov,Post-monsoon,720.0,1.33,6.6,320.0,5.7,0.1366,0.123,88.5
+Bitra,12.0,Dec,NE monsoon / winter,744.0,1.34,6.5,330.0,5.7,0.137,0.1233,91.7
+Kiltan,1.0,Jan,NE monsoon / winter,744.0,1.3,6.5,320.0,5.4,0.1298,0.1168,86.9
+Kiltan,2.0,Feb,NE monsoon / winter,672.0,1.21,6.3,310.0,4.5,0.1082,0.0974,65.5
+Kiltan,3.0,Mar,Pre-monsoon,744.0,1.22,6.2,300.0,4.5,0.1082,0.0974,72.5
+Kiltan,4.0,Apr,Pre-monsoon,720.0,1.3,6.5,290.0,5.4,0.1292,0.1163,83.7
+Kiltan,5.0,May,Pre-monsoon,744.0,1.71,7.5,260.0,10.8,0.2575,0.2318,172.4
+Kiltan,6.0,Jun,SW monsoon,720.0,2.5,8.8,245.0,27.0,0.6198,0.5579,401.7
+Kiltan,7.0,Jul,SW monsoon,744.0,2.63,9.0,250.0,30.6,0.6775,0.6097,453.7
+Kiltan,8.0,Aug,SW monsoon,744.0,2.42,8.8,255.0,25.2,0.5852,0.5267,391.9
+Kiltan,9.0,Sep,SW monsoon,720.0,2.0,8.3,265.0,16.2,0.3855,0.347,249.8
+Kiltan,10.0,Oct,Post-monsoon,744.0,1.45,7.0,290.0,7.2,0.173,0.1557,115.9
+Kiltan,11.0,Nov,Post-monsoon,720.0,1.29,6.6,320.0,5.4,0.1292,0.1163,83.7
+Kiltan,12.0,Dec,NE monsoon / winter,744.0,1.3,6.5,330.0,5.4,0.1295,0.1165,86.7
+Kadmat,1.0,Jan,NE monsoon / winter,744.0,1.3,6.5,320.0,5.4,0.1293,0.1164,86.6
+Kadmat,2.0,Feb,NE monsoon / winter,672.0,1.21,6.3,310.0,4.5,0.1081,0.0973,65.4
+Kadmat,3.0,Mar,Pre-monsoon,744.0,1.22,6.2,300.0,4.5,0.1079,0.0971,72.2
+Kadmat,4.0,Apr,Pre-monsoon,720.0,1.3,6.5,290.0,5.4,0.1291,0.1162,83.7
+Kadmat,5.0,May,Pre-monsoon,744.0,1.71,7.5,260.0,10.8,0.2585,0.2326,173.1
+Kadmat,6.0,Jun,SW monsoon,720.0,2.5,8.8,245.0,27.0,0.6165,0.5549,399.5
+Kadmat,7.0,Jul,SW monsoon,744.0,2.63,9.0,250.0,30.6,0.6807,0.6127,455.8
+Kadmat,8.0,Aug,SW monsoon,744.0,2.42,8.8,255.0,25.2,0.5839,0.5255,391.0
+Kadmat,9.0,Sep,SW monsoon,720.0,2.0,8.3,265.0,16.2,0.3859,0.3474,250.1
+Kadmat,10.0,Oct,Post-monsoon,744.0,1.45,7.0,290.0,7.2,0.1727,0.1555,115.7
+Kadmat,11.0,Nov,Post-monsoon,720.0,1.29,6.6,320.0,5.4,0.1296,0.1166,84.0
+Kadmat,12.0,Dec,NE monsoon / winter,744.0,1.3,6.5,330.0,5.4,0.1297,0.1167,86.8
+Perumal Par North,1.0,Jan,NE monsoon / winter,744.0,1.36,6.5,320.0,5.88,0.1423,0.1281,95.3
+Perumal Par North,2.0,Feb,NE monsoon / winter,672.0,1.26,6.3,310.0,4.9,0.1178,0.106,71.2
+Perumal Par North,3.0,Mar,Pre-monsoon,744.0,1.27,6.2,300.0,4.9,0.1182,0.1064,79.1
+Perumal Par North,4.0,Apr,Pre-monsoon,720.0,1.36,6.5,290.0,5.88,0.1414,0.1272,91.6
+Perumal Par North,5.0,May,Pre-monsoon,744.0,1.79,7.5,260.0,11.76,0.2809,0.2528,188.1
+Perumal Par North,6.0,Jun,SW monsoon,720.0,2.61,8.8,245.0,29.4,0.6565,0.5909,425.4
+Perumal Par North,7.0,Jul,SW monsoon,744.0,2.75,9.0,250.0,33.32,0.7243,0.6518,485.0
+Perumal Par North,8.0,Aug,SW monsoon,744.0,2.52,8.8,255.0,27.44,0.6246,0.5622,418.2
+Perumal Par North,9.0,Sep,SW monsoon,720.0,2.08,8.3,265.0,17.64,0.4172,0.3755,270.3
+Perumal Par North,10.0,Oct,Post-monsoon,744.0,1.51,7.0,290.0,7.84,0.188,0.1692,125.9
+Perumal Par North,11.0,Nov,Post-monsoon,720.0,1.35,6.6,320.0,5.88,0.1405,0.1264,91.0
+Perumal Par North,12.0,Dec,NE monsoon / winter,744.0,1.36,6.5,330.0,5.88,0.141,0.1269,94.4
+Perumal Par Middle,1.0,Jan,NE monsoon / winter,744.0,1.36,6.5,320.0,5.88,0.1409,0.1268,94.4
+Perumal Par Middle,2.0,Feb,NE monsoon / winter,672.0,1.26,6.3,310.0,4.9,0.1176,0.1059,71.1
+Perumal Par Middle,3.0,Mar,Pre-monsoon,744.0,1.27,6.2,300.0,4.9,0.1176,0.1058,78.7
+Perumal Par Middle,4.0,Apr,Pre-monsoon,720.0,1.36,6.5,290.0,5.88,0.1415,0.1274,91.7
+Perumal Par Middle,5.0,May,Pre-monsoon,744.0,1.79,7.5,260.0,11.76,0.2822,0.254,189.0
+Perumal Par Middle,6.0,Jun,SW monsoon,720.0,2.61,8.8,245.0,29.4,0.6572,0.5915,425.9
+Perumal Par Middle,7.0,Jul,SW monsoon,744.0,2.75,9.0,250.0,33.32,0.7207,0.6486,482.6
+Perumal Par Middle,8.0,Aug,SW monsoon,744.0,2.52,8.8,255.0,27.44,0.6252,0.5627,418.6
+Perumal Par Middle,9.0,Sep,SW monsoon,720.0,2.08,8.3,265.0,17.64,0.4208,0.3788,272.7
+Perumal Par Middle,10.0,Oct,Post-monsoon,744.0,1.51,7.0,290.0,7.84,0.1887,0.1698,126.3
+Perumal Par Middle,11.0,Nov,Post-monsoon,720.0,1.35,6.6,320.0,5.88,0.1407,0.1266,91.2
+Perumal Par Middle,12.0,Dec,NE monsoon / winter,744.0,1.36,6.5,330.0,5.88,0.1417,0.1275,94.9
+Perumal Par South,1.0,Jan,NE monsoon / winter,744.0,1.36,6.5,320.0,5.88,0.1414,0.1273,94.7
+Perumal Par South,2.0,Feb,NE monsoon / winter,672.0,1.26,6.3,310.0,4.9,0.1174,0.1057,71.0
+Perumal Par South,3.0,Mar,Pre-monsoon,744.0,1.27,6.2,300.0,4.9,0.1181,0.1063,79.1
+Perumal Par South,4.0,Apr,Pre-monsoon,720.0,1.36,6.5,290.0,5.88,0.1406,0.1265,91.1
+Perumal Par South,5.0,May,Pre-monsoon,744.0,1.79,7.5,260.0,11.76,0.2814,0.2532,188.4
+Perumal Par South,6.0,Jun,SW monsoon,720.0,2.61,8.8,245.0,29.4,0.6584,0.5926,426.7
+Perumal Par South,7.0,Jul,SW monsoon,744.0,2.75,9.0,250.0,33.32,0.7205,0.6484,482.4
+Perumal Par South,8.0,Aug,SW monsoon,744.0,2.52,8.8,255.0,27.44,0.6257,0.5631,419.0
+Perumal Par South,9.0,Sep,SW monsoon,720.0,2.08,8.3,265.0,17.64,0.4181,0.3763,270.9
+Perumal Par South,10.0,Oct,Post-monsoon,744.0,1.51,7.0,290.0,7.84,0.1888,0.17,126.5
+Perumal Par South,11.0,Nov,Post-monsoon,720.0,1.35,6.6,320.0,5.88,0.1413,0.1272,91.6
+Perumal Par South,12.0,Dec,NE monsoon / winter,744.0,1.36,6.5,330.0,5.88,0.1412,0.1271,94.5
+Amini,1.0,Jan,NE monsoon / winter,744.0,1.29,6.5,320.0,5.28,0.1273,0.1145,85.2
+Amini,2.0,Feb,NE monsoon / winter,672.0,1.19,6.3,310.0,4.4,0.1056,0.0951,63.9
+Amini,3.0,Mar,Pre-monsoon,744.0,1.2,6.2,300.0,4.4,0.1053,0.0947,70.5
+Amini,4.0,Apr,Pre-monsoon,720.0,1.29,6.5,290.0,5.28,0.1266,0.1139,82.0
+Amini,5.0,May,Pre-monsoon,744.0,1.7,7.5,260.0,10.56,0.2539,0.2285,170.0
+Amini,6.0,Jun,SW monsoon,720.0,2.47,8.8,245.0,26.4,0.6045,0.544,391.7
+Amini,7.0,Jul,SW monsoon,744.0,2.6,9.0,250.0,29.92,0.6679,0.6011,447.2
+Amini,8.0,Aug,SW monsoon,744.0,2.39,8.8,255.0,24.64,0.5693,0.5124,381.2
+Amini,9.0,Sep,SW monsoon,720.0,1.97,8.3,265.0,15.84,0.3787,0.3408,245.4
+Amini,10.0,Oct,Post-monsoon,744.0,1.43,7.0,290.0,7.04,0.1699,0.153,113.8
+Amini,11.0,Nov,Post-monsoon,720.0,1.28,6.6,320.0,5.28,0.1277,0.1149,82.7
+Amini,12.0,Dec,NE monsoon / winter,744.0,1.29,6.5,330.0,5.28,0.1276,0.1149,85.5
+Parali I (eroded 2017),1.0,Jan,NE monsoon / winter,744.0,1.35,6.5,320.0,5.82,0.1392,0.1253,93.2
+Parali I (eroded 2017),2.0,Feb,NE monsoon / winter,672.0,1.25,6.3,310.0,4.85,0.1164,0.1048,70.4
+Parali I (eroded 2017),3.0,Mar,Pre-monsoon,744.0,1.26,6.2,300.0,4.85,0.1166,0.105,78.1
+Parali I (eroded 2017),4.0,Apr,Pre-monsoon,720.0,1.35,6.5,290.0,5.82,0.1399,0.1259,90.6
+Parali I (eroded 2017),5.0,May,Pre-monsoon,744.0,1.78,7.5,260.0,11.64,0.28,0.252,187.5
+Parali I (eroded 2017),6.0,Jun,SW monsoon,720.0,2.6,8.8,245.0,29.1,0.6534,0.588,423.4
+Parali I (eroded 2017),7.0,Jul,SW monsoon,744.0,2.73,9.0,250.0,32.98,0.7116,0.6405,476.5
+Parali I (eroded 2017),8.0,Aug,SW monsoon,744.0,2.51,8.8,255.0,27.16,0.6185,0.5567,414.2
+Parali I (eroded 2017),9.0,Sep,SW monsoon,720.0,2.07,8.3,265.0,17.46,0.4151,0.3736,269.0
+Parali I (eroded 2017),10.0,Oct,Post-monsoon,744.0,1.5,7.0,290.0,7.76,0.1871,0.1684,125.3
+Parali I (eroded 2017),11.0,Nov,Post-monsoon,720.0,1.34,6.6,320.0,5.82,0.1398,0.1258,90.6
+Parali I (eroded 2017),12.0,Dec,NE monsoon / winter,744.0,1.35,6.5,330.0,5.82,0.1404,0.1264,94.0
+Parali II,1.0,Jan,NE monsoon / winter,744.0,1.35,6.5,320.0,5.82,0.1394,0.1255,93.3
+Parali II,2.0,Feb,NE monsoon / winter,672.0,1.25,6.3,310.0,4.85,0.1166,0.105,70.5
+Parali II,3.0,Mar,Pre-monsoon,744.0,1.26,6.2,300.0,4.85,0.1166,0.1049,78.0
+Parali II,4.0,Apr,Pre-monsoon,720.0,1.35,6.5,290.0,5.82,0.1391,0.1252,90.1
+Parali II,5.0,May,Pre-monsoon,744.0,1.78,7.5,260.0,11.64,0.2784,0.2506,186.4
+Parali II,6.0,Jun,SW monsoon,720.0,2.6,8.8,245.0,29.1,0.6543,0.5888,424.0
+Parali II,7.0,Jul,SW monsoon,744.0,2.73,9.0,250.0,32.98,0.7153,0.6438,479.0
+Parali II,8.0,Aug,SW monsoon,744.0,2.51,8.8,255.0,27.16,0.6194,0.5575,414.8
+Parali II,9.0,Sep,SW monsoon,720.0,2.07,8.3,265.0,17.46,0.4168,0.3751,270.1
+Parali II,10.0,Oct,Post-monsoon,744.0,1.5,7.0,290.0,7.76,0.1872,0.1684,125.3
+Parali II,11.0,Nov,Post-monsoon,720.0,1.34,6.6,320.0,5.82,0.1395,0.1255,90.4
+Parali II,12.0,Dec,NE monsoon / winter,744.0,1.35,6.5,330.0,5.82,0.1394,0.1254,93.3
+Parali III,1.0,Jan,NE monsoon / winter,744.0,1.35,6.5,320.0,5.82,0.1396,0.1257,93.5
+Parali III,2.0,Feb,NE monsoon / winter,672.0,1.25,6.3,310.0,4.85,0.1161,0.1045,70.2
+Parali III,3.0,Mar,Pre-monsoon,744.0,1.26,6.2,300.0,4.85,0.1167,0.105,78.1
+Parali III,4.0,Apr,Pre-monsoon,720.0,1.35,6.5,290.0,5.82,0.14,0.126,90.7
+Parali III,5.0,May,Pre-monsoon,744.0,1.78,7.5,260.0,11.64,0.2795,0.2515,187.1
+Parali III,6.0,Jun,SW monsoon,720.0,2.6,8.8,245.0,29.1,0.6557,0.5902,424.9
+Parali III,7.0,Jul,SW monsoon,744.0,2.73,9.0,250.0,32.98,0.7166,0.6449,479.8
+Parali III,8.0,Aug,SW monsoon,744.0,2.51,8.8,255.0,27.16,0.6168,0.5552,413.0
+Parali III,9.0,Sep,SW monsoon,720.0,2.07,8.3,265.0,17.46,0.4155,0.3739,269.2
+Parali III,10.0,Oct,Post-monsoon,744.0,1.5,7.0,290.0,7.76,0.185,0.1665,123.9
+Parali III,11.0,Nov,Post-monsoon,720.0,1.34,6.6,320.0,5.82,0.1392,0.1253,90.2
+Parali III,12.0,Dec,NE monsoon / winter,744.0,1.35,6.5,330.0,5.82,0.1393,0.1254,93.3
+Thinnakara,1.0,Jan,NE monsoon / winter,744.0,1.35,6.5,320.0,5.82,0.1395,0.1255,93.4
+Thinnakara,2.0,Feb,NE monsoon / winter,672.0,1.25,6.3,310.0,4.85,0.1169,0.1052,70.7
+Thinnakara,3.0,Mar,Pre-monsoon,744.0,1.26,6.2,300.0,4.85,0.117,0.1053,78.4
+Thinnakara,4.0,Apr,Pre-monsoon,720.0,1.35,6.5,290.0,5.82,0.1388,0.1249,89.9
+Thinnakara,5.0,May,Pre-monsoon,744.0,1.78,7.5,260.0,11.64,0.2802,0.2522,187.6
+Thinnakara,6.0,Jun,SW monsoon,720.0,2.6,8.8,245.0,29.1,0.6551,0.5896,424.5
+Thinnakara,7.0,Jul,SW monsoon,744.0,2.73,9.0,250.0,32.98,0.7157,0.6441,479.2
+Thinnakara,8.0,Aug,SW monsoon,744.0,2.51,8.8,255.0,27.16,0.6179,0.5561,413.7
+Thinnakara,9.0,Sep,SW monsoon,720.0,2.07,8.3,265.0,17.46,0.42,0.378,272.2
+Thinnakara,10.0,Oct,Post-monsoon,744.0,1.5,7.0,290.0,7.76,0.1857,0.1672,124.4
+Thinnakara,11.0,Nov,Post-monsoon,720.0,1.34,6.6,320.0,5.82,0.1396,0.1256,90.5
+Thinnakara,12.0,Dec,NE monsoon / winter,744.0,1.35,6.5,330.0,5.82,0.1401,0.1261,93.8
+Bangaram,1.0,Jan,NE monsoon / winter,744.0,1.35,6.5,320.0,5.82,0.1395,0.1256,93.4
+Bangaram,2.0,Feb,NE monsoon / winter,672.0,1.25,6.3,310.0,4.85,0.116,0.1044,70.2
+Bangaram,3.0,Mar,Pre-monsoon,744.0,1.26,6.2,300.0,4.85,0.1162,0.1046,77.8
+Bangaram,4.0,Apr,Pre-monsoon,720.0,1.35,6.5,290.0,5.82,0.1396,0.1257,90.5
+Bangaram,5.0,May,Pre-monsoon,744.0,1.78,7.5,260.0,11.64,0.2787,0.2508,186.6
+Bangaram,6.0,Jun,SW monsoon,720.0,2.6,8.8,245.0,29.1,0.6575,0.5918,426.1
+Bangaram,7.0,Jul,SW monsoon,744.0,2.73,9.0,250.0,32.98,0.7159,0.6443,479.4
+Bangaram,8.0,Aug,SW monsoon,744.0,2.51,8.8,255.0,27.16,0.6171,0.5553,413.2
+Bangaram,9.0,Sep,SW monsoon,720.0,2.07,8.3,265.0,17.46,0.4149,0.3734,268.8
+Bangaram,10.0,Oct,Post-monsoon,744.0,1.5,7.0,290.0,7.76,0.1853,0.1668,124.1
+Bangaram,11.0,Nov,Post-monsoon,720.0,1.34,6.6,320.0,5.82,0.1397,0.1257,90.5
+Bangaram,12.0,Dec,NE monsoon / winter,744.0,1.35,6.5,330.0,5.82,0.1401,0.1261,93.8
+South Bangaram Cay,1.0,Jan,NE monsoon / winter,744.0,1.35,6.5,320.0,5.82,0.14,0.126,93.7
+South Bangaram Cay,2.0,Feb,NE monsoon / winter,672.0,1.25,6.3,310.0,4.85,0.1165,0.1049,70.5
+South Bangaram Cay,3.0,Mar,Pre-monsoon,744.0,1.26,6.2,300.0,4.85,0.1163,0.1046,77.9
+South Bangaram Cay,4.0,Apr,Pre-monsoon,720.0,1.35,6.5,290.0,5.82,0.14,0.126,90.7
+South Bangaram Cay,5.0,May,Pre-monsoon,744.0,1.78,7.5,260.0,11.64,0.2778,0.2501,186.0
+South Bangaram Cay,6.0,Jun,SW monsoon,720.0,2.6,8.8,245.0,29.1,0.654,0.5886,423.8
+South Bangaram Cay,7.0,Jul,SW monsoon,744.0,2.73,9.0,250.0,32.98,0.7152,0.6437,478.9
+South Bangaram Cay,8.0,Aug,SW monsoon,744.0,2.51,8.8,255.0,27.16,0.6186,0.5568,414.2
+South Bangaram Cay,9.0,Sep,SW monsoon,720.0,2.07,8.3,265.0,17.46,0.4143,0.3728,268.5
+South Bangaram Cay,10.0,Oct,Post-monsoon,744.0,1.5,7.0,290.0,7.76,0.1872,0.1685,125.4
+South Bangaram Cay,11.0,Nov,Post-monsoon,720.0,1.34,6.6,320.0,5.82,0.14,0.126,90.7
+South Bangaram Cay,12.0,Dec,NE monsoon / winter,744.0,1.35,6.5,330.0,5.82,0.1396,0.1257,93.5
+Kalpitti,1.0,Jan,NE monsoon / winter,744.0,1.37,6.5,320.0,6.0,0.1435,0.1292,96.1
+Kalpitti,2.0,Feb,NE monsoon / winter,672.0,1.27,6.3,310.0,5.0,0.1205,0.1084,72.9
+Kalpitti,3.0,Mar,Pre-monsoon,744.0,1.28,6.2,300.0,5.0,0.1197,0.1077,80.1
+Kalpitti,4.0,Apr,Pre-monsoon,720.0,1.37,6.5,290.0,6.0,0.1444,0.13,93.6
+Kalpitti,5.0,May,Pre-monsoon,744.0,1.81,7.5,260.0,12.0,0.2885,0.2596,193.2
+Kalpitti,6.0,Jun,SW monsoon,720.0,2.64,8.8,245.0,30.0,0.6707,0.6036,434.6
+Kalpitti,7.0,Jul,SW monsoon,744.0,2.78,9.0,250.0,34.0,0.732,0.6588,490.2
+Kalpitti,8.0,Aug,SW monsoon,744.0,2.55,8.8,255.0,28.0,0.6355,0.572,425.5
+Kalpitti,9.0,Sep,SW monsoon,720.0,2.1,8.3,265.0,18.0,0.43,0.387,278.6
+Kalpitti,10.0,Oct,Post-monsoon,744.0,1.53,7.0,290.0,8.0,0.1913,0.1722,128.1
+Kalpitti,11.0,Nov,Post-monsoon,720.0,1.36,6.6,320.0,6.0,0.1447,0.1302,93.8
+Kalpitti,12.0,Dec,NE monsoon / winter,744.0,1.37,6.5,330.0,6.0,0.1435,0.1292,96.1
+Agatti,1.0,Jan,NE monsoon / winter,744.0,1.37,6.5,320.0,6.0,0.1444,0.13,96.7
+Agatti,2.0,Feb,NE monsoon / winter,672.0,1.27,6.3,310.0,5.0,0.1196,0.1076,72.3
+Agatti,3.0,Mar,Pre-monsoon,744.0,1.28,6.2,300.0,5.0,0.1199,0.1079,80.3
+Agatti,4.0,Apr,Pre-monsoon,720.0,1.37,6.5,290.0,6.0,0.1439,0.1295,93.2
+Agatti,5.0,May,Pre-monsoon,744.0,1.81,7.5,260.0,12.0,0.2886,0.2597,193.2
+Agatti,6.0,Jun,SW monsoon,720.0,2.64,8.8,245.0,30.0,0.671,0.6039,434.8
+Agatti,7.0,Jul,SW monsoon,744.0,2.78,9.0,250.0,34.0,0.7307,0.6576,489.3
+Agatti,8.0,Aug,SW monsoon,744.0,2.55,8.8,255.0,28.0,0.6374,0.5736,426.8
+Agatti,9.0,Sep,SW monsoon,720.0,2.1,8.3,265.0,18.0,0.4301,0.3871,278.7
+Agatti,10.0,Oct,Post-monsoon,744.0,1.53,7.0,290.0,8.0,0.1927,0.1734,129.0
+Agatti,11.0,Nov,Post-monsoon,720.0,1.36,6.6,320.0,6.0,0.1437,0.1293,93.1
+Agatti,12.0,Dec,NE monsoon / winter,744.0,1.37,6.5,330.0,6.0,0.1444,0.1299,96.7
+Pitti (Bird Island),1.0,Jan,NE monsoon / winter,744.0,1.34,6.5,320.0,5.7,0.1371,0.1234,91.8
+Pitti (Bird Island),2.0,Feb,NE monsoon / winter,672.0,1.24,6.3,310.0,4.75,0.114,0.1026,68.9
+Pitti (Bird Island),3.0,Mar,Pre-monsoon,744.0,1.25,6.2,300.0,4.75,0.1136,0.1023,76.1
+Pitti (Bird Island),4.0,Apr,Pre-monsoon,720.0,1.34,6.5,290.0,5.7,0.1361,0.1225,88.2
+Pitti (Bird Island),5.0,May,Pre-monsoon,744.0,1.76,7.5,260.0,11.4,0.2728,0.2455,182.7
+Pitti (Bird Island),6.0,Jun,SW monsoon,720.0,2.57,8.8,245.0,28.5,0.643,0.5787,416.7
+Pitti (Bird Island),7.0,Jul,SW monsoon,744.0,2.71,9.0,250.0,32.3,0.7062,0.6356,472.9
+Pitti (Bird Island),8.0,Aug,SW monsoon,744.0,2.48,8.8,255.0,26.6,0.6083,0.5475,407.3
+Pitti (Bird Island),9.0,Sep,SW monsoon,720.0,2.05,8.3,265.0,17.1,0.4067,0.366,263.5
+Pitti (Bird Island),10.0,Oct,Post-monsoon,744.0,1.49,7.0,290.0,7.6,0.1831,0.1648,122.6
+Pitti (Bird Island),11.0,Nov,Post-monsoon,720.0,1.33,6.6,320.0,5.7,0.1372,0.1235,88.9
+Pitti (Bird Island),12.0,Dec,NE monsoon / winter,744.0,1.34,6.5,330.0,5.7,0.1363,0.1226,91.2
+Andrott,1.0,Jan,NE monsoon / winter,744.0,1.34,6.5,320.0,5.7,0.137,0.1233,91.7
+Andrott,2.0,Feb,NE monsoon / winter,672.0,1.24,6.3,310.0,4.75,0.1145,0.103,69.2
+Andrott,3.0,Mar,Pre-monsoon,744.0,1.25,6.2,300.0,4.75,0.1145,0.103,76.6
+Andrott,4.0,Apr,Pre-monsoon,720.0,1.34,6.5,290.0,5.7,0.1366,0.1229,88.5
+Andrott,5.0,May,Pre-monsoon,744.0,1.76,7.5,260.0,11.4,0.2711,0.244,181.5
+Andrott,6.0,Jun,SW monsoon,720.0,2.57,8.8,245.0,28.5,0.6451,0.5806,418.1
+Andrott,7.0,Jul,SW monsoon,744.0,2.71,9.0,250.0,32.3,0.703,0.6327,470.7
+Andrott,8.0,Aug,SW monsoon,744.0,2.48,8.8,255.0,26.6,0.6114,0.5502,409.4
+Andrott,9.0,Sep,SW monsoon,720.0,2.05,8.3,265.0,17.1,0.4076,0.3669,264.2
+Andrott,10.0,Oct,Post-monsoon,744.0,1.49,7.0,290.0,7.6,0.182,0.1638,121.8
+Andrott,11.0,Nov,Post-monsoon,720.0,1.33,6.6,320.0,5.7,0.1372,0.1234,88.9
+Andrott,12.0,Dec,NE monsoon / winter,744.0,1.34,6.5,330.0,5.7,0.137,0.1233,91.8
+Kavaratti,1.0,Jan,NE monsoon / winter,744.0,1.3,6.5,320.0,5.4,0.1293,0.1163,86.6
+Kavaratti,2.0,Feb,NE monsoon / winter,672.0,1.21,6.3,310.0,4.5,0.1085,0.0976,65.6
+Kavaratti,3.0,Mar,Pre-monsoon,744.0,1.22,6.2,300.0,4.5,0.1084,0.0975,72.6
+Kavaratti,4.0,Apr,Pre-monsoon,720.0,1.3,6.5,290.0,5.4,0.1295,0.1166,83.9
+Kavaratti,5.0,May,Pre-monsoon,744.0,1.71,7.5,260.0,10.8,0.2592,0.2333,173.6
+Kavaratti,6.0,Jun,SW monsoon,720.0,2.5,8.8,245.0,27.0,0.6168,0.5551,399.7
+Kavaratti,7.0,Jul,SW monsoon,744.0,2.63,9.0,250.0,30.6,0.6787,0.6108,454.4
+Kavaratti,8.0,Aug,SW monsoon,744.0,2.42,8.8,255.0,25.2,0.5835,0.5251,390.7
+Kavaratti,9.0,Sep,SW monsoon,720.0,2.0,8.3,265.0,16.2,0.3854,0.3469,249.8
+Kavaratti,10.0,Oct,Post-monsoon,744.0,1.45,7.0,290.0,7.2,0.1726,0.1553,115.5
+Kavaratti,11.0,Nov,Post-monsoon,720.0,1.29,6.6,320.0,5.4,0.129,0.1161,83.6
+Kavaratti,12.0,Dec,NE monsoon / winter,744.0,1.3,6.5,330.0,5.4,0.1296,0.1166,86.8
+Cheriyam,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1508,0.1357,101.0
+Cheriyam,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1256,0.113,76.0
+Cheriyam,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1256,0.1131,84.1
+Cheriyam,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1519,0.1367,98.4
+Cheriyam,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3018,0.2716,202.1
+Cheriyam,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6944,0.625,450.0
+Cheriyam,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7529,0.6776,504.1
+Cheriyam,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6591,0.5932,441.3
+Cheriyam,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.4486,0.4038,290.7
+Cheriyam,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2015,0.1814,135.0
+Cheriyam,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1513,0.1362,98.1
+Cheriyam,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1508,0.1357,101.0
+Kodithala,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1513,0.1362,101.3
+Kodithala,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1252,0.1127,75.8
+Kodithala,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1267,0.114,84.8
+Kodithala,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1521,0.1369,98.5
+Kodithala,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3008,0.2708,201.4
+Kodithala,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6935,0.6242,449.4
+Kodithala,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7512,0.6761,503.0
+Kodithala,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6613,0.5952,442.8
+Kodithala,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.4481,0.4033,290.3
+Kodithala,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2023,0.1821,135.5
+Kodithala,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1509,0.1358,97.8
+Kodithala,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1511,0.136,101.2
+Suheli Cheriyakara,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1509,0.1358,101.1
+Suheli Cheriyakara,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1262,0.1136,76.3
+Suheli Cheriyakara,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1263,0.1137,84.6
+Suheli Cheriyakara,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1507,0.1356,97.7
+Suheli Cheriyakara,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3005,0.2704,201.2
+Suheli Cheriyakara,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6939,0.6245,449.6
+Suheli Cheriyakara,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7554,0.6799,505.8
+Suheli Cheriyakara,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6573,0.5916,440.1
+Suheli Cheriyakara,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.448,0.4032,290.3
+Suheli Cheriyakara,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2017,0.1816,135.1
+Suheli Cheriyakara,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1508,0.1357,97.7
+Suheli Cheriyakara,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1515,0.1363,101.4
+Suheli Indira-Shastri Dweep,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1509,0.1358,101.0
+Suheli Indira-Shastri Dweep,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1256,0.113,75.9
+Suheli Indira-Shastri Dweep,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1256,0.1131,84.1
+Suheli Indira-Shastri Dweep,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1518,0.1366,98.4
+Suheli Indira-Shastri Dweep,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3016,0.2714,201.9
+Suheli Indira-Shastri Dweep,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6911,0.622,447.8
+Suheli Indira-Shastri Dweep,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7538,0.6784,504.8
+Suheli Indira-Shastri Dweep,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6602,0.5942,442.1
+Suheli Indira-Shastri Dweep,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.4483,0.4035,290.5
+Suheli Indira-Shastri Dweep,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2014,0.1813,134.9
+Suheli Indira-Shastri Dweep,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1507,0.1356,97.7
+Suheli Indira-Shastri Dweep,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1516,0.1364,101.5
+Kalpeni,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1502,0.1352,100.6
+Kalpeni,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1261,0.1135,76.3
+Kalpeni,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1261,0.1135,84.4
+Kalpeni,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1514,0.1363,98.1
+Kalpeni,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3018,0.2716,202.1
+Kalpeni,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6931,0.6238,449.1
+Kalpeni,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7542,0.6788,505.0
+Kalpeni,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6569,0.5912,439.8
+Kalpeni,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.4508,0.4057,292.1
+Kalpeni,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2024,0.1822,135.5
+Kalpeni,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.151,0.1359,97.9
+Kalpeni,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1522,0.137,101.9
+Pitti (Kalpeni),1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.151,0.1359,101.1
+Pitti (Kalpeni),2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1258,0.1132,76.1
+Pitti (Kalpeni),3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1251,0.1126,83.8
+Pitti (Kalpeni),4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1512,0.1361,98.0
+Pitti (Kalpeni),5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3022,0.272,202.3
+Pitti (Kalpeni),6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6944,0.625,450.0
+Pitti (Kalpeni),7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7563,0.6806,506.4
+Pitti (Kalpeni),8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6557,0.5901,439.0
+Pitti (Kalpeni),9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.449,0.4041,291.0
+Pitti (Kalpeni),10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2028,0.1826,135.8
+Pitti (Kalpeni),11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1502,0.1352,97.3
+Pitti (Kalpeni),12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1502,0.1352,100.6
+Koomel,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.151,0.1359,101.1
+Koomel,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1262,0.1136,76.3
+Koomel,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1256,0.1131,84.1
+Koomel,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1501,0.1351,97.3
+Koomel,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3022,0.272,202.3
+Koomel,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6922,0.6229,448.5
+Koomel,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7547,0.6793,505.4
+Koomel,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6568,0.5911,439.8
+Koomel,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.4494,0.4044,291.2
+Koomel,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2016,0.1815,135.0
+Koomel,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1503,0.1353,97.4
+Koomel,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1513,0.1361,101.3
+Tilakkam East,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1506,0.1355,100.8
+Tilakkam East,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1268,0.1141,76.7
+Tilakkam East,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.126,0.1134,84.3
+Tilakkam East,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1509,0.1358,97.8
+Tilakkam East,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3018,0.2716,202.1
+Tilakkam East,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6931,0.6238,449.1
+Tilakkam East,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7517,0.6766,503.4
+Tilakkam East,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6587,0.5929,441.1
+Tilakkam East,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.448,0.4032,290.3
+Tilakkam East,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2026,0.1823,135.7
+Tilakkam East,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1515,0.1363,98.2
+Tilakkam East,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1516,0.1364,101.5
+Tilakkam West,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1514,0.1363,101.4
+Tilakkam West,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.126,0.1134,76.2
+Tilakkam West,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1259,0.1133,84.3
+Tilakkam West,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1513,0.1361,98.0
+Tilakkam West,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3029,0.2726,202.8
+Tilakkam West,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.694,0.6246,449.7
+Tilakkam West,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7546,0.6792,505.3
+Tilakkam West,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6574,0.5917,440.2
+Tilakkam West,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.4479,0.4031,290.2
+Tilakkam West,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2015,0.1814,134.9
+Tilakkam West,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1513,0.1362,98.1
+Tilakkam West,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1509,0.1358,101.1
+Suheli Valiyakara,1.0,Jan,NE monsoon / winter,744.0,1.41,6.5,320.0,6.3,0.1508,0.1357,101.0
+Suheli Valiyakara,2.0,Feb,NE monsoon / winter,672.0,1.3,6.3,310.0,5.25,0.1264,0.1138,76.5
+Suheli Valiyakara,3.0,Mar,Pre-monsoon,744.0,1.31,6.2,300.0,5.25,0.1255,0.113,84.1
+Suheli Valiyakara,4.0,Apr,Pre-monsoon,720.0,1.41,6.5,290.0,6.3,0.1502,0.1352,97.4
+Suheli Valiyakara,5.0,May,Pre-monsoon,744.0,1.85,7.5,260.0,12.6,0.3018,0.2716,202.1
+Suheli Valiyakara,6.0,Jun,SW monsoon,720.0,2.7,8.8,245.0,31.5,0.6922,0.623,448.6
+Suheli Valiyakara,7.0,Jul,SW monsoon,744.0,2.85,9.0,250.0,35.7,0.7553,0.6797,505.7
+Suheli Valiyakara,8.0,Aug,SW monsoon,744.0,2.61,8.8,255.0,29.4,0.6607,0.5946,442.4
+Suheli Valiyakara,9.0,Sep,SW monsoon,720.0,2.16,8.3,265.0,18.9,0.4469,0.4022,289.6
+Suheli Valiyakara,10.0,Oct,Post-monsoon,744.0,1.56,7.0,290.0,8.4,0.2011,0.181,134.6
+Suheli Valiyakara,11.0,Nov,Post-monsoon,720.0,1.4,6.6,320.0,6.3,0.1512,0.136,97.9
+Suheli Valiyakara,12.0,Dec,NE monsoon / winter,744.0,1.41,6.5,330.0,6.3,0.1513,0.1361,101.3
+Minicoy,1.0,Jan,NE monsoon / winter,744.0,1.44,6.5,320.0,6.6,0.1582,0.1424,106.0
+Minicoy,2.0,Feb,NE monsoon / winter,672.0,1.33,6.3,310.0,5.5,0.1316,0.1184,79.6
+Minicoy,3.0,Mar,Pre-monsoon,744.0,1.35,6.2,300.0,5.5,0.1322,0.119,88.5
+Minicoy,4.0,Apr,Pre-monsoon,720.0,1.44,6.5,290.0,6.6,0.1583,0.1425,102.6
+Minicoy,5.0,May,Pre-monsoon,744.0,1.9,7.5,260.0,13.2,0.3175,0.2857,212.6
+Minicoy,6.0,Jun,SW monsoon,720.0,2.77,8.8,245.0,33.0,0.7151,0.6436,463.4
+Minicoy,7.0,Jul,SW monsoon,744.0,2.91,9.0,250.0,37.4,0.7746,0.6971,518.6
+Minicoy,8.0,Aug,SW monsoon,744.0,2.67,8.8,255.0,30.8,0.6833,0.6149,457.5
+Minicoy,9.0,Sep,SW monsoon,720.0,2.21,8.3,265.0,19.8,0.4696,0.4227,304.3
+Minicoy,10.0,Oct,Post-monsoon,744.0,1.6,7.0,290.0,8.8,0.2111,0.19,141.4
+Minicoy,11.0,Nov,Post-monsoon,720.0,1.43,6.6,320.0,6.6,0.1581,0.1423,102.5
+Minicoy,12.0,Dec,NE monsoon / winter,744.0,1.44,6.5,330.0,6.6,0.1588,0.1429,106.3
+Viringili,1.0,Jan,NE monsoon / winter,744.0,1.44,6.5,320.0,6.6,0.159,0.1431,106.4
+Viringili,2.0,Feb,NE monsoon / winter,672.0,1.33,6.3,310.0,5.5,0.1324,0.1191,80.1
+Viringili,3.0,Mar,Pre-monsoon,744.0,1.35,6.2,300.0,5.5,0.1318,0.1187,88.3
+Viringili,4.0,Apr,Pre-monsoon,720.0,1.44,6.5,290.0,6.6,0.1583,0.1425,102.6
+Viringili,5.0,May,Pre-monsoon,744.0,1.9,7.5,260.0,13.2,0.3171,0.2854,212.3
+Viringili,6.0,Jun,SW monsoon,720.0,2.77,8.8,245.0,33.0,0.7136,0.6422,462.4
+Viringili,7.0,Jul,SW monsoon,744.0,2.91,9.0,250.0,37.4,0.7753,0.6978,519.2
+Viringili,8.0,Aug,SW monsoon,744.0,2.67,8.8,255.0,30.8,0.6827,0.6144,457.1
+Viringili,9.0,Sep,SW monsoon,720.0,2.21,8.3,265.0,19.8,0.4669,0.4202,302.5
+Viringili,10.0,Oct,Post-monsoon,744.0,1.6,7.0,290.0,8.8,0.2105,0.1895,141.0
+Viringili,11.0,Nov,Post-monsoon,720.0,1.43,6.6,320.0,6.6,0.1589,0.143,103.0
+Viringili,12.0,Dec,NE monsoon / winter,744.0,1.44,6.5,330.0,6.6,0.158,0.1422,105.8

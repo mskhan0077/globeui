@@ -1,0 +1,2 @@
+island,group,lat_deg_N,lon_deg_E,resource_lat,resource_lon,note
+Brest,France,48.390,-4.486,48.20,-5.50,"Hourly data from the BoobWorld team (brest_france.csv): Open-Meteo, open Atlantic ~75 km west of Brest"

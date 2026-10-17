@@ -1,0 +1,5 @@
+{
+  "places": [
+    { "id": "brest", "name": "Brest", "lat": 48.390, "lng": -4.486, "parent": "FRA", "zoomHeight": 25000 }
+  ]
+}

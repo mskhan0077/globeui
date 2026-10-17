@@ -1,0 +1,7 @@
+technology,typical_unit_size,capex_island_INR,opex_INR_per_unit_yr,opex_pct_of_capex,lifetime_yr,degradation_per_yr,availability,lifecycle_gCO2_per_kWh,TRL
+Wind,500 kW turbines,105125.0,2465.0,0.023448275862068966,25.0,0.003,0.97,11.0,9
+Floating Solar PV,250 kWp blocks,85620.0,1950.0,0.022775052557813594,25.0,0.006,0.98,48.0,9 inland / 6–7 nearshore
+OTEC,"0.5–1 MW net, closed-cycle",2640000.0,88000.0,0.03333333333333333,30.0,0.0,0.92,15.0,6–7
+Wave,250 kW WEC (OWC / point absorber),1056000.0,52800.0,0.05,20.0,0.0,0.9,20.0,6–7
+BESS,"Li-ion LFP, containerised",12000.0,300.0,0.025,15.0,0.02,0.98,"n/a (embodied ~80 kgCO2/kWh cap., ASSUMPTION)",9
+Diesel (baseline),500 kW DG sets,15600.0,1040.0,0.06666666666666667,15.0,0.0,0.95,"≈900 (direct 804 + upstream, ASSUMPTION)",9

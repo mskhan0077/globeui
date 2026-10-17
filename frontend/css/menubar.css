@@ -1,0 +1,97 @@
+/* Floating top ribbon, shared by the globe and island opening (frontend/index.html)
+   and the planner pages (backend/app/templates/base.html, served at /css/menubar.css).
+   The "Blue" bold + "Grid" light wordmark stands on its own on the left; the glass
+   ribbon (navy fading into #099ade) with the outlined Planner button fills the rest.
+   All Helvetica. */
+:root {
+  /* Bar geometry, also used by content placed below it (help box, planner). */
+  --menubar-top: 12px;
+  --menubar-height: 64px;
+  --menubar-bottom: calc(var(--menubar-top) + var(--menubar-height)); /* 76px */
+  --menubar-accent: #55f2e8; /* BlenderEarth cyan */
+}
+
+/* The bar row: the BlueGrid wordmark on its own on the left, then the glass ribbon
+   (.menubar__nav) filling the rest of the width with the links. */
+.menubar {
+  position: fixed;
+  top: var(--menubar-top);
+  left: 12px;
+  right: 12px;
+  z-index: 10; /* above the map and the planner overlay */
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: var(--menubar-height);
+  color: #f3faff;
+  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- brand: Blue/Grid, outside the ribbon ---------- */
+.menubar__brand {
+  flex-shrink: 0;
+  padding: 0 6px;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  /* No glass behind it: a shadow keeps it legible over bright land */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.menubar__word { font-size: 2.5rem; font-weight: 700; letter-spacing: 0.01em; line-height: 1; }
+.menubar__word span { font-weight: 300; margin-left: 1px; }
+
+/* ---------- the ribbon, with the links ---------- */
+.menubar__nav {
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 0 22px;
+  overflow-x: auto;
+  border-radius: 16px;
+  /* Navy glass fading into #099ade: the globe/island shows through, blurred. */
+  background: linear-gradient(100deg, rgba(4, 24, 39, 0.72) 0%, rgba(6, 60, 92, 0.62) 45%, rgba(9, 154, 222, 0.5) 100%);
+  border: 1px solid rgba(130, 198, 218, 0.28);
+  box-shadow: 0 8px 28px rgba(0, 10, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* legible over bright land through the glass */
+}
+.menubar__nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s;
+}
+.menubar__nav a:hover { background: rgba(255, 255, 255, 0.14); }
+.menubar__nav a[aria-current="page"] { background: rgba(0, 0, 0, 0.22); }
+/* The main call to action: outlined, like BlenderEarth's "Open Planner" */
+.menubar__nav a.menubar__cta { border-color: rgba(85, 242, 232, 0.6); color: #d9fffb; }
+.menubar__nav a.menubar__cta:hover { background: rgba(85, 242, 232, 0.16); border-color: var(--menubar-accent); }
+.menubar__cta svg { width: 15px; height: 15px; }
+.menubar a:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ---------- on the island opening (js/story/opening.js): wordmark only, above the scene ---------- */
+html.opening-story .menubar { z-index: 101; } /* .opening is 100 */
+html.has-opening .menubar__nav { display: none; }
+
+@media (max-width: 480px) {
+  :root { --menubar-height: 58px; }
+  .menubar { left: 8px; right: 8px; gap: 8px; }
+  .menubar__brand { padding: 0 2px; }
+  .menubar__word { font-size: 1.75rem; }
+  .menubar__nav { gap: 2px; padding: 0 8px; }
+  .menubar__nav a { padding: 7px 10px; font-size: 0.85rem; }
+  .menubar__cta svg { display: none; }
+}

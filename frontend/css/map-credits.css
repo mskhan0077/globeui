@@ -1,0 +1,21 @@
+/* Map imagery credits, shared by the globe (frontend/index.html) and the planner
+   page backdrop (backend/app/templates/base.html, served at /css/map-credits.css). */
+/* Esri imagery attribution is required; keep it visible. */
+.map-credits {
+  position: fixed;
+  left: 10px;
+  bottom: 6px;
+  z-index: 10; /* above the place overlay */
+  font-size: 11px;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.map-credits a {
+  color: inherit;
+}
+
+/* Cesium ion logo: only required when using Cesium ion services, which this app doesn't. */
+.map-credits .cesium-credit-logoContainer {
+  display: none !important;
+}
