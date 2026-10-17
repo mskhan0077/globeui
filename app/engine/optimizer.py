@@ -6,7 +6,6 @@ import numpy as np
 from scipy.optimize import linprog
 from . import economics
 
-
 def get_dynamic_grid(load_kW: float) -> dict:
     """Scale the grid search space dynamically based on target load."""
     max_w_s = max(4000, int(load_kW * 10))
@@ -51,7 +50,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
     def calc_a(name, is_solar=False, is_bess=False):
         c_base = float(tech.loc[name, "capex_island_INR"])
         lifetime = float(tech.loc[name, "lifetime_yr"])
-        # Use nominal rate for asset lifetime CRF
         crf_val = economics.crf(r_nom, lifetime)
         
         if is_bess:
@@ -60,8 +58,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
             pi_bess = float(finance.get("inflation_rate_bess", -0.05))
             repl_future = c_base * float(finance["bess_replacement_cost_fraction"]) * ((1+pi_bess)**repl_yr)
             repl_pv = repl_future / ((1+r_nom)**repl_yr)
-            
-            # Annualized OPEX and Replacement
             a = c_base * crf_val 
             a += (opex_nominal * pv_factor_opex + repl_pv) * crf_proj
             a -= float(finance["bess_vgf_INR_per_kWh"]) * crf_proj
@@ -80,7 +76,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
     a_v = calc_a("Wave")
     a_b = calc_a("BESS", is_bess=True)
     
-    # Calculate true levelized EAC of Diesel (Year 1 fuel cost * PV factor * CRF)
     pi_diesel = float(finance.get("inflation_rate_diesel", 0.07))
     pv_factor_diesel = economics.growing_annuity_pv(r_nom, pi_diesel, n_proj)
     c_diesel = float(finance["diesel_fuel_cost_INR_per_kWh"]) * pv_factor_diesel * crf_proj
@@ -104,7 +99,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
 
     A_eq, b_eq, A_ub, b_ub = [], [], [], []
 
-    # Gen limits
     for i in range(4):
         for t in range(T):
             row = np.zeros(N)
@@ -112,7 +106,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
             row[i] = -cfs[i][t]
             A_ub.append(row); b_ub.append(0)
 
-    # Energy Balance
     for t in range(T):
         row = np.zeros(N)
         for i in range(4): row[idx_g(i, t)] = 1
@@ -143,7 +136,6 @@ def solve_monthly_lp(island: str, load_kW: float, dfs: dict, lpsp_target: float)
         row = np.zeros(N); row[idx_u(t)] = 1
         A_ub.append(row); b_ub.append(load_kW)
 
-    # Annual LPSP limit
     row = np.zeros(N)
     for t in range(T): row[idx_u(t)] = hours[t]
     A_ub.append(row); b_ub.append(lpsp_target * load_kW * np.sum(hours))
@@ -183,12 +175,36 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
     grid = get_dynamic_grid(load_kW)
     results: list[dict] = []
 
+    # FAST PATH: Pre-calculate CF sums for pruning 
+    island_norm = island.replace("_", " ").strip().lower()
+    hourly_key = None
+    if "hourly" in dfs:
+        for k in dfs["hourly"].keys():
+            k_norm = str(k).replace("_", " ").strip().lower()
+            if island_norm == k_norm or island_norm in k_norm or k_norm in island_norm:
+                hourly_key = k
+                break
+
+    if hourly_key:
+        h = dfs["hourly"][hourly_key]
+        cf_sums = {
+            "wind_kW": h["cf_wind"].sum(),
+            "solar_kWp": h["cf_fpv"].sum(),
+            "otec_kW": h["cf_otec"].sum(),
+            "wave_kW": h["cf_wave"].sum()
+        }
+    else:
+        cf_sums = {k: 0 for k in ["wind_kW", "solar_kWp", "otec_kW", "wave_kW"]}
+
+    load_annual = load_kW * 8760
+    min_gen_needed = load_annual * (1 - lpsp_target)
+
     # Exact Math Optimization
     lp_caps = solve_monthly_lp(island, load_kW, dfs, lpsp_target)
     if lp_caps:
         lp_caps["load_kW"] = load_kW
         try:
-            r = evaluate(island, lp_caps, dfs, use_hourly=True)
+            r = evaluate(island, lp_caps, dfs, use_hourly=True, fast=True)
             lpsp = r["reliability"].get("lpsp_hourly", r["reliability"].get("lpsp_annual", 1.0))
             
             if lpsp <= lpsp_target + 1e-4:
@@ -211,8 +227,15 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
     # Grid Search Enumeration
     for caps in _iter_combos(grid):
         caps = {**caps, "load_kW": load_kW}
+        
+        # PRUNING: check if physical max generation is enough
+        total_gen = sum(caps[k] * cf_sums[k] for k in cf_sums)
+        if total_gen < min_gen_needed:
+            continue
+            
         try:
-            r = evaluate(island, caps, dfs, use_hourly=True)
+            # FAST EVALUATION: Skip Pandas/UI formatting
+            r = evaluate(island, caps, dfs, use_hourly=True, fast=True)
         except Exception:
             continue
             

@@ -14,10 +14,8 @@ def dispatch_hourly(
     """Dispatch BESS over hourly generation and load profiles."""
     eta = float(np.sqrt(rte))
     pmax = c_rate * bess_kWh
-    
-    # ALIGNED WITH LP: Max SOC is DoD * Capacity. Min SOC is 0.
     smax = dod * bess_kWh
-    smin = 0.0 
+    smin = 0.0
     n = len(gen_kW)
     
     self_discharge_rate = 0.015 
@@ -28,35 +26,62 @@ def dispatch_hourly(
     curtailed = np.zeros(n)
     soc_hist = np.zeros(n)
 
+    # Local variable assignment for speed
+    _sd = 1.0 - self_discharge_rate
+    _eta = eta
+    _pmax = pmax
+    _smax = smax
+    _gen = gen_kW
+    _load = load_kW
+
     for t in range(n):
-        # Apply strict multi-day discharge penalty
         if soc > smin:
-            soc = max(smin, soc * (1.0 - self_discharge_rate))
+            soc = max(smin, soc * _sd)
             
-        net = gen_kW[t] - load_kW[t]
+        net = _gen[t] - _load[t]
         if net >= 0:
-            room = max(smax - soc, 0.0)
-            charge = min(net, room / eta, pmax)
-            soc += eta * charge
-            curtailed[t] = max(net - charge, 0.0)
-            delivered[t] = min(gen_kW[t], load_kW[t])
+            room = _smax - soc
+            if room < 0.0:
+                room = 0.0
+            charge = net
+            room_eta = room / _eta
+            if room_eta < charge:
+                charge = room_eta
+            if _pmax < charge:
+                charge = _pmax
+                
+            soc += _eta * charge
+            spill = net - charge
+            curtailed[t] = spill if spill > 0.0 else 0.0
+            delivered[t] = _gen[t] if _gen[t] < _load[t] else _load[t]
         else:
             need = -net
-            avail = max(soc - smin, 0.0) * eta
-            discharge = min(need, avail, pmax)
-            soc -= discharge / eta
-            delivered[t] = min(gen_kW[t] + discharge, load_kW[t])
-            unmet[t] = max(load_kW[t] - gen_kW[t] - discharge, 0.0)
+            avail = (soc - smin) * _eta
+            if avail < 0.0:
+                avail = 0.0
+            discharge = need
+            if avail < discharge:
+                discharge = avail
+            if _pmax < discharge:
+                discharge = _pmax
+                
+            soc -= discharge / _eta
+            served = _gen[t] + discharge
+            delivered[t] = served if served < _load[t] else _load[t]
+            short = _load[t] - served
+            unmet[t] = short if short > 0.0 else 0.0
+            
         soc_hist[t] = soc
 
-    total_load = float(load_kW.sum())
-    total_unmet = float(unmet.sum())
+    total_load = float(np.sum(_load))
+    total_unmet = float(np.sum(unmet))
+    
     return {
-        "delivered_kWh": float(delivered.sum()),
+        "delivered_kWh": float(np.sum(delivered)),
         "unmet_kWh": total_unmet,
-        "curtailed_kWh": float(curtailed.sum()),
+        "curtailed_kWh": float(np.sum(curtailed)),
         "lpsp": total_unmet / max(total_load, 1e-9),
-        "lole_hours": int((unmet > 1e-9).sum()),
+        "lole_hours": int(np.sum(unmet > 1e-9)),
         "soc_kWh": soc_hist.tolist(),
         "hourly_delivered": delivered,
         "hourly_unmet": unmet,

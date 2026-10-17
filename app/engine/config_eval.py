@@ -8,25 +8,9 @@ from . import generation, bess, economics, carbon, scoring
 
 
 def evaluate(island: str, capacities: dict, dfs: dict,
-             use_hourly: bool | None = None) -> dict:
+             use_hourly: bool | None = None, fast: bool = False) -> dict:
     """Full pipeline for one configuration."""
 
-    # Base Generation (Fallback to rough monthly model)
-    monthly = generation.monthly_generation(island, capacities, dfs)
-    annual = {
-        "hours": float(monthly["hours"].sum()),
-        "gen_wind_kWh": float(monthly["gen_wind_kWh"].sum()),
-        "gen_fpv_kWh": float(monthly["gen_fpv_kWh"].sum()),
-        "gen_otec_kWh": float(monthly["gen_otec_kWh"].sum()),
-        "gen_wave_kWh": float(monthly["gen_wave_kWh"].sum()),
-        "gen_total_kWh": float(monthly["gen_total_kWh"].sum()),
-        "load_kWh": float(monthly["load_kWh"].sum()),
-        "delivered_kWh": float(monthly["delivered_kWh"].sum()),
-        "surplus_kWh": float(monthly["surplus_kWh"].sum()),
-        "unmet_kWh": float(monthly["unmet_kWh"].sum()),
-    }
-
-    # Hourly Refinement (Identify 8760 file via robust matching)
     island_norm = island.replace("_", " ").strip().lower()
     hourly_key = None
     if "hourly" in dfs:
@@ -40,7 +24,27 @@ def evaluate(island: str, capacities: dict, dfs: dict,
     finance = dfs["finance"]
     hr_result = None
 
-    # High-Fidelity Override (If real 8760 API data exists)
+    # 1. Base Generation (Fallback to rough monthly model)
+    # Skip this entirely if we are running fast and have hourly data
+    if not (fast and do_hourly and hourly_key):
+        monthly = generation.monthly_generation(island, capacities, dfs)
+        annual = {
+            "hours": float(monthly["hours"].sum()),
+            "gen_wind_kWh": float(monthly["gen_wind_kWh"].sum()),
+            "gen_fpv_kWh": float(monthly["gen_fpv_kWh"].sum()),
+            "gen_otec_kWh": float(monthly["gen_otec_kWh"].sum()),
+            "gen_wave_kWh": float(monthly["gen_wave_kWh"].sum()),
+            "gen_total_kWh": float(monthly["gen_total_kWh"].sum()),
+            "load_kWh": float(monthly["load_kWh"].sum()),
+            "delivered_kWh": float(monthly["delivered_kWh"].sum()),
+            "surplus_kWh": float(monthly["surplus_kWh"].sum()),
+            "unmet_kWh": float(monthly["unmet_kWh"].sum()),
+        }
+    else:
+        monthly = None
+        annual = {}
+
+    # 2. Hourly Refinement
     if do_hourly and hourly_key:
         h = dfs["hourly"][hourly_key]
         
@@ -60,6 +64,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
             c_rate=float(finance["bess_max_c_rate"]),
         )
         
+        annual["hours"] = 8760.0
         annual["gen_wind_kWh"] = float(gen_wind.sum())
         annual["gen_fpv_kWh"] = float(gen_fpv.sum())
         annual["gen_otec_kWh"] = float(gen_otec.sum())
@@ -70,8 +75,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         annual["unmet_kWh"] = float(hr_result["unmet_kWh"])
         annual["surplus_kWh"] = float(hr_result["curtailed_kWh"])
         
-        # OVERRIDE the monthly dataframe directly
-        if "timestamp_local" in h.columns:
+        if not fast and "timestamp_local" in h.columns:
             df_agg = pd.DataFrame({
                 "month_num": h["timestamp_local"].dt.month,
                 "gen_wind_kWh": gen_wind,
@@ -91,7 +95,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                 if col in monthly.columns:
                     monthly[col] = df_agg[col].values
 
-    # Economics (Calculated AFTER hourly dispatch for exact LCOE/CoS)
+    # 3. Economics
     capex, subsidy = economics.compute_capex(capacities, dfs["tech"], finance)
     opex = economics.compute_annual_opex(capacities, dfs["tech"])
     repl = economics.bess_replacement_pv(capex.get("bess_kWh", 0), finance)
@@ -102,24 +106,35 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         finance,
     )
     
-    # Carbon Metrics
     carb = carbon.carbon_metrics(annual["delivered_kWh"], finance)
 
-    # Reliability Metrics
     lpsp_annual = annual["unmet_kWh"] / max(annual["load_kWh"], 1e-9)
     reliability = {
         "lpsp_annual": lpsp_annual, 
-        "lpsp_monthly": lpsp_annual, # Kept for backward compatibility
+        "lpsp_monthly": lpsp_annual,
         "coverage_annual": 1.0 - lpsp_annual,
         "coverage_monthly": 1.0 - lpsp_annual,
-        "worst_month_coverage": float(monthly["coverage"].min()) if "coverage" in monthly else 1.0,
     }
 
     if hr_result:
         reliability["lpsp_hourly"] = hr_result["lpsp"]
         reliability["coverage_hourly"] = 1.0 - hr_result["lpsp"]
+        
+    if not fast and monthly is not None:
+        reliability["worst_month_coverage"] = float(monthly["coverage"].min()) if "coverage" in monthly else 1.0
 
-    # Build Final Result
+    plf_target = annual["delivered_kWh"] / (float(capacities.get("load_kW", 1000.0)) * 8760.0)
+
+    if fast:
+        return {
+            "annual": annual,
+            "econ": econ,
+            "carbon": carb,
+            "reliability": reliability,
+            "plf_target": plf_target,
+        }
+
+    # 4. Full UI Result
     result = {
         "island": island,
         "capacities": dict(capacities),
@@ -129,7 +144,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "econ": econ,
         "carbon": carb,
         "reliability": reliability,
-        "plf_target": annual["delivered_kWh"] / (float(capacities.get("load_kW", 1000.0)) * 8760.0),
+        "plf_target": plf_target,
     }
 
     resolved_tz = "Unknown"
