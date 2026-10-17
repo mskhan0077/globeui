@@ -18,7 +18,7 @@ def load_all(data_dir: str | Path = "Data/processed") -> dict:
     with open(d / "finance_params.json") as fh:
         finance = json.load(fh)
 
-    # 1. Load Hourly API Data
+    # Load Hourly API Data
     hourly: dict[str, pd.DataFrame] = {}
     hourly_dir = d / "hourly"
     if hourly_dir.exists():
@@ -34,7 +34,7 @@ def load_all(data_dir: str | Path = "Data/processed") -> dict:
                 
             hourly[clean_key] = df
 
-    # 2. Load Master CSVs
+    # Load Master CSVs
     dfs = {
         "islands": _read(d, "islands.csv").set_index("island"),
         "tech":    _read(d, "tech_params.csv").set_index("technology"),
@@ -46,18 +46,18 @@ def load_all(data_dir: str | Path = "Data/processed") -> dict:
         "hourly":  hourly,
     }
 
-    # 3. AUTO-DISCOVERY: Inject any missing hourly islands into the master datasets
+    # AUTO-DISCOVERY: Inject any missing hourly islands into the master datasets
     missing_islands = [k for k in hourly.keys() if k not in dfs["islands"].index]
     
     if missing_islands:
-        # A. Add to Islands list (This pushes it to the UI dropdown)
+        # Add to Islands list (This pushes it to the UI dropdown)
         new_islands = pd.DataFrame([
             {"island": idx, "lat_deg_N": 0.0, "lon_deg_E": 0.0, "peak_demand_kW_DUMMY": 1000.0} 
             for idx in missing_islands
         ]).set_index("island")
         dfs["islands"] = pd.concat([dfs["islands"], new_islands])
 
-        # B. Add dummy monthly rows to prevent KeyErrors in the fallback engine
+        # Add dummy monthly rows to prevent KeyErrors in the fallback engine
         # (The 8760 hourly arrays will overwrite these 0s during evaluation)
         months = list(range(1, 13))
         hours = [744, 672, 744, 720, 744, 720, 744, 744, 720, 744, 720, 744]

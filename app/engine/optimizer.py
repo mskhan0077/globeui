@@ -176,7 +176,7 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
     grid = get_dynamic_grid(load_kW)
     results: list[dict] = []
 
-    # 1. Exact Math Optimization
+    # Exact Math Optimization
     lp_caps = solve_monthly_lp(island, load_kW, dfs, lpsp_target)
     if lp_caps:
         lp_caps["load_kW"] = load_kW
@@ -201,7 +201,7 @@ def optimize(island: str, load_kW: float, dfs: dict, weights: dict,
         except Exception:
             pass
 
-    # 2. Grid Search Enumeration
+    # Grid Search Enumeration
     for caps in _iter_combos(grid):
         caps = {**caps, "load_kW": load_kW}
         try:

@@ -69,7 +69,7 @@ def convert_to_capacity_factors(df):
     # Scale to 92% availability at the 22°C design point, and CLAMP to max 1.0
     df["cf_otec"] = (nof * (0.92 / 0.70)).clip(lower=0.0, upper=1.0)
 
-    # 4. Wave Energy Converter
+    # Wave Energy Converter
     df["wave_power_flux"] = 0.49 * (df["wave_height_m"]**2) * df["wave_period_s"]
     def wave_cf(row):
         h, j = row["wave_height_m"], row["wave_power_flux"]

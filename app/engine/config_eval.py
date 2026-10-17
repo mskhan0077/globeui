@@ -11,7 +11,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
              use_hourly: bool | None = None) -> dict:
     """Full pipeline for one configuration."""
 
-    # 1. Base Generation (Fallback to rough monthly model)
+    # Base Generation (Fallback to rough monthly model)
     monthly = generation.monthly_generation(island, capacities, dfs)
     annual = {
         "hours": float(monthly["hours"].sum()),
@@ -26,7 +26,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "unmet_kWh": float(monthly["unmet_kWh"].sum()),
     }
 
-    # 2. Hourly Refinement (Identify 8760 file via robust matching)
+    # Hourly Refinement (Identify 8760 file via robust matching)
     island_norm = island.replace("_", " ").strip().lower()
     hourly_key = None
     if "hourly" in dfs:
@@ -40,7 +40,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
     finance = dfs["finance"]
     hr_result = None
 
-    # 3. High-Fidelity Override (If real 8760 API data exists)
+    # High-Fidelity Override (If real 8760 API data exists)
     if do_hourly and hourly_key:
         h = dfs["hourly"][hourly_key]
         
@@ -92,7 +92,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                 if col in monthly.columns:
                     monthly[col] = df_agg[col].values
 
-    # 4. Economics (Calculated AFTER hourly dispatch for exact LCOE/CoS)
+    # Economics (Calculated AFTER hourly dispatch for exact LCOE/CoS)
     capex, subsidy = economics.compute_capex(capacities, dfs["tech"], finance)
     opex = economics.compute_annual_opex(capacities, dfs["tech"])
     repl = economics.bess_replacement_pv(capex.get("bess_kWh", 0), finance)
@@ -103,11 +103,11 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         finance,
     )
     
-    # 5. Carbon Metrics
+    # Carbon Metrics
     carb = carbon.carbon_metrics(annual["delivered_kWh"], finance)
 
-    # 6. Reliability Metrics
-        # 6. Reliability Metrics
+    # Reliability Metrics
+        # Reliability Metrics
     lpsp_annual = annual["unmet_kWh"] / max(annual["load_kWh"], 1e-9)
     reliability = {
         "lpsp_annual": lpsp_annual, 

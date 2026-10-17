@@ -9,7 +9,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
 def monthly_generation(island: str, capacities: dict, dfs: dict) -> pd.DataFrame:
     """Return a DataFrame indexed by month with generation / load / BESS flows."""
     w = dfs["wind"].loc[island]

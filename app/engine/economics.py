@@ -1,9 +1,6 @@
 """Annualized cost model."""
 from __future__ import annotations
 
-import numpy as np
-
-
 CAPACITY_TO_TECH = {
     "wind_kW":   "Wind",
     "solar_kWp": "Floating Solar PV",
@@ -12,11 +9,9 @@ CAPACITY_TO_TECH = {
     "bess_kWh":  "BESS",
 }
 
-
 def crf(rate: float, years: float) -> float:
     """Capital recovery factor."""
     return rate * (1 + rate) ** years / ((1 + rate) ** years - 1)
-
 
 def compute_capex(capacities: dict, tech, finance: dict) -> tuple[dict, float]:
     """Return ({cap_key: INR}, subsidy_INR)."""
@@ -33,14 +28,12 @@ def compute_capex(capacities: dict, tech, finance: dict) -> tuple[dict, float]:
         )
     return capex, subsidy
 
-
 def compute_annual_opex(capacities: dict, tech) -> float:
     om = 0.0
     for cap_key, tech_name in CAPACITY_TO_TECH.items():
         if "opex_INR_per_unit_yr" in tech.columns:
             om += float(capacities[cap_key]) * float(tech.loc[tech_name, "opex_INR_per_unit_yr"])
     return om
-
 
 def bess_replacement_pv(capex_bess_INR: float, finance: dict) -> float:
     """Present value of the one-time BESS replacement."""
@@ -49,7 +42,6 @@ def bess_replacement_pv(capex_bess_INR: float, finance: dict) -> float:
         * float(finance["bess_replacement_cost_fraction"])
         / (1 + float(finance["discount_rate_real"])) ** float(finance["bess_replacement_year"])
     )
-
 
 def cost_metrics(
     capex: dict,
