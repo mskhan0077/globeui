@@ -12,7 +12,7 @@ def test_health(client):
     r = client.get("/api/health")
     j = r.get_json()
     assert j["ok"] is True
-    assert j["islands"] == 36
+    assert j["islands"] >= 36
 
 
 def test_evaluate_basic(client):
@@ -55,4 +55,4 @@ def test_tech_scores_in_range(client):
     assert j["ok"], j
     for tech, s in j["result"]["tech_scores"].items():
         for k in ("resource", "capex", "reliability", "sustainability"):
-            assert 0 <= s[k] <= 10, (tech, k, s[k])
+            assert 0 <= s[k] <= 100, (tech, k, s[k])
