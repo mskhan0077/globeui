@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, render_template, request
 from app.config import APP_DEFAULTS
-from app.references import numbered
+from app.references import alphabetical
 
 bp = Blueprint("main", __name__)
 
@@ -31,4 +31,4 @@ def about():
 
 @bp.get("/references")
 def references():
-    return render_template("references.html", references=numbered())
+    return render_template("references.html", references=alphabetical())

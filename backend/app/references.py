@@ -1,167 +1,129 @@
-"""The literature behind BlueGrid's figures, numbered like a research paper.
+"""Published sources for facts and KPI definitions shown on the BlueGrid site, cited
+author–date style: research papers and government publications.
 
-One list for the whole site: the /references page shows it, and /api/references gives
-the numbers to the planner's (i) boxes and the globe's fact bubbles, which cite by key,
-e.g. [1] or [3, 4]. Numbers follow the order below, so add new entries at the end to
-keep existing numbers stable.
+Only independent literature goes here, never the sources of BlueGrid's own dataset.
+The /references page lists them alphabetically; /api/references gives the front ends a
+short label and a link for each key, so text can cite e.g. "(IRENA, 2024)" with the
+words linking to the entry on the References page.
 """
 from __future__ import annotations
 
 REFERENCES: list[dict] = [
     {
         "key": "irena-costs-2023",
-        "authors": "IRENA",
+        "cite": "IRENA, 2024",
+        "authors": "International Renewable Energy Agency (IRENA)",
         "year": "2024",
         "title": "Renewable Power Generation Costs in 2023",
-        "source": "International Renewable Energy Agency, Abu Dhabi",
+        "source": "IRENA, Abu Dhabi",
         "url": "https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2024/Sep/IRENA_Renewable_power_generation_costs_in_2023.pdf",
     },
     {
-        "key": "ipcc-ar5-annex3",
-        "authors": "Schlömer, S., Bruckner, T., Fulton, L., Hertwich, E., McKinnon, A., Perczyk, D., Roy, J., Schaeffer, R., Sims, R., Smith, P., & Wiser, R.",
-        "year": "2014",
-        "title": "Annex III: Technology-specific cost and performance parameters",
-        "source": "In Climate Change 2014: Mitigation of Climate Change. Contribution of Working Group III to the Fifth Assessment Report of the IPCC. Cambridge University Press",
-        "url": "https://www.ipcc.ch/report/ar5/wg3/",
+        "key": "owid-safest-cleanest",
+        "cite": "Ritchie, 2024",
+        "authors": "Ritchie, H.",
+        "year": "2024",
+        "title": "What are the safest and cleanest sources of energy?",
+        "source": "Our World in Data (carbon intensity figures updated March 2024; life-cycle data from UNECE and Turconi et al.)",
+        "url": "https://ourworldindata.org/safest-sources-of-energy",
+    },
+    {
+        "key": "seforall-sids-2012",
+        "cite": "SEforALL, 2012",
+        "authors": "Sustainable Energy for All (SEforALL)",
+        "year": "2012",
+        "title": "Twenty Small Island Developing States announce new actions that reduce dependence on fossil fuels and end poverty (Barbados Declaration)",
+        "source": "SEforALL, 8 May 2012",
+        "url": "https://www.seforall.org/news/twenty-small-island-developing-states-announce-new-actions-that-reduce-dependence-on-fossil",
+    },
+
+    # ---------- KPI definitions (planner (i) boxes) ----------
+    {
+        "key": "eia-lcoe-2025",
+        "cite": "EIA, 2025",
+        "authors": "U.S. Energy Information Administration (EIA)",
+        "year": "2025",
+        "title": "Levelized Costs of New Generation Resources in the Annual Energy Outlook 2025",
+        "source": "EIA, Washington, DC, April 2025",
+        "url": "https://www.eia.gov/outlooks/aeo/electricity_generation/pdf/AEO2025_LCOE_report.pdf",
+    },
+    {
+        "key": "eia-capital-cost-2024",
+        "cite": "EIA, 2024",
+        "authors": "U.S. Energy Information Administration (EIA)",
+        "year": "2024",
+        "title": "Capital Cost and Performance Characteristics for Utility-Scale Electric Power Generating Technologies",
+        "source": "Prepared by Sargent & Lundy for EIA, Washington, DC, February 2024",
+        "url": "https://www.eia.gov/analysis/studies/powerplants/capitalcost/pdf/capital_cost_AEO2025.pdf",
+    },
+    {
+        "key": "eia-capacity-factor",
+        "cite": "EIA, n.d.",
+        "authors": "U.S. Energy Information Administration (EIA)",
+        "year": "n.d.",
+        "title": "Glossary: Capacity factor",
+        "source": "EIA, Washington, DC",
+        "url": "https://www.eia.gov/tools/glossary/index.php?id=Capacity_factor",
+    },
+    {
+        "key": "short-1995",
+        "cite": "Short et al., 1995",
+        "authors": "Short, W., Packey, D. J., & Holt, T.",
+        "year": "1995",
+        "title": "A Manual for the Economic Evaluation of Energy Efficiency and Renewable Energy Technologies",
+        "source": "National Renewable Energy Laboratory (U.S. Department of Energy), Golden, CO, NREL/TP-462-5173",
+        "url": "https://www.osti.gov/biblio/35391",
+    },
+    {
+        "key": "omb-a94-2023",
+        "cite": "OMB, 2023",
+        "authors": "Office of Management and Budget (OMB)",
+        "year": "2023",
+        "title": "Circular A-94: Guidelines and Discount Rates for Benefit-Cost Analysis of Federal Programs",
+        "source": "Executive Office of the President, Washington, DC, November 2023 (section on real versus nominal discount rates)",
+        "url": "https://www.whitehouse.gov/wp-content/uploads/2023/11/CircularA-94.pdf",
+    },
+    {
+        "key": "borowy-1996",
+        "cite": "Borowy & Salameh, 1996",
+        "authors": "Borowy, B. S., & Salameh, Z. M.",
+        "year": "1996",
+        "title": "Methodology for optimally sizing the combination of a battery bank and PV array in a wind/PV hybrid system",
+        "source": "IEEE Transactions on Energy Conversion, 11(2), 367–375",
+        "url": "https://doi.org/10.1109/60.507648",
+    },
+    {
+        "key": "yang-2007",
+        "cite": "Yang et al., 2007",
+        "authors": "Yang, H., Lu, L., & Zhou, W.",
+        "year": "2007",
+        "title": "A novel optimization sizing model for hybrid solar-wind power generation system",
+        "source": "Solar Energy, 81(1), 76–84",
+        "url": "https://doi.org/10.1016/j.solener.2006.06.010",
     },
     {
         "key": "ipcc-2006-combustion",
-        "authors": "IPCC",
+        "cite": "IPCC, 2006",
+        "authors": "Intergovernmental Panel on Climate Change (IPCC)",
         "year": "2006",
         "title": "2006 IPCC Guidelines for National Greenhouse Gas Inventories, Volume 2: Energy, Chapter 2: Stationary Combustion",
-        "source": "Institute for Global Environmental Strategies (IGES), Hayama, Japan",
+        "source": "Institute for Global Environmental Strategies (IGES), Hayama, Japan (Table 2.2: default CO₂ emission factors)",
         "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_2_Ch2_Stationary_Combustion.pdf",
-    },
-    {
-        "key": "lok-sabha-pac-2022",
-        "authors": "Public Accounts Committee",
-        "year": "2022",
-        "title": "Generation and Distribution of Power in Lakshadweep Islands (46th Report, 17th Lok Sabha)",
-        "source": "Lok Sabha Secretariat, New Delhi",
-        "url": "https://eparlib.nic.in/bitstream/123456789/845632/1/17_Public_Accounts_46.pdf",
-    },
-    {
-        "key": "bluegrid-kadmat",
-        "authors": "BlueGrid",
-        "year": "2026",
-        "title": "Least-cost renewable mix for Kadmat at 1 MW demand, compared with diesel only",
-        "source": "Authors’ calculation with the BlueGrid planner (25-year nominal discounted cash flow)",
-        "url": "/planner?island=Kadmat",
-    },
-    {
-        "key": "kerc-wind-2026",
-        "authors": "Wind Insider",
-        "year": "2026",
-        "title": "KERC sets ₹3.24/unit ceiling tariff for wind projects for FY27–FY29 in Karnataka",
-        "source": "Wind Insider, 5 May 2026",
-        "url": "https://windinsider.com/2026/05/05/kerc-sets-%e2%82%b93-24-unit-ceiling-tariff-for-wind-projects-for-fy27-fy29-in-karnataka/",
-    },
-    {
-        "key": "ctuil-benchmarks-2026",
-        "authors": "Energetica India",
-        "year": "2026",
-        "title": "CTUIL revises benchmark costs, land requirements for solar, wind and BESS projects",
-        "source": "Energetica India, September 2026",
-        "url": "https://www.energetica-india.net/news/ctuil-revises-benchmark-costs-land-requirements-for-solar-wind-and-bess-projects",
-    },
-    {
-        "key": "giz-floating-pv-2024",
-        "authors": "pv magazine India",
-        "year": "2024",
-        "title": "New study calculates 207 GWp of floating solar potential in India (MNRE / GIZ IN-Solar study)",
-        "source": "pv magazine India, 9 May 2024",
-        "url": "https://www.pv-magazine-india.com/2024/05/09/new-study-shows-207-gwp-of-floating-solar-potential-in-india",
-    },
-    {
-        "key": "ember-bess-2025",
-        "authors": "Ember",
-        "year": "2025",
-        "title": "Batteries now cheap enough to deliver solar when it is needed",
-        "source": "Ember, December 2025",
-        "url": "https://ember-energy.org/latest-updates/batteries-now-cheap-enough-to-deliver-solar-when-it-is-needed/",
-    },
-    {
-        "key": "irena-otec-2014",
-        "authors": "Kempener, R., & Neumann, F.",
-        "year": "2014",
-        "title": "Ocean Thermal Energy Conversion: Technology Brief (Ocean Energy Technology Brief 1)",
-        "source": "International Renewable Energy Agency, Abu Dhabi",
-        "url": "https://www.irena.org/publications/2014/Jun/Ocean-Thermal-Energy-Conversion",
-    },
-    {
-        "key": "oes-lcoe-2015",
-        "authors": "Ocean Energy Systems",
-        "year": "2015",
-        "title": "International Levelised Cost of Energy for Ocean Energy Technologies",
-        "source": "IEA Technology Collaboration Programme for Ocean Energy Systems",
-        "url": "https://www.ocean-energy-systems.org/publications/oes-documents/market-policy-/document/international-levelised-cost-of-energy-for-ocean-energy-technologies-2015-/",
-    },
-    {
-        "key": "wave-india-2025",
-        "authors": "Sathyanarayana, A., & Seelam, J.",
-        "year": "2025",
-        "title": "Wave energy potential along the Indian coast: A comprehensive review",
-        "source": "Ocean Engineering, 316, 120033",
-        "url": "https://doi.org/10.1016/j.oceaneng.2024.120033",
-    },
-    {
-        "key": "pm-ssy-2026",
-        "authors": "Indian Infrastructure",
-        "year": "2026",
-        "title": "Cabinet approves Rs 50.7 billion scheme to promote floating solar projects (PM Surya Sarovar Yojana)",
-        "source": "Indian Infrastructure, 4 August 2026",
-        "url": "https://indianinfrastructure.com/2026/08/04/cabinet-approves-rs-50-7-billion-scheme-to-promote-floating-solar-projects/",
-    },
-    {
-        "key": "bess-vgf-2025",
-        "authors": "SolarQuarter",
-        "year": "2025",
-        "title": "Ministry of Power launches ₹5,400 crore VGF scheme to boost 30 GWh battery energy storage capacity",
-        "source": "SolarQuarter, 10 June 2025",
-        "url": "https://solarquarter.com/2025/06/10/ministry-of-power-launches-%E2%82%B95400-crore-vgf-scheme-to-boost-30-gwh-battery-energy-storage-capacity/",
-    },
-    {
-        "key": "era5-2020",
-        "authors": "Hersbach, H., Bell, B., Berrisford, P., et al.",
-        "year": "2020",
-        "title": "The ERA5 global reanalysis",
-        "source": "Quarterly Journal of the Royal Meteorological Society, 146(730), 1999–2049",
-        "url": "https://doi.org/10.1002/qj.3803",
-    },
-    {
-        "key": "open-meteo-2023",
-        "authors": "Zippenfenig, P.",
-        "year": "2023",
-        "title": "Open-Meteo.com Weather API [Computer software]",
-        "source": "Zenodo",
-        "url": "https://doi.org/10.5281/zenodo.7970649",
-    },
-    {
-        "key": "global-wind-atlas-2023",
-        "authors": "Davis, N. N., Badger, J., Hahmann, A. N., et al.",
-        "year": "2023",
-        "title": "The Global Wind Atlas: A high-resolution dataset of climatologies and associated web-based application",
-        "source": "Bulletin of the American Meteorological Society, 104(8), E1507–E1525",
-        "url": "https://doi.org/10.1175/BAMS-D-21-0075.1",
-    },
-    {
-        "key": "global-solar-atlas-2019",
-        "authors": "ESMAP",
-        "year": "2019",
-        "title": "Global Solar Atlas 2.0: Technical Report",
-        "source": "Energy Sector Management Assistance Program, World Bank, Washington, DC",
-        "url": "https://documents.worldbank.org/curated/en/529431592893043403",
     },
 ]
 
-_NUMBER = {ref["key"]: i + 1 for i, ref in enumerate(REFERENCES)}
+
+def anchor(key: str) -> str:
+    """Element id of a reference on the References page."""
+    return f"ref-{key}"
 
 
-def numbered() -> list[dict]:
-    """REFERENCES with their citation number ("n")."""
-    return [{**ref, "n": _NUMBER[ref["key"]]} for ref in REFERENCES]
+def alphabetical() -> list[dict]:
+    """REFERENCES sorted by author then year, with their page anchor."""
+    refs = sorted(REFERENCES, key=lambda r: (r["authors"].lower(), r["year"]))
+    return [{**r, "anchor": anchor(r["key"])} for r in refs]
 
 
-def numbers() -> dict[str, int]:
-    """key → citation number, for the front ends."""
-    return dict(_NUMBER)
+def citations() -> dict[str, dict]:
+    """key → {"label": "IRENA, 2024", "href": "/references#ref-…"}, for the front ends."""
+    return {r["key"]: {"label": r["cite"], "href": f"/references#{anchor(r['key'])}"} for r in REFERENCES}

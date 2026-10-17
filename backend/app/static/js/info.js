@@ -16,7 +16,7 @@
   }
   const loadTech = cached("/api/tech", (j) => j.tech);
   const loadFinance = cached("/api/finance", (j) => j.finance);
-  const loadRefNumbers = cached("/api/references", (j) => j.numbers);
+  const loadCitations = cached("/api/references", (j) => j.citations);
 
   const escape = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
   const inr = (x) => "₹" + Number(x).toLocaleString("en-IN", { maximumFractionDigits: 0 });
@@ -46,7 +46,7 @@
       ? `<dl class="info-box__list">${techRows(name, p).map(([k, v]) =>
           `<dt>${escape(k)}</dt><dd>${escape(v)}</dd>`).join("")}</dl>`
       : `<p class="info-box__muted">No parameters found for this technology.</p>`;
-    return { title: name, html: body, refs: window.BlueGrid.techRefs?.[name] };
+    return { title: name, html: body };
   }
 
   async function explanationContent(key) {
@@ -78,17 +78,16 @@
     box.style.top = `${top}px`;
   }
 
-  // Numbered citations, research-paper style: [3, 7], each linking to its entry on the
+  // "References: (Short et al., 1995; EIA, 2025)", the words linking to each entry on the
   // References page (new tab, so the planner stays as it is).
-  function citations(keys, numbers) {
-    const ns = [...new Set((keys || []).map((k) => numbers?.[k]).filter(Boolean))].sort((a, b) => a - b);
-    if (!ns.length) return "";
-    const links = ns.map((n) => `<a href="/references#ref-${n}" target="_blank" rel="noopener">${n}</a>`);
-    return `<p class="info-box__source">References [${links.join(", ")}]</p>`;
+  function references(keys, citations) {
+    const links = (keys || []).map((k) => citations?.[k]).filter(Boolean)
+      .map(({ label, href }) => `<a href="${escape(href)}" target="_blank" rel="noopener">${escape(label)}</a>`);
+    return links.length ? `<p class="info-box__refs">References: (${links.join("; ")})</p>` : "";
   }
 
-  function render({ title, html, refs }, numbers) {
-    box.innerHTML = `<p class="info-box__title">${escape(title)}</p>${html}` + citations(refs, numbers);
+  function render({ title, html, refs }, citations) {
+    box.innerHTML = `<p class="info-box__title">${escape(title)}</p>${html}` + references(refs, citations);
   }
 
   async function open(button, pin) {
@@ -103,8 +102,8 @@
     place(button);
     try {
       const content = button.dataset.tech ? await techContent(button.dataset.tech) : await explanationContent(button.dataset.info);
-      const numbers = await loadRefNumbers().catch(() => null); // no citations if unavailable
-      if (current === button) render(content, numbers);
+      const citations = content.refs ? await loadCitations().catch(() => null) : null; // none if unavailable
+      if (current === button) render(content, citations);
     } catch {
       if (current === button) render({ title: label, html: `<p class="info-box__muted">Couldn’t load this information.</p>` });
     }

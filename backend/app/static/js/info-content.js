@@ -1,6 +1,6 @@
 /* Text for the planner's (i) boxes on charts and KPIs (shown by info.js).
-   Each entry: { title, html(ctx), needsFinance?, refs? }. refs are keys of the reference
-   list (backend/app/references.py), shown as numbered citations like [3, 7].
+   Each entry: { title, html(ctx), needsFinance?, refs? }. refs (KPI definitions only) are
+   keys of backend/app/references.py, shown as linked author–date citations.
    ctx = { finance: finance_params.json values, defaults: planner defaults, fmt: { inr, pct } }.
    Formulas mirror backend/app/engine (economics.py, carbon.py, scoring.py, config_eval.py). */
 (() => {
@@ -8,9 +8,6 @@
   const formula = (f) => `<p class="info-box__formula">${f}</p>`;
   const num = (x, d = 2) => Number(x).toFixed(d);
 
-  // Cost benchmarks behind the island CAPEX figures
-  const COST_REFS = ["kerc-wind-2026", "ctuil-benchmarks-2026", "giz-floating-pv-2024",
-    "irena-otec-2014", "oes-lcoe-2015", "ember-bess-2025"];
 
   // Inflation inputs of the nominal DCF model, with the engine's defaults
   // (economics.py) for any that finance_params.json doesn't list.
@@ -27,15 +24,6 @@
 
   window.BlueGrid = window.BlueGrid || {};
 
-  // References for each technology's (i) box (costs, life-cycle emissions)
-  window.BlueGrid.techRefs = {
-    "Wind": ["kerc-wind-2026", "ctuil-benchmarks-2026", "ipcc-ar5-annex3"],
-    "Floating Solar PV": ["giz-floating-pv-2024", "pm-ssy-2026", "ipcc-ar5-annex3"],
-    "OTEC": ["irena-otec-2014", "oes-lcoe-2015"],
-    "Wave": ["oes-lcoe-2015", "wave-india-2025"],
-    "BESS": ["ctuil-benchmarks-2026", "ember-bess-2025", "bess-vgf-2025"],
-  };
-
   window.BlueGrid.infoContent = {
     // ---------- charts ----------
     monthly: {
@@ -44,7 +32,6 @@
         p("How much electricity each technology generates in each month (MWh) for the capacities on the sliders, stacked by technology.",
           "The dashed line is the demand: target load × hours in the month. Where the bars rise above it there is surplus (stored in the battery or curtailed); below it, the battery and then diesel must cover the gap.",
           "When the place has hourly data, each month is the total of an hour-by-hour (8,760-hour) simulation; otherwise it uses monthly average capacity factors."),
-      refs: ["open-meteo-2023", "era5-2020"],
     },
     viability: {
       title: "Technology viability scores (0–100)",
@@ -56,7 +43,6 @@
           <dt>Reliability</dt><dd>100 × (10th-percentile month’s capacity factor ÷ its average) × TRL ÷ 9: steadiness and maturity</dd>
           <dt>Sustainability</dt><dd>100 × (1 − its lifecycle gCO₂/kWh ÷ the highest)</dd>
         </dl>`,
-      refs: ["global-wind-atlas-2023", "global-solar-atlas-2019", "era5-2020", "ipcc-ar5-annex3", "irena-otec-2014"],
     },
 
     ranked: {
@@ -92,7 +78,7 @@
           p(`A nominal discounted cash flow over ${num(f.project_life_yr, 0)} years (see 💡 Nominal DCF model): O&amp;M rises ${fmt.pct(d.opex, 0)} a year, and the battery replacement in year ${num(f.bess_replacement_year, 0)} is priced with battery costs changing ${fmt.pct(d.bess, 0)} a year.`,
             `CRF (capital recovery factor) at the ${fmt.pct(d.nominal, 1)} nominal rate turns present values into an equal yearly cost.`);
       },
-      refs: COST_REFS,
+      refs: ["eia-lcoe-2025", "short-1995"],
     },
     cos: {
       title: "System cost (cost of service)",
@@ -103,7 +89,7 @@
           formula("(present value of capital + O&amp;M + diesel fuel) × CRF ÷ total demand per year") +
           p(`Diesel fuel costs ${fmt.inr(f.diesel_fuel_cost_INR_per_kWh)} per unmet kWh in year 1 and rises ${fmt.pct(d.diesel, 0)} a year, so diesel-reliant mixes cost more over the project life.`);
       },
-      refs: ["lok-sabha-pac-2022"],
+      refs: ["short-1995", "eia-lcoe-2025"],
     },
     nominal: {
       title: "Nominal discount rate",
@@ -114,6 +100,7 @@
           formula("r_nom = (1 + r_real) × (1 + inflation) − 1") +
           p(`Here (1 + ${fmt.pct(Number(f.discount_rate_real), 0)}) × (1 + ${fmt.pct(d.general, 0)}) − 1 = ${fmt.pct(d.nominal, 2)}.`);
       },
+      refs: ["omb-a94-2023", "short-1995"],
     },
     dcf: {
       title: "Nominal discounted cash flow (DCF)",
@@ -129,6 +116,7 @@
           formula(`r_nom = (1 + r_real) × (1 + inflation) − 1 = ${fmt.pct(d.nominal, 2)}`) +
           p("Discounting inflating costs at a nominal rate counts future costs correctly, so mixes that lean on diesel for years are penalised as they should be.");
       },
+      refs: ["omb-a94-2023", "short-1995"],
     },
     plf: {
       title: "PLF vs target",
@@ -136,6 +124,7 @@
         p("Plant load factor against the target: the share of the target demand that renewables (with the battery) actually supply over the year. 100% means the full load is met every hour.") +
         formula("energy delivered ÷ (target load × 8,760 h)") +
         p("The figure below it is the energy delivered per year."),
+      refs: ["eia-capacity-factor"],
     },
     lpsp: {
       title: "LPSP (loss of power supply probability)",
@@ -145,6 +134,7 @@
         formula("unmet energy ÷ total demand") +
         p(`<strong>hourly</strong>: from an hour-by-hour simulation with battery dispatch (round-trip efficiency ${fmt.pct(f.bess_round_trip_eff, 0)}, usable up to ${fmt.pct(f.bess_depth_of_discharge, 0)} of capacity, max C-rate ${num(f.bess_max_c_rate, 1)}, 1.5% self-discharge per hour). <strong>annual</strong>: from monthly totals only (no hourly data for the place), which is optimistic because it can’t see night-time gaps.`,
           d.reliability_target_lpsp != null ? `Find optimal mix only accepts mixes with LPSP ≤ ${fmt.pct(d.reliability_target_lpsp, 0)}.` : ""),
+      refs: ["borowy-1996", "yang-2007"],
     },
     co2: {
       title: "CO₂ avoided",
@@ -153,7 +143,7 @@
         p("Diesel CO₂ emissions avoided each year because renewables supply the energy instead. Only delivered energy counts, not curtailed surplus.") +
         formula(`energy delivered (MWh) × ${num(f.diesel_emission_factor_tCO2_per_MWh, 3)} tCO₂/MWh`) +
         p("The factor is the diesel generators’ emission intensity."),
-      refs: ["ipcc-2006-combustion", "lok-sabha-pac-2022"],
+      refs: ["ipcc-2006-combustion"],
     },
     capex: {
       title: "CAPEX",
@@ -165,7 +155,7 @@
             ? `Subsidies are on: ${fmt.inr(f.fpv_cfa_subsidy_INR_per_kW)}/kW for floating solar and ${fmt.inr(f.bess_vgf_INR_per_kWh)}/kWh for the battery.`
             : "Subsidies are currently off.",
           "Each technology’s unit cost is in its (i) next to the sliders. Shown in crore (1 Cr = ₹1,00,00,000)."),
-      refs: [...COST_REFS, "pm-ssy-2026", "bess-vgf-2025"],
+      refs: ["eia-capital-cost-2024"],
     },
     unmet: {
       title: "Unmet energy",
@@ -174,7 +164,7 @@
         p("Electricity demand that renewables and the battery can’t supply over the year. It’s assumed to be covered by diesel generators.") +
         formula("total demand − energy delivered") +
         p(`Costed in System cost at ${fmt.inr(f.diesel_fuel_cost_INR_per_kWh)} per kWh in year 1, rising ${fmt.pct(dcf(f).diesel, 0)} a year.`),
-      refs: ["lok-sabha-pac-2022"],
+      refs: ["borowy-1996", "yang-2007"],
     },
   };
 })();

@@ -61,8 +61,8 @@
 
 .fact-bubble__title { position: relative; margin: 0 0 6px; font-size: 18px; font-weight: 700; line-height: 1.3; }
 .fact-bubble__text { position: relative; margin: 0; font-size: 16px; line-height: 1.5; }
-/* Numbered citations, e.g. [3, 4], linking to the References page */
-.fact-bubble__cite { font-size: 13px; color: rgba(244, 248, 252, 0.75); white-space: nowrap; }
+/* Author–date citations, e.g. (IRENA, 2024), linking to the References page */
+.fact-bubble__cite { font-size: 14px; color: rgba(244, 248, 252, 0.8); white-space: nowrap; }
 .fact-bubble__cite a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 .fact-bubble__cite a:hover { color: #fff; }
 

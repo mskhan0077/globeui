@@ -39,7 +39,7 @@ globeui/
 │   │   ├── config.py        # Planner defaults (slider bounds, weights, LPSP target)
 │   │   ├── data_loader.py
 │   │   ├── engine/          # generation, BESS dispatch, economics, carbon, scoring, LP + grid optimizer
-│   │   ├── references.py    # Numbered reference list: /references page + /api/references (citations like [3, 7])
+│   │   ├── references.py    # Independent sources for site facts: /references page + /api/references, cited author–date like (IRENA, 2024)
 │   │   ├── reports/         # PDF report: pdf.py (data → WeasyPrint), charts.py (static SVG charts)
 │   │   ├── routes/          # api.py (/api), export.py (/export), main.py (/planner), frontend.py (/)
 │   │   ├── templates/       # Planner page (/planner, also embedded in the globe), /about, /references, report/report.html (PDF)

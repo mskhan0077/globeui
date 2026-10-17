@@ -3,16 +3,14 @@
 {% block content %}
 <section class="panel">
   <h2>References</h2>
-  <p>Figures shown in BlueGrid cite these works by number, as in a research paper, e.g. [1] or [2, 3].</p>
-  <ol class="references">
+  <p>Research papers and government publications behind the facts on the globe and the KPI definitions in the planner, cited in the text by author and year, e.g. (IRENA, 2024).</p>
+  <ul class="references">
     {% for ref in references %}
-    <li id="ref-{{ ref.n }}" value="{{ ref.n }}">
-      <span class="references__n">[{{ ref.n }}]</span>
-      <span>{{ ref.authors }} ({{ ref.year }}). <em>{{ ref.title }}</em>. {{ ref.source }}.
-        {% if ref.url %}<a href="{{ ref.url }}"{% if ref.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{{ ref.url | replace('https://', '') }}</a>{% endif %}
-      </span>
+    <li id="{{ ref.anchor }}">
+      {{ ref.authors }} ({{ ref.year }}). <em>{{ ref.title }}</em>{% if ref.title[-1] not in '?.!' %}.{% endif %} {{ ref.source }}.
+      <a href="{{ ref.url }}" target="_blank" rel="noopener">{{ ref.url | replace('https://', '') }}</a>
     </li>
     {% endfor %}
-  </ol>
+  </ul>
 </section>
 {% endblock %}

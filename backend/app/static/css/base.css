@@ -72,9 +72,8 @@ button:disabled { opacity: 0.45; cursor: default; }
   .grid-2 { grid-template-columns: 1fr; }
 }
 
-/* References page (templates/references.html) */
-.references { list-style: none; margin: 16px 0 0; padding: 0; counter-reset: none; }
-.references li { display: grid; grid-template-columns: 3.2em 1fr; gap: 4px; padding: 10px 6px; border-top: 1px solid var(--border); line-height: 1.55; scroll-margin-top: 110px; }
+/* References page (templates/references.html): author–date list */
+.references { list-style: none; margin: 16px 0 0; padding: 0; }
+.references li { padding: 10px 6px 10px 2.2em; text-indent: -1.6em; border-top: 1px solid var(--border); line-height: 1.55; scroll-margin-top: 110px; }
 .references li:target { background: rgba(85, 242, 232, 0.10); border-radius: 8px; }
-.references__n { font-weight: 700; color: var(--muted); }
 .references a { word-break: break-all; color: #8cc8ff; }

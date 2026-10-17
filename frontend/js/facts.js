@@ -31,17 +31,16 @@ function bubbleOutline(w, h, tx, ty) {
   ].join(' ');
 }
 
-// Text with {key} / {key1,key2} placeholders → escaped HTML with numbered citations,
-// e.g. "… [3, 4]", each linking to its entry on the References page (new tab).
-// Without the numbers yet, placeholders are simply left out.
-function withCitations(text, numbers) {
+// Text with {key} / {key1,key2} placeholders → escaped HTML with author–date citations,
+// e.g. "… (IRENA, 2024)" or "(Ritchie, 2024; SEforALL, 2012)", the words linking to the
+// entry on the References page (new tab). Until the list has loaded, placeholders are left out.
+function withCitations(text, refs) {
   return String(text).split(/(\s?\{[^}]+\})/).map((part) => {
     const m = part.match(/^\s?\{([^}]+)\}$/);
     if (!m) return escape(part);
-    const ns = [...new Set(m[1].split(',').map((k) => numbers?.[k.trim()]).filter(Boolean))].sort((a, b) => a - b);
-    if (!ns.length) return '';
-    return ` <span class="fact-bubble__cite">[${ns.map((n) =>
-      `<a href="/references#ref-${n}" target="_blank" rel="noopener">${n}</a>`).join(', ')}]</span>`;
+    const links = m[1].split(',').map((k) => refs?.[k.trim()]).filter(Boolean)
+      .map(({ label, href }) => `<a href="${escape(href)}" target="_blank" rel="noopener">${escape(label)}</a>`);
+    return links.length ? ` <span class="fact-bubble__cite">(${links.join('; ')})</span>` : '';
   }).join('');
 }
 
@@ -55,11 +54,11 @@ export function createFactCards(container, viewer) {
     </figure>`).join('');
   const bubbles = [...container.querySelectorAll('.fact-bubble')];
 
-  // Swap the {key} placeholders for numbered citations once the numbers are in.
+  // Swap the {key} placeholders for author–date citations once the list is in.
   fetch(`${API_BASE_URL}/references`)
     .then((r) => r.json())
-    .then(({ numbers }) => bubbles.forEach((el, i) => {
-      el.querySelector('.fact-bubble__text').innerHTML = withCitations(FACTS[i].text, numbers);
+    .then(({ citations }) => bubbles.forEach((el, i) => {
+      el.querySelector('.fact-bubble__text').innerHTML = withCitations(FACTS[i].text, citations);
       last = ''; // bubble heights may change: lay out again
     }))
     .catch(() => {}); // no citations if the list is unavailable

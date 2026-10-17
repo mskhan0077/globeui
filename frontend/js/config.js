@@ -75,8 +75,8 @@ export const OPENING = {
 };
 
 // "Why renewables" speech bubbles on the right of the zoomed-out globe (js/facts.js,
-// css/facts.css): one fact each, top to bottom. The Kadmat figures are BlueGrid model
-// results (1 MW demand); update them if the model changes.
+// css/facts.css): one fact each, top to bottom. Facts come from independent published
+// sources only (backend/app/references.py), not from BlueGrid's dataset.
 export const FACT_BUBBLES = {
   angles: [-38, 0, 38], // where each tail touches the globe: degrees from its right-hand edge (− = up)
   gap: 56,              // px from the globe's outline to the bubble
@@ -86,10 +86,10 @@ export const FACT_BUBBLES = {
   maxWidth: 380,        // px; bubbles narrow down to minWidth to fit beside the globe
   minWidth: 260,
 };
-// Text may cite the reference list (backend/app/references.py) with {key} or {key1,key2}:
-// shown as numbered citations, e.g. [1] or [3, 4], linking to the References page.
+// Text cites the reference list (backend/app/references.py) with {key} or {key1,key2},
+// shown author–date style, e.g. "(IRENA, 2024)", linking to the References page.
 export const FACTS = [
   { title: 'Cheapest power ever built', text: '81% of new renewable capacity added in 2023 was cheaper than the fossil-fuel alternative {irena-costs-2023}.' },
-  { title: '70× less carbon', text: 'Over its whole life, a wind turbine emits about 11 g of CO₂ per kWh {ipcc-ar5-annex3}. A diesel generator emits about 800 g from its exhaust alone {ipcc-2006-combustion,lok-sabha-pac-2022}.' },
-  { title: 'Diesel costs 2.6× more', text: 'Over 25 years, running Kadmat on diesel costs about ₹50 per kWh. BlueGrid’s best renewable mix costs about ₹19.5, backup included {bluegrid-kadmat}.' },
+  { title: 'Up to 30× less carbon', text: 'Over its whole life, solar power emits 23–82 g of CO₂ per kWh, depending on where the panels are made. Oil-fired power, like island diesel generators, emits about 715 g {owid-safest-cleanest}.' },
+  { title: 'No more fuel shipments', text: 'Most small island states depend on imported oil for their electricity, which leaves them exposed to every swing in oil prices {seforall-sids-2012}. Sunlight, wind and waves need no shipping.' },
 ];

@@ -7,7 +7,7 @@ import pandas as pd
 from app.engine.config_eval import evaluate
 from app.engine.optimizer import optimize
 from app.config import APP_DEFAULTS
-from app.references import numbers
+from app.references import citations
 import time
 import uuid
 
@@ -16,8 +16,8 @@ bp = Blueprint("api", __name__)
 
 @bp.get("/references")
 def api_references():
-    """Citation numbers by key, for [n] links in the planner and on the globe."""
-    return jsonify({"ok": True, "numbers": numbers()})
+    """Author–date label and link per reference key, for citations like "(IRENA, 2024)"."""
+    return jsonify({"ok": True, "citations": citations()})
 
 @bp.get("/health")
 def health():
