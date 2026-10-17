@@ -102,7 +102,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                     monthly[col] = df_agg[col].values
 
     # Economics (using localized tech data)
-    capex, subsidy = economics.compute_capex(capacities, tech, finance)
+    capex, subsidy = economics.compute_capex(capacities, tech, finance, dfs.get("discount"))
     opex = economics.compute_annual_opex(capacities, tech)
     repl = economics.bess_replacement_pv(capex.get("bess_kWh", 0), finance)
 
@@ -156,6 +156,24 @@ def evaluate(island: str, capacities: dict, dfs: dict,
                     "max": float(np.max(vals)),
                 }
 
+    # Volume discount breakdown (list price vs discounted CAPEX per tech)
+    capex_list, _ = economics.compute_capex(capacities, tech, finance)
+    disc = dfs.get("discount")
+    volume_discount = {}
+    for cap_key, tech_name in economics.CAPACITY_TO_TECH.items():
+        has_row = disc is not None and tech_name in disc.index
+        unit_size = float(disc.loc[tech_name, "typical_unit_size"]) if has_row else 0.0
+        list_inr = capex_list[cap_key]
+        volume_discount[cap_key] = {
+            "tech": tech_name,
+            "unit_size": unit_size,
+            "unit_basis": str(disc.loc[tech_name, "unit_basis"]) if has_row else "",
+            "units": float(capacities.get(cap_key, 0)) / unit_size if unit_size > 0 else 0.0,
+            "list_INR": list_inr,
+            "discounted_INR": capex[cap_key],
+            "discount_pct": 1.0 - capex[cap_key] / list_inr if list_inr > 0 else 0.0,
+        }
+
     # Full UI Result
     result = {
         "island": island,
@@ -164,6 +182,7 @@ def evaluate(island: str, capacities: dict, dfs: dict,
         "stats": stats,
         "annual": annual,
         "capex": capex,
+        "volume_discount": volume_discount,
         "econ": econ,
         "carbon": carb,
         "reliability": reliability,

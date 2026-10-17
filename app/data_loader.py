@@ -38,6 +38,7 @@ def load_all(data_dir: str | Path = "Data/processed") -> dict:
     dfs = {
         "islands": _read(d, "islands.csv").set_index("island"),
         "tech":    _read(d, "tech_params.csv").set_index("technology"),
+        "discount": _read(d, "discount_params.csv").set_index("technology"),
         "finance": finance,
         "wind":    _read(d, "wind_monthly.csv").set_index(["island", "month_num"]),
         "solar":   _read(d, "solar_monthly.csv").set_index(["island", "month_num"]),

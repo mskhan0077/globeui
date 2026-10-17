@@ -52,3 +52,11 @@ def test_tech_scores_in_range(client):
     for tech, s in j["result"]["tech_scores"].items():
         for k in ("resource", "capex", "reliability", "sustainability"):
             assert 0 <= s[k] <= 100, (tech, k, s[k])
+
+def test_volume_discount_factor():
+    from app.engine.economics import volume_discount_factor as f
+    assert f(0, 500, 0.95) == 1.0
+    assert f(500, 500, 0.95) == 1.0                      # single unit: list price
+    assert f(1000, 500, 0.95) == pytest.approx((1 + 0.95) / 2)
+    assert f(5000, 500, 0.95) < f(2500, 500, 0.95) < 1.0  # more units, bigger discount
+    assert f(5000, 500, 1.0) == pytest.approx(1.0)        # eov = 1 disables discount

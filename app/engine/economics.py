@@ -27,11 +27,33 @@ def get_nominal_rate(finance: dict) -> float:
     pi_gen = float(finance.get("inflation_rate_general", 0.05))
     return (1 + r_real) * (1 + pi_gen) - 1
 
-def compute_capex(capacities: dict, tech, finance: dict) -> tuple[dict, float]:
+def volume_discount_factor(capacity: float, unit_size: float, eov: float) -> float:
+    """Average CAPEX multiplier when `capacity` is bought in blocks of `unit_size`.
+
+    The N-th unit costs N**log2(eov) times the first one, i.e. every doubling of
+    units cuts the unit price to `eov` (bulk discount, O'Connor et al. 2013):
+        C_T = UC * sum_{N=1..n} N**(ln(eov)/ln 2)
+    A part-block at the end is priced at the next unit's marginal cost.
+    """
+    n = capacity / unit_size if unit_size > 0 else 0.0
+    if n <= 1.0:
+        return 1.0
+    b = np.log2(eov)
+    whole = int(n)
+    total = np.sum(np.arange(1, whole + 1) ** b) + (n - whole) * (whole + 1) ** b
+    return float(total / n)
+
+def compute_capex(capacities: dict, tech, finance: dict, discount=None) -> tuple[dict, float]:
     """Return ({cap_key: INR}, subsidy_INR)."""
     capex = {}
     for cap_key, tech_name in CAPACITY_TO_TECH.items():
         unit_cost = float(tech.loc[tech_name, "capex_island_INR"])
+        if discount is not None and tech_name in discount.index:
+            unit_cost *= volume_discount_factor(
+                float(capacities[cap_key]),
+                float(discount.loc[tech_name, "typical_unit_size"]),
+                float(discount.loc[tech_name, "eov"]),
+            )
         capex[cap_key] = float(capacities[cap_key]) * unit_cost
 
     subsidy = 0.0

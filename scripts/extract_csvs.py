@@ -188,6 +188,16 @@ def extract_tech(reader: XlsxReader, fx: float):
     report("tech_params.csv", len(df), expected=6)
 
 
+def extract_discount(reader: XlsxReader):
+    """Discount_Params: unit block size + economies-of-volume factor per tech."""
+    df = reader.sheet("Discount_Params")
+    df = drop_trailing_notes(df, ["technology", "typical_unit_size", "eov"])
+    for col in ["typical_unit_size", "eov"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df.to_csv(OUT / "discount_params.csv", index=False)
+    report("discount_params.csv", len(df), expected=5)
+
+
 def extract_monthly(reader: XlsxReader, sheet: str, filename: str,
                     required: list[str], expected: int | None = 432):
     df = reader.sheet(sheet)
@@ -216,6 +226,7 @@ def main():
 
         extract_islands(reader)
         extract_tech(reader, fx)
+        extract_discount(reader)
 
         extract_monthly(reader, "Wind_Monthly",  "wind_monthly.csv",
                         ["island", "month_num", "cf_net_after_losses"])

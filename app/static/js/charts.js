@@ -62,6 +62,9 @@
     const num = (x, d = 2) => Number(x).toFixed(d);
     
     const nomRate = e.nominal_discount_rate ? (e.nominal_discount_rate * 100).toFixed(2) : "N/A";
+    const vd = Object.values(r.volume_discount || {});
+    const saving = vd.reduce((s, d) => s + d.list_INR - d.discounted_INR, 0);
+    const capexSub = saving > 0 ? `island-adjusted, −₹${num(saving / 1e7, 2)} Cr volume discount` : "island-adjusted";
 
     els.kpis.innerHTML = [
       kpiCard("LCOE (RE only)", `₹${num(e.LCOE_RE_INR_per_kWh)}`, "per kWh delivered"),
@@ -70,9 +73,52 @@
       kpiCard("PLF vs target", `${num(r.plf_target * 100, 1)}%`, `${inr(a.delivered_kWh / 1000)} MWh served`),
       kpiCard("LPSP", `${num(lpsp * 100)}%`, rel.lpsp_hourly != null ? "hourly" : "annual"),
       kpiCard("CO₂ avoided", `${inr(c.co2_avoided_t)} t`, "per year"),
-      kpiCard("CAPEX", `₹${num(e.capex_INR / 1e7, 1)} Cr`, "island-adjusted"),
+      kpiCard("CAPEX", `₹${num(e.capex_INR / 1e7, 1)} Cr`, capexSub),
       kpiCard("Unmet", `${inr(a.unmet_kWh / 1000)} MWh`, "diesel top-up"),
     ].join("");
+  }
+
+  function renderDiscount(r) {
+    const panel = document.getElementById("panel-discount");
+    const vd = SLIDERS.map(({ key }) => (r.volume_discount || {})[key])
+      .filter((d) => d && d.list_INR > 0);
+    if (!vd.length) { panel.style.display = "none"; return; }
+    panel.style.display = "block";
+
+    const cr = (x) => `₹${(x / 1e7).toFixed(2)} Cr`;
+    const rows = vd.map((d) => `
+      <tr>
+        <td><strong>${d.tech}</strong></td>
+        <td>${d.units.toFixed(1)} × ${d.unit_size} ${d.unit_basis}</td>
+        <td>${cr(d.list_INR)}</td>
+        <td>${(d.discount_pct * 100).toFixed(1)}%</td>
+        <td>${cr(d.list_INR - d.discounted_INR)}</td>
+        <td>${cr(d.discounted_INR)}</td>
+      </tr>`).join("");
+
+    const list = vd.reduce((s, d) => s + d.list_INR, 0);
+    const net = vd.reduce((s, d) => s + d.discounted_INR, 0);
+    document.getElementById("table-discount").innerHTML = `
+      <table class="ranked-table">
+        <thead><tr>
+          <th>Technology</th>
+          <th>Units</th>
+          <th>List CAPEX</th>
+          <th>Discount</th>
+          <th>Saving</th>
+          <th>Discounted CAPEX</th>
+        </tr></thead>
+        <tbody>${rows}
+          <tr>
+            <td><strong>Total</strong></td>
+            <td></td>
+            <td><strong>${cr(list)}</strong></td>
+            <td><strong>${((1 - net / list) * 100).toFixed(1)}%</strong></td>
+            <td><strong>${cr(list - net)}</strong></td>
+            <td><strong>${cr(net)}</strong></td>
+          </tr>
+        </tbody>
+      </table>`;
   }
 
   function renderStats(r) {
@@ -239,6 +285,7 @@
     }
 
     renderKPIs(resp.result);
+    renderDiscount(resp.result);
     renderStats(resp.result);
     renderMonthly(resp.result);
     renderRadar(resp.result.tech_scores);
